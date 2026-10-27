@@ -70,6 +70,7 @@ const {
 } = require('./scripts/appimage-node-runtime.cjs')
 const { signWindowsUninstallerViaSignPath } = require('./scripts/windows-uninstaller-signing.cjs')
 const { buildMacShipItScheduling } = require('./scripts/macos-shipit-scheduling.cjs')
+const { resolveReleaseDistribution } = require('./release-distribution.cjs')
 
 // Dev channels need release bundle ID/signature/notarization so Squirrel.Mac accepts updates and macOS retains app identity.
 const isMacHourly = process.env.ORCA_MAC_HOURLY === '1'
@@ -102,6 +103,9 @@ const devChannelRepo = isHourlyChannel
     : isAdhocChannel
       ? 'orca-adhoc'
       : null
+const releaseDistribution = resolveReleaseDistribution()
+// Only upstream releases go through SignPath; fork distributions publish unsigned installers.
+const isWinUnsigned = isWinDevChannel || !releaseDistribution.isUpstream
 const appId = 'com.stablyai.orca'
 const featureWallResources = {
   from: 'resources/onboarding/feature-wall',
@@ -513,9 +517,9 @@ module.exports = {
     // Sign hook signs nothing: it relays transient NSIS uninstaller files to CI SignPath; unset relay env leaves local/dev builds inert.
     signtoolOptions: {
       sign: signWindowsUninstallerViaSignPath,
-      ...(isWinDevChannel ? {} : { publisherName: 'SignPath Foundation' })
+      ...(isWinUnsigned ? {} : { publisherName: 'SignPath Foundation' })
     },
-    ...(isWinDevChannel ? { verifyUpdateCodeSignature: false } : {}),
+    ...(isWinUnsigned ? { verifyUpdateCodeSignature: false } : {}),
     extraResources: [
       ...commonExtraResources,
       ...windowsRuntimeResources,
@@ -550,9 +554,9 @@ module.exports = {
     ]
   },
   nsis: {
-    artifactName: 'orca-windows-setup.${ext}',
-    shortcutName: '${productName}',
-    uninstallDisplayName: '${productName}',
+    artifactName: `${releaseDistribution.artifactPrefix}-windows-setup.\${ext}`,
+    shortcutName: releaseDistribution.displayName ?? '${productName}',
+    uninstallDisplayName: releaseDistribution.displayName ?? '${productName}',
     createDesktopShortcut: 'always',
     // One NSIS include hosts update-guarded daemon cleanup and additive markdown Open With registration.
     // Avoid fileAssociations: it would steal default .md ownership; see the include’s header.
@@ -730,10 +734,12 @@ module.exports = {
   // Dual-arch builds need target node-pty rebuilds or Intel Macs get arm64 binaries and posix_spawnp failure.
   // beforeBuild performs targeted rebuild then returns false to skip optional cpu-features.
   npmRebuild: true,
+  // Fork versions such as 1.4.242-itg.0 must still write latest.yml, which the updater probes.
+  ...(releaseDistribution.isUpstream ? {} : { detectUpdateChannel: false }),
   publish: {
     provider: 'github',
-    owner: 'stablyai',
-    repo: devChannelRepo ?? 'orca',
+    owner: releaseDistribution.owner,
+    repo: devChannelRepo ?? releaseDistribution.repo,
     // Keep main-repo releases draft until release-cut verifies all assets; early --publish always would expose missing Windows installers.
     releaseType: devChannelRepo ? 'prerelease' : 'draft'
   }

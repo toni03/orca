@@ -1,0 +1,194 @@
+name: ITG Windows Release
+
+# Fork-only: builds the unsigned "Orca ITG" Windows installer and publishes it as a GitHub Release of this repository.
+# Version: <upstream stable>-itg.<n>, e.g. v1.4.242-itg.0 is the first ITG build over upstream 1.4.242.
+# The updater parses tags as semver, so a fourth numeric component (v1.4.242.0) would be ignored.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag, or SHA to build
+        required: false
+        type: string
+        default: main
+      base_version:
+        description: Upstream version this build is based on (default latest stablyai/orca stable release)
+        required: false
+        type: string
+        default: ''
+      itg_index:
+        description: ITG build number over that base (default next free number)
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: itg-release-windows
+  cancel-in-progress: false
+
+jobs:
+  build-win:
+    if: github.repository != 'stablyai/orca'
+    runs-on: windows-2022
+    permissions:
+      contents: write
+    timeout-minutes: 120
+    env:
+      ORCA_BACKGROUND_LAUNCH: '1'
+      NODE_OPTIONS: --max-old-space-size=4096
+      # Read by electron-builder (publish target, names, signing) and the main build (updater feed).
+      ORCA_RELEASE_REPOSITORY: ${{ github.repository }}
+      ORCA_RELEASE_DISPLAY_NAME: Orca ITG
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve the ITG version
+        id: version
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_INPUT: ${{ inputs.base_version }}
+          INDEX_INPUT: ${{ inputs.itg_index }}
+        run: |
+          set -euo pipefail
+          base="${BASE_INPUT#v}"
+          if [[ -z "$base" ]]; then
+            base="$(gh release view --repo stablyai/orca --json tagName --jq .tagName)"
+            base="${base#v}"
+          fi
+          if [[ ! "$base" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::base_version must be X.Y.Z, got '$base'."
+            exit 1
+          fi
+          index="$INDEX_INPUT"
+          if [[ -z "$index" ]]; then
+            last="$(gh release list --repo "$GITHUB_REPOSITORY" --limit 200 --json tagName --jq '.[].tagName' \
+              | sed -n "s/^v${base//./\\.}-itg\.\([0-9][0-9]*\)$/\1/p" | sort -n | tail -1)"
+            index=$(( ${last:--1} + 1 ))
+          fi
+          if [[ ! "$index" =~ ^[0-9]+$ ]]; then
+            echo "::error::itg_index must be a non-negative integer, got '$index'."
+            exit 1
+          fi
+          version="${base}-itg.${index}"
+          tag="v${version}"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::error::Release $tag already exists in $GITHUB_REPOSITORY."
+            exit 1
+          fi
+          echo "base=$base" >>"$GITHUB_OUTPUT"
+          echo "version=$version" >>"$GITHUB_OUTPUT"
+          echo "tag=$tag" >>"$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >>"$GITHUB_OUTPUT"
+          echo "Building Orca ITG $tag from $(git rev-parse --short HEAD)"
+
+      # pnpm must be on PATH before setup-node so setup-node can locate the store.
+      - name: Setup pnpm
+        uses: pnpm/setup@v2
+        with:
+          install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+          check-latest: true
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            mobile/pnpm-lock.yaml
+
+      - name: Cache electron-builder downloads
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~\AppData\Local\electron\Cache
+            ~\AppData\Local\electron-builder\Cache
+          key: electron-builder-win-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            electron-builder-win-
+
+      - name: Install dependencies
+        uses: nick-fields/retry@v4
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_wait_seconds: 30
+          command: pnpm install --frozen-lockfile
+
+      # Build required out/mobile-web from mobile's React Native/Expo install.
+      - uses: ./.github/actions/install-mobile-dependencies
+
+      - name: Ensure the Rust toolchain for the Windows CLI launcher
+        shell: pwsh
+        run: |
+          if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
+            rustup toolchain install stable --profile minimal
+            rustup default stable
+          }
+          cargo --version
+
+      - name: Build app
+        shell: bash
+        run: pnpm build:release
+
+      # Create the draft at the built commit so electron-builder uploads into it instead of tagging the default branch.
+      - name: Create draft release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          SHA: ${{ steps.version.outputs.sha }}
+          BASE: ${{ steps.version.outputs.base }}
+        run: |
+          set -euo pipefail
+          notes="Orca ITG build over upstream [v${BASE}](https://github.com/stablyai/orca/releases/tag/v${BASE}), from ${SHA}.
+
+          Unsigned installer: Windows SmartScreen may warn on first install (More info → Run anyway). Installed builds update themselves from this repository."
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft --target "$SHA" \
+            --title "Orca ITG ${TAG#v}" --notes "$notes"
+
+      - name: Package and upload Windows artifacts
+        uses: nick-fields/retry@v4
+        with:
+          timeout_minutes: 30
+          max_attempts: 2
+          retry_wait_seconds: 30
+          command: node config/scripts/ensure-native-runtime.mjs --runtime=electron; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm exec electron-builder --config config/electron-builder.config.cjs --win --publish always
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ORCA_LOCAL_BUILD_VERSION: ${{ steps.version.outputs.version }}
+          ORCA_BUILD_COMMIT: ${{ steps.version.outputs.sha }}
+          EP_GH_IGNORE_TIME: 'true'
+
+      # Publish only a complete release: the updater must never see a tag without its installer and manifest.
+      - name: Verify assets and publish the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          assets="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
+          echo "Assets on $TAG:"
+          echo "$assets"
+          for required in latest.yml orca-itg-windows-setup.exe orca-itg-windows-setup.exe.blockmap; do
+            if ! grep -qx "$required" <<<"$assets"; then
+              echo "::error::$TAG is missing $required."
+              exit 1
+            fi
+          done
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern latest.yml --output - | tee /dev/stderr | grep -qx "version: $VERSION"
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          echo "Published https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG"
