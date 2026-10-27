@@ -18,6 +18,11 @@ as `v1.4.242.0` is not usable.
 3. The workflow creates a draft, uploads `orca-itg-windows-setup.exe`, its blockmap and `latest.yml`,
    checks them, and publishes the release as Latest.
 
+The release notes come from `config/scripts/itg-release-notes.sh`: a link to the upstream release
+notes of the base version, then the ITG changes on `main` that upstream does not have. Feature
+branches are listed by their upstream PR; ITG-only branches by their commit subjects, leaving out
+`ci`, `build` and `chore` commits.
+
 Download link for the team: `https://github.com/<owner>/<repo>/releases/latest/download/orca-itg-windows-setup.exe`.
 
 ## How the build differs from upstream

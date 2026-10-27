@@ -152,11 +152,13 @@ jobs:
           BASE: ${{ steps.version.outputs.base }}
         run: |
           set -euo pipefail
-          notes="Orca ITG build over upstream [v${BASE}](https://github.com/stablyai/orca/releases/tag/v${BASE}), from ${SHA}.
-
-          Unsigned installer: Windows SmartScreen may warn on first install (More info → Run anyway). Installed builds update themselves from this repository."
+          git fetch --no-tags https://github.com/stablyai/orca.git main
+          notes="$RUNNER_TEMP/itg-release-notes.md"
+          bash config/scripts/itg-release-notes.sh "$BASE" "$(git rev-parse FETCH_HEAD)" "$GITHUB_REPOSITORY_OWNER" >"$notes"
+          printf '\nBuilt from %s. Unsigned installer: Windows SmartScreen may warn on first install (More info → Run anyway). Installed builds update themselves from this repository.\n' "$SHA" >>"$notes"
+          cat "$notes"
           gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft --target "$SHA" \
-            --title "Orca ITG ${TAG#v}" --notes "$notes"
+            --title "Orca ITG ${TAG#v}" --notes-file "$notes"
 
       - name: Package and upload Windows artifacts
         uses: nick-fields/retry@v4
