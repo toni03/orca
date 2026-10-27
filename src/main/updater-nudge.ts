@@ -1,5 +1,6 @@
 import { net } from 'electron'
 import { compareVersions, isValidVersion } from './updater-fallback'
+import { IS_FORK_DISTRIBUTION } from '../shared/release-distribution'
 
 export type NudgeConfig = {
   id: string
@@ -8,6 +9,10 @@ export type NudgeConfig = {
 }
 
 export async function fetchNudge(): Promise<NudgeConfig | null> {
+  // onorca.dev nudges target upstream versions; fork builds would match ranges meant for others.
+  if (IS_FORK_DISTRIBUTION) {
+    return null
+  }
   try {
     const res = await net.fetch('https://onorca.dev/whats-new/nudge.json', {
       signal: AbortSignal.timeout(5000)

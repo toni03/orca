@@ -8,12 +8,19 @@ function resolveReleaseDistribution(env = process.env) {
     throw new Error(`ORCA_RELEASE_REPOSITORY must be "owner/repo", got "${repository}"`)
   }
   const displayName = env.ORCA_RELEASE_DISPLAY_NAME?.trim() || null
+  const isUpstream = repository === UPSTREAM_RELEASE_REPOSITORY
+  // Fork releases are versioned <upstream>-<versionTag>.<n>; the app treats those as stable.
+  const versionTag = isUpstream ? null : env.ORCA_RELEASE_VERSION_TAG?.trim() || null
+  if (versionTag !== null && !/^[a-z][a-z0-9]*$/.test(versionTag)) {
+    throw new Error(`ORCA_RELEASE_VERSION_TAG must be lowercase alphanumeric, got "${versionTag}"`)
+  }
   return {
     repository,
     owner: match[1],
     repo: match[2],
-    isUpstream: repository === UPSTREAM_RELEASE_REPOSITORY,
+    isUpstream,
     displayName,
+    versionTag,
     artifactPrefix: displayName
       ? displayName
           .toLowerCase()

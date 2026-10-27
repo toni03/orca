@@ -1,4 +1,5 @@
-const RELEASE_REPOSITORY = ORCA_RELEASE_REPOSITORY
+import { RELEASE_REPOSITORY } from '../../shared/release-distribution'
+
 const RELEASE_PATH_PATTERN = RELEASE_REPOSITORY.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')
 
 export const RELEASES_URL = `https://github.com/${RELEASE_REPOSITORY}/releases`

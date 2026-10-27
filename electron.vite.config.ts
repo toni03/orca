@@ -68,10 +68,13 @@ function createDarkBuildMarkerPlugin(): Plugin {
 // Pin official skill installs to the bundled commit on every channel; main installs, renderer prints the command.
 const ORCA_BUILD_COMMIT_LITERAL = JSON.stringify(resolveBuildSourceCommit())
 // The updater reads releases from the repository the build was published to (forks set it).
-const ORCA_RELEASE_REPOSITORY_LITERAL = JSON.stringify(
-  createRequire(import.meta.url)('./config/release-distribution.cjs').resolveReleaseDistribution()
-    .repository
-)
+const RELEASE_DISTRIBUTION = createRequire(import.meta.url)(
+  './config/release-distribution.cjs'
+).resolveReleaseDistribution()
+const RELEASE_DISTRIBUTION_DEFINES = {
+  ORCA_RELEASE_REPOSITORY: JSON.stringify(RELEASE_DISTRIBUTION.repository),
+  ORCA_RELEASE_VERSION_TAG: JSON.stringify(RELEASE_DISTRIBUTION.versionTag)
+}
 
 function createStartupDiagnosticsBanner(chunkName: string): string {
   return `
@@ -242,7 +245,7 @@ export const electronViteConfig: UserConfig = {
       ORCA_POSTHOG_WRITE_KEY: ORCA_POSTHOG_WRITE_KEY_LITERAL,
       ORCA_DIAGNOSTICS_TOKEN_URL: ORCA_DIAGNOSTICS_TOKEN_URL_LITERAL,
       ORCA_BUILD_COMMIT: ORCA_BUILD_COMMIT_LITERAL,
-      ORCA_RELEASE_REPOSITORY: ORCA_RELEASE_REPOSITORY_LITERAL,
+      ...RELEASE_DISTRIBUTION_DEFINES,
       ...DARK_BUILD_DEFINES
     },
     // @xterm/headless declares exports:null; point Vite directly at its published CJS main to permit inlining.
@@ -271,6 +274,7 @@ export const electronViteConfig: UserConfig = {
     cacheDir: resolve('.cache/vite/renderer'),
     define: {
       ORCA_BUILD_COMMIT: ORCA_BUILD_COMMIT_LITERAL,
+      ...RELEASE_DISTRIBUTION_DEFINES,
       ...DARK_BUILD_DEFINES
     },
     resolve: {
