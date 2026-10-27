@@ -35,6 +35,15 @@ release workflow and checks the published release. It stops without pushing when
 check failure needs a person. Orca must be running on the machine that owns the automation; missed
 runs start when Orca opens within the grace window.
 
+### Daily PR review
+
+A second automation, "ITG PR review", runs every day at 07:30 Europe/Madrid with no precheck. A
+Claude session follows [`itg-pr-review-prompt.md`](./itg-pr-review-prompt.md) over the open
+`stablyai/orca` PRs by `toni03`: it fixes clear review comments, conflicts with `main` and failing
+checks on the PR branches in the fork, answers the threads it addressed, and ends with a status
+summary per PR (Automations → ITG PR review → run history). It never marks PRs ready, merges or
+force-pushes; anything needing a person stays in the summary.
+
 Download link for the team: `https://github.com/<owner>/<repo>/releases/latest/download/orca-itg-windows-setup.exe`.
 
 ## How the build differs from upstream
