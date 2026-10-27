@@ -189,6 +189,12 @@ jobs:
               exit 1
             fi
           done
-          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern latest.yml --output - | tee /dev/stderr | grep -qx "version: $VERSION"
+          # Git Bash on the Windows runner has no /dev/stderr, so print the manifest from a variable.
+          manifest="$(gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern latest.yml --output -)"
+          echo "$manifest"
+          if ! grep -qx "version: $VERSION" <<<"$manifest"; then
+            echo "::error::latest.yml on $TAG is not version $VERSION."
+            exit 1
+          fi
           gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
           echo "Published https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG"
