@@ -27,10 +27,17 @@ Download link for the team: `https://github.com/<owner>/<repo>/releases/latest/d
 
 ## How the build differs from upstream
 
-The workflow sets two variables read by `config/release-distribution.cjs`:
+The workflow sets three variables read by `config/release-distribution.cjs`:
 
 - `ORCA_RELEASE_REPOSITORY` (`owner/repo`): the publish target and the updater feed baked into the app.
 - `ORCA_RELEASE_DISPLAY_NAME` (`Orca ITG`): shortcut, uninstaller and installer file names.
+- `ORCA_RELEASE_VERSION_TAG` (`itg`): the app treats `<upstream>-itg.<n>` as a stable release, so
+  update checks and the build picker (Settings → General → Updates, Alt+click) use this repository's
+  releases.
+
+In a fork build the release channel picker offers only Stable (the RC and dev channels live in
+upstream repositories), and the onorca.dev changelog and update nudges are off. Agent state rules
+still come from `stablyai/orca`.
 
 With a repository other than `stablyai/orca` the installer is unsigned (no SignPath), so Windows
 SmartScreen warns on first install and the updater skips the publisher check. macOS and Linux builds

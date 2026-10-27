@@ -1,6 +1,7 @@
 import { net } from 'electron'
 import type { ChangelogData } from '../shared/update-status-types'
 import { compareVersions } from './updater-fallback'
+import { IS_FORK_DISTRIBUTION } from '../shared/release-distribution'
 
 type ChangelogEntry = {
   version: string
@@ -29,6 +30,10 @@ export async function fetchChangelog(
   incomingVersion: string,
   localVersion: string
 ): Promise<ChangelogData | null> {
+  // onorca.dev only describes upstream releases; forks fall back to their release notes link.
+  if (IS_FORK_DISTRIBUTION) {
+    return null
+  }
   const res = await net.fetch('https://onorca.dev/whats-new/changelog.json', {
     signal: AbortSignal.timeout(5000)
   })

@@ -1,14 +1,16 @@
 import { compareAppVersions, isValidAppVersion } from './app-version'
+import {
+  IS_FORK_DISTRIBUTION,
+  isForkReleaseVersion,
+  RELEASE_REPOSITORY
+} from './release-distribution'
 
 export type ReleaseChannel = 'stable' | 'rc' | 'hourly' | 'daily' | 'adhoc'
 
-export const RELEASE_CHANNELS: readonly ReleaseChannel[] = [
-  'stable',
-  'rc',
-  'hourly',
-  'daily',
-  'adhoc'
-]
+// Forks publish only stable builds; the other channels' repos would install upstream builds over the fork.
+export const RELEASE_CHANNELS: readonly ReleaseChannel[] = IS_FORK_DISTRIBUTION
+  ? ['stable']
+  : ['stable', 'rc', 'hourly', 'daily', 'adhoc']
 
 export const RELEASE_CHANNEL_LABELS: Readonly<Record<ReleaseChannel, string>> = {
   stable: 'Stable',
@@ -22,7 +24,7 @@ export const RELEASE_CHANNEL_LABELS: Readonly<Record<ReleaseChannel, string>> = 
 export const HOURLY_RELEASE_REPO = 'stablyai/orca-hourly'
 export const DAILY_RELEASE_REPO = 'stablyai/orca-daily'
 export const ADHOC_RELEASE_REPO = 'stablyai/orca-adhoc'
-export const MAIN_RELEASE_REPO = 'stablyai/orca'
+export const MAIN_RELEASE_REPO = RELEASE_REPOSITORY
 
 /** The dev channels, each published to its own repo rather than the main one. */
 const DEDICATED_REPO_CHANNELS = ['hourly', 'daily', 'adhoc'] as const
@@ -168,6 +170,9 @@ export function getVersionChannel(version: string): ReleaseChannel | null {
   }
   if (isAdhocVersion(normalized)) {
     return 'adhoc'
+  }
+  if (isForkReleaseVersion(normalized)) {
+    return 'stable'
   }
   // Why the dev channels are tested first: they are prereleases too, so this
   // catch-all would otherwise file every one of them under rc.

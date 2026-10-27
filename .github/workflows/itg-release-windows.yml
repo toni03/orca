@@ -43,6 +43,8 @@ jobs:
       # Read by electron-builder (publish target, names, signing) and the main build (updater feed).
       ORCA_RELEASE_REPOSITORY: ${{ github.repository }}
       ORCA_RELEASE_DISPLAY_NAME: Orca ITG
+      # Prerelease identifier of ITG versions; the app treats <upstream>-itg.<n> as a stable release.
+      ORCA_RELEASE_VERSION_TAG: itg
 
     steps:
       - name: Checkout
@@ -73,14 +75,14 @@ jobs:
           index="$INDEX_INPUT"
           if [[ -z "$index" ]]; then
             last="$(gh release list --repo "$GITHUB_REPOSITORY" --limit 200 --json tagName --jq '.[].tagName' \
-              | sed -n "s/^v${base//./\\.}-itg\.\([0-9][0-9]*\)$/\1/p" | sort -n | tail -1)"
+              | sed -n "s/^v${base//./\\.}-${ORCA_RELEASE_VERSION_TAG}\.\([0-9][0-9]*\)$/\1/p" | sort -n | tail -1)"
             index=$(( ${last:--1} + 1 ))
           fi
           if [[ ! "$index" =~ ^[0-9]+$ ]]; then
             echo "::error::itg_index must be a non-negative integer, got '$index'."
             exit 1
           fi
-          version="${base}-itg.${index}"
+          version="${base}-${ORCA_RELEASE_VERSION_TAG}.${index}"
           tag="v${version}"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "::error::Release $tag already exists in $GITHUB_REPOSITORY."

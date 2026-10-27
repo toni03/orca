@@ -1,3 +1,5 @@
+import { isForkReleaseVersion } from './release-distribution'
+
 type ParsedVersion = {
   core: [number, number, number]
   prerelease: string[]
@@ -32,7 +34,7 @@ export function parseCliVersion(output: string | null | undefined): string | nul
 
 export function isPrereleaseAppVersion(value: string): boolean {
   const parsed = parseVersion(value)
-  return parsed !== null && parsed.prerelease.length > 0
+  return parsed !== null && parsed.prerelease.length > 0 && !isForkReleaseVersion(value)
 }
 
 export function isPerfPrereleaseAppVersion(value: string): boolean {
