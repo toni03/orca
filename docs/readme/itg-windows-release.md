@@ -40,9 +40,11 @@ runs start when Orca opens within the grace window.
 A second automation, "ITG PR review", runs every day at 07:30 Europe/Madrid with no precheck. A
 Claude session follows [`itg-pr-review-prompt.md`](./itg-pr-review-prompt.md) over the open
 `stablyai/orca` PRs by `toni03`: it fixes clear review comments, conflicts with `main` and failing
-checks on the PR branches in the fork, answers the threads it addressed, and ends with a status
-summary per PR (Automations → ITG PR review → run history). It never marks PRs ready, merges or
-force-pushes; anything needing a person stays in the summary.
+checks on the PR branches in the fork, and answers the threads it addressed. An open PR (draft or
+not) counts as a stable ITG feature, so it then merges any pushed PR branch commits missing from the
+fork's `main` and pushes `main` (fast-forward only, no release). It ends with a status table of the
+open PRs (Automations → ITG PR review → run history). It never marks PRs ready, merges or closes
+them upstream, or force-pushes; anything needing a person stays in the summary.
 
 Download link for the team: `https://github.com/<owner>/<repo>/releases/latest/download/orca-itg-windows-setup.exe`.
 
