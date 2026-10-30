@@ -30,10 +30,14 @@ Europe/Madrid. Its precheck runs `config/scripts/itg-upstream-release-pending.mj
 `main` branch (`git show main:<script> | node --input-type=module - toni03/orca`, so it works whatever
 the main checkout has open) and skips the run unless `stablyai/orca` has a stable release newer than the base of the fork's latest release.
 When there is one, a Claude session follows [`itg-upstream-sync-prompt.md`](./itg-upstream-sync-prompt.md):
-it merges upstream `main` into the fork's `main`, runs `pnpm check:changed`, pushes, runs the
-release workflow and checks the published release. It stops without pushing when a conflict or a
-check failure needs a person. Orca must be running on the machine that owns the automation; missed
-runs start when Orca opens within the grace window.
+it merges upstream `main` into the fork's `main` on the worktree's `auto/itg-upstream-sync` branch,
+runs `pnpm check:changed`, pushes, runs the release workflow and checks the published release. It
+stops without pushing when a conflict or a check failure needs a person. Orca must be running on the
+machine that owns the automation; missed runs start when Orca opens within the grace window.
+
+Only the `itg-*` workflows run in the fork. The upstream ones fail here (they need upstream secrets
+and runners) and burn Actions minutes, so they are disabled, and each sync disables any that a merge
+adds.
 
 ### Daily PR review
 
