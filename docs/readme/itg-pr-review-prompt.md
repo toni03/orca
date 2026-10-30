@@ -27,9 +27,9 @@ Remotos: `origin` = `stablyai/orca` (nunca hagas push ahí), `fork` = `toni03/or
 6. No puedes resolver tú lo que requiere a una persona: capturas o evidencias visuales, decisiones de diseño o respuestas a preguntas de los mantenedores. Déjalo en el resumen.
 7. Termina con una tabla con todas las PRs abiertas, una fila por PR (en la columna PR, el enlace Markdown a la PR, sin comillas invertidas):
 
-   | PR              | Título   | Estado         | Revisión                           | Checks                           | Conflictos | Orca ITG                                                   | Pendiente                            |
-   | --------------- | -------- | -------------- | ---------------------------------- | -------------------------------- | ---------- | ---------------------------------------------------------- | ------------------------------------ |
-   | `[#<n>](<url>)` | <título> | borrador/lista | aprobada/cambios pedidos/pendiente | ok/fallan (motivo)/no ejecutados | sí/no      | integrada hoy (`<sha>`)/ya integrada/sin integrar (motivo) | nada, o un resumen de pocas palabras |
+   | PR                                                  | Título   | Estado         | Revisión                           | Checks                           | Conflictos | Orca ITG                                                   | Pendiente                            |
+   | --------------------------------------------------- | -------- | -------------- | ---------------------------------- | -------------------------------- | ---------- | ---------------------------------------------------------- | ------------------------------------ |
+   | `[#<n>](https://github.com/stablyai/orca/pull/<n>)` | <título> | borrador/lista | aprobada/cambios pedidos/pendiente | ok/fallan (motivo)/no ejecutados | sí/no      | integrada hoy (`<sha>`)/ya integrada/sin integrar (motivo) | nada, o un resumen de pocas palabras |
 
    Debajo, para cada PR con actividad o pendientes:
    - Hecho hoy: cambios, commits, respuestas publicadas e integración en Orca ITG.
