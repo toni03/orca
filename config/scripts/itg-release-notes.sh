@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Prints the Markdown notes of an ITG release: a link to the upstream Orca release notes, then the
-# ITG changes on HEAD that upstream main does not have.
+# ITG changes on HEAD that upstream main and the previous ITG release do not have.
 # Usage: itg-release-notes.sh <base X.Y.Z> <upstream main SHA> <PR author>
 set -euo pipefail
 
@@ -13,18 +13,12 @@ prs="$(gh pr list --repo stablyai/orca --author "$author" --state all --limit 20
   --json number,title,url,headRefName,state \
   --jq '.[] | [.headRefName, "\(.title) ([#\(.number)](\(.url))\(if .state == "MERGED" then ", already merged upstream" else "" end))"] | @tsv')"
 
-echo "Orca ITG is Orca v${base} plus the changes below."
-echo
-echo "## Orca v${base}"
-echo
-echo "See the [Orca v${base} release notes](https://github.com/stablyai/orca/releases/tag/v${base})."
-echo
-echo "## ITG changes"
-echo
+# Each release lists only what changed since the previous one; the first lists everything.
+previous="$(git describe --tags --abbrev=0 --match 'v*-itg.*' HEAD 2>/dev/null || true)"
 
 declare -A seen=()
-lines=0
-for commit in $(git rev-list --first-parent --reverse HEAD --not "$upstream"); do
+changes=()
+for commit in $(git rev-list --first-parent --reverse HEAD --not "$upstream" ${previous:+"$previous"}); do
   read -r -a parents <<<"$(git rev-list --parents -n 1 "$commit")"
   if ((${#parents[@]} < 3)); then
     entries="$(git log -1 --format='%s' "$commit")"
@@ -53,11 +47,26 @@ for commit in $(git rev-list --first-parent --reverse HEAD --not "$upstream"); d
       continue
     fi
     seen[$entry]=1
-    echo "- $entry"
-    lines=$((lines + 1))
+    changes+=("$entry")
   done <<<"$entries"
 done
 
-if ((lines == 0)); then
-  echo "No ITG changes on top of upstream."
+if ((${#changes[@]} == 0)); then
+  echo "Orca ITG upgraded to Orca v${base}, with no ITG changes ${previous:+since $previous}."
+else
+  echo "Orca ITG is Orca v${base} plus the changes below."
+fi
+echo
+echo "## Orca v${base}"
+echo
+echo "See the [Orca v${base} release notes](https://github.com/stablyai/orca/releases/tag/v${base})."
+if ((${#changes[@]} > 0)); then
+  echo
+  if [[ -n "$previous" ]]; then
+    echo "## ITG changes since ${previous}"
+  else
+    echo "## ITG changes"
+  fi
+  echo
+  printf -- '- %s\n' "${changes[@]}"
 fi
