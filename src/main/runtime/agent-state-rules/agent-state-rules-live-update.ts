@@ -6,7 +6,7 @@ import type { GlobalSettings } from '../../../shared/global-settings-types'
 import { getVersionChannel } from '../../../shared/release-channel'
 import { UPSTREAM_RELEASE_REPOSITORY } from '../../../shared/release-distribution'
 import { getMainHttpClient } from '../../network/http-client'
-import { writePluginFileAtomically } from '../../plugins/plugin-atomic-file-write'
+import { writePluginFileAtomically } from '../../plugins/installation/plugin-atomic-file-write'
 import {
   activateAgentStateRules,
   BUNDLED_AGENT_STATE_RULES,
