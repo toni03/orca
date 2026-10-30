@@ -120,12 +120,16 @@ function buildTasks(root, plan, { files, mergeBase, maxWorkers, bun }) {
   if (plan.typecheckProjects.length > 0) {
     tasks.push({
       name: `typecheck (${plan.typecheckProjects.map((config) => path.basename(config, '.json')).join(', ')})`,
+      heavy: true,
       steps: [
         step(node, [
           'config/scripts/run-typecheck-projects-in-parallel.mjs',
           ...plan.typecheckProjects.map((config) => `--project=${config}`),
           // A worker cap means a shared host; 4 checkers cut typecheck CPU by about a third.
-          ...(maxWorkers ? [`--checkers=${Math.max(2, Number(maxWorkers) * 2)}`] : [])
+          // Why bun-concurrency: Windows/x64 uses `bun check`, which ignores --checkers.
+          ...(maxWorkers
+            ? [`--checkers=${Math.max(2, Number(maxWorkers) * 2)}`, '--bun-concurrency=1']
+            : [])
         ])
       ]
     })
@@ -144,6 +148,7 @@ function buildTasks(root, plan, { files, mergeBase, maxWorkers, bun }) {
       ])
     tasks.push({
       name: 'unit tests',
+      heavy: true,
       steps: [
         step(node, ['config/scripts/ensure-native-runtime.mjs', '--runtime=node']),
         ...(related.length > 0
@@ -162,6 +167,8 @@ function buildTasks(root, plan, { files, mergeBase, maxWorkers, bun }) {
   if (plan.staticAnalysis) {
     tasks.push({
       name: 'changed-code quality',
+      // Its type-aware scan runs tsgolint, which peaks near 6.5 GB on this repo.
+      heavy: true,
       steps: [step(node, ['config/scripts/check-changed-code-quality.mjs', mergeBase])]
     })
     if (existing.length > 0) {
@@ -245,17 +252,44 @@ async function runTask(task, { root, env, runProcess, stepTimeoutMs }) {
   return { task, ok: true, output, elapsed: seconds(startedAt) }
 }
 
-async function runPool(tasks, concurrency, run) {
+// Heavy tasks (multi-GB compilers/test pools) share `heavyLimit` slots; light ones fill the rest.
+async function runPool(tasks, concurrency, run, heavyLimit = Infinity) {
   const results = []
-  let next = 0
+  const pending = [...tasks]
+  const wakers = []
+  let heavyRunning = 0
+  const take = () => {
+    const index = pending.findIndex((task) => !task.heavy || heavyRunning < heavyLimit)
+    return index === -1 ? null : pending.splice(index, 1)[0]
+  }
   await Promise.all(
     Array.from({ length: Math.min(concurrency, tasks.length) }, async () => {
-      while (next < tasks.length) {
-        results.push(await run(tasks[next++]))
+      while (pending.length > 0) {
+        const task = take()
+        if (!task) {
+          await new Promise((resolve) => wakers.push(resolve))
+          continue
+        }
+        if (task.heavy) {
+          heavyRunning += 1
+        }
+        try {
+          results.push(await run(task))
+        } finally {
+          if (task.heavy) {
+            heavyRunning -= 1
+            wakers.splice(0).forEach((wake) => wake())
+          }
+        }
       }
     })
   )
   return results
+}
+
+function positiveIntegerEnv(name) {
+  const value = Number(process.env[name])
+  return Number.isInteger(value) && value > 0 ? value : null
 }
 
 export async function main(root, argv) {
@@ -310,7 +344,13 @@ export async function main(root, argv) {
   )
 
   // Typecheck and tests lead the queue: they take longest, so the short checks fill in around them.
-  const concurrency = Math.max(3, Math.floor(availableParallelism() / 3))
+  const concurrency =
+    positiveIntegerEnv('ORCA_CHECK_CHANGED_CONCURRENCY') ??
+    Math.max(3, Math.floor(availableParallelism() / 3))
+  // Why: typecheck, tsgolint and the test pool each take several GB; overlapping them OOMs smaller hosts.
+  const heavyLimit =
+    positiveIntegerEnv('ORCA_CHECK_CHANGED_HEAVY_CONCURRENCY') ??
+    (options.maxWorkers ? 1 : Infinity)
   const running = new Map()
   // Why: output is buffered until a task ends, so long test runs would otherwise look hung.
   const heartbeat = setInterval(() => {
@@ -318,22 +358,27 @@ export async function main(root, argv) {
     console.log(`… ${seconds(startedAt)} elapsed; running: ${active.join(', ')}`)
   }, HEARTBEAT_MS)
   heartbeat.unref()
-  const results = await runPool(tasks, concurrency, async (task) => {
-    running.set(task.name, performance.now())
-    const result = await runTask(task, {
-      root,
-      env,
-      runProcess,
-      stepTimeoutMs: options.stepTimeoutMs
-    })
-    running.delete(task.name)
-    if (result.ok) {
-      console.log(`✓ ${task.name} (${result.elapsed})`)
-    } else {
-      console.error(`\n✗ ${task.name} (${result.elapsed})\n${tail(result.output)}`)
-    }
-    return result
-  }).finally(() => clearInterval(heartbeat))
+  const results = await runPool(
+    tasks,
+    concurrency,
+    async (task) => {
+      running.set(task.name, performance.now())
+      const result = await runTask(task, {
+        root,
+        env,
+        runProcess,
+        stepTimeoutMs: options.stepTimeoutMs
+      })
+      running.delete(task.name)
+      if (result.ok) {
+        console.log(`✓ ${task.name} (${result.elapsed})`)
+      } else {
+        console.error(`\n✗ ${task.name} (${result.elapsed})\n${tail(result.output)}`)
+      }
+      return result
+    },
+    heavyLimit
+  ).finally(() => clearInterval(heartbeat))
   const failed = results.filter((result) => !result.ok)
   if (failed.length > 0) {
     console.error(
