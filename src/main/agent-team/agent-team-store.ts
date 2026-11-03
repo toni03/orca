@@ -18,9 +18,16 @@ function isAgentTeamState(value: unknown): value is AgentTeamState {
   return (
     'version' in value &&
     value.version === 1 &&
-    ['roles', 'teams', 'seats', 'projects', 'issues'].every(
-      (key) => key in value && Array.isArray(Reflect.get(value, key))
-    ) &&
+    'roles' in value &&
+    Array.isArray(value.roles) &&
+    'teams' in value &&
+    Array.isArray(value.teams) &&
+    'seats' in value &&
+    Array.isArray(value.seats) &&
+    'projects' in value &&
+    Array.isArray(value.projects) &&
+    'issues' in value &&
+    Array.isArray(value.issues) &&
     'workflow' in value &&
     typeof value.workflow === 'object' &&
     value.workflow !== null
