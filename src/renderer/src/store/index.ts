@@ -18,6 +18,7 @@ import { createJiraSlice } from './slices/jira'
 import { createEditorSlice } from './slices/editor'
 import { createStatsSlice } from './slices/stats'
 import { createMemorySlice } from './slices/memory'
+import { createAgentTeamSlice } from './slices/agent-team'
 import { createWorkspaceSpaceSlice } from './slices/workspace-space'
 import {
   createClaudeUsageSlice,
@@ -115,6 +116,7 @@ export const useAppStore = create<AppState>()(
           ...createEditorSlice(...a),
           ...createStatsSlice(...a),
           ...createMemorySlice(...a),
+          ...createAgentTeamSlice(...a),
           ...createWorkspaceSpaceSlice(...a),
           ...createClaudeUsageSlice(...a),
           ...createCodexUsageSlice(...a),

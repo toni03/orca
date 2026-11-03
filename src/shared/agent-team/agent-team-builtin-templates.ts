@@ -126,3 +126,19 @@ export function createInitialAgentTeamState(now: number): AgentTeamState {
     workflow: { roundsPerIssue: 3, batchThreshold: 2, paused: false }
   }
 }
+
+/** Starting point for a project spec; the headings match what the Manager and seats look for. */
+export const EMPTY_PROJECT_SPEC = [
+  '## Tracker',
+  'Which labels or statuses mean registered, approved, in progress, in review and rejected.',
+  '',
+  '## Branches and merge requests',
+  'Branch naming and the base branch merge requests target.',
+  '',
+  '## Checks',
+  'Commands every seat runs before handing off.',
+  '',
+  '## For QA',
+  'Extra instructions only the QA role receives.',
+  ''
+].join('\n')

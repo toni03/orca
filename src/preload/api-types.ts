@@ -20,6 +20,7 @@ import type {
 import type { AiVaultApi } from './api/ai-vault-api'
 import type { AppApi, E2EApi, PlatformApi } from './api/app-api'
 import type { AutomationsApi } from './api/automation-api'
+import type { AgentTeamApi } from './api/agent-team-api'
 import type { BrowserApi } from './api/browser/browser-api'
 import type { CliApi } from './api/cli-install-api'
 import type { CrashReportsApi, FeedbackApi } from './api/crash-report-api'
@@ -163,6 +164,7 @@ export type PreloadApi = {
   /** COMPAT(legacy-relay-bridge): desktop-only, revisit 2027-01-15. */
   legacyRelayBridge?: LegacyRelayBridgeApi
   automations: AutomationsApi
+  agentTeam: AgentTeamApi
   wsl: RuntimeApi['wsl']
   wslMove: WslMoveApi
   wslDriveProject: WslDriveProjectApi

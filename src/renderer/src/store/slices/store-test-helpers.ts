@@ -17,6 +17,7 @@ import { createJiraSlice } from './jira'
 import { createEditorSlice } from './editor'
 import { createStatsSlice } from './stats'
 import { createMemorySlice } from './memory'
+import { createAgentTeamSlice } from './agent-team'
 import { createWorkspaceSpaceSlice } from './workspace-space'
 import {
   createClaudeUsageSlice,
@@ -89,6 +90,7 @@ export function createTestStore() {
         ...createEditorSlice(...a),
         ...createStatsSlice(...a),
         ...createMemorySlice(...a),
+        ...createAgentTeamSlice(...a),
         ...createWorkspaceSpaceSlice(...a),
         ...createClaudeUsageSlice(...a),
         ...createCodexUsageSlice(...a),
