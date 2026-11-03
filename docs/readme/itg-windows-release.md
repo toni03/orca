@@ -36,6 +36,12 @@ runs `pnpm check:changed`, pushes, runs the release workflow and checks the publ
 stops without pushing when a conflict or a check failure needs a person. Orca must be running on the
 machine that owns the automation; missed runs start when Orca opens within the grace window.
 
+Before each `check:changed`, both automations run `config/scripts/itg-stale-check-processes.mjs --kill`.
+Windows does not stop a process's children with it, so a check whose agent shell ended (session
+closed, or stopped for low memory) keeps its `bun`, `tsgolint` and `tsc` workers running. The script
+stops only those trees whose launching shell is gone; agent TypeScript servers with a live session
+are left alone.
+
 Only the `itg-*` workflows run in the fork. The upstream ones fail here (they need upstream secrets
 and runners) and burn Actions minutes, so they are disabled, and each sync disables any that a merge
 adds.
