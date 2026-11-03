@@ -163,11 +163,17 @@ export function applyAgentTeamUserDecision(args: {
   decision: AgentTeamUserDecision
   now: number
 }): AgentTeamIssue {
-  const { issue, team, roles, decision, now } = args
+  const { team, roles, decision, now } = args
+  const open = openAssignment(args.issue)
+  // Every decision but resume ends the session that was waiting, so its late report is ignored.
+  const issue =
+    open && decision.kind !== 'resume'
+      ? closeAssignment(args.issue, open.id, { stopReason: 'cancelled' }, now)
+      : args.issue
   const base = { ...issue, needsYou: undefined, updatedAt: now }
   switch (decision.kind) {
     case 'resume':
-      if (openAssignment(issue)) {
+      if (open) {
         return { ...base, status: 'working' }
       }
       return {

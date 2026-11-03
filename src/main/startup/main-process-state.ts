@@ -114,6 +114,8 @@ export const mainProcessState = {
   watcherShutdownPromise: null as Promise<void> | null,
   watcherShutdownDone: false,
   automations: null as AutomationService | null,
+  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: widens the null slot to the stop function assigned by main-process-agent-team.
+  stopAgentTeam: null as (() => void) | null,
   pluginService: null as PluginService | null,
   pluginKillListService: null as PluginKillListService | null,
   // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: widens the null initial value; assigned once plugins start.

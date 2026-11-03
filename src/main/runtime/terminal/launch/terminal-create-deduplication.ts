@@ -18,6 +18,7 @@ import {
 } from '../../../../shared/execution-host'
 import { resolveWorktreeLaunchHost } from '../../worktree-launch-host-repo'
 import type { TuiAgent } from '../../../../shared/tui-agent'
+import type { AgentLaunchPreferences } from '../../../../shared/agent-session/agent-session-host-authority'
 import type { TerminalWorkspaceLaunchScope } from '../../runtime-legacy-worker-terminal-recovery-types'
 
 export abstract class OrcaRuntimeWithTerminalCreateDeduplication extends OrcaRuntimeWithCreateAgentSession {
@@ -180,6 +181,8 @@ export abstract class OrcaRuntimeWithTerminalCreateDeduplication extends OrcaRun
       prompt: string
       title?: string
       extraAgentArgs?: string
+      /** Model and effort for this launch; the agent's defaults apply when absent. */
+      launchPreferences?: AgentLaunchPreferences
       suppressStartupUpdatePrompt?: boolean
       /** Run now is the user's act; a scheduled run is background and a stopped WSL distro holds it. */
       wslUserAct?: true
@@ -197,17 +200,23 @@ export abstract class OrcaRuntimeWithTerminalCreateDeduplication extends OrcaRun
     if (!repo) {
       throw new Error('Repository for the selected workspace is no longer available.')
     }
-    const startup = this.buildStartupForAgent(repo, opts.agent, opts.prompt, undefined, {
-      ...(opts.extraAgentArgs ? { extraAgentArgs: opts.extraAgentArgs } : {}),
-      ...(opts.suppressStartupUpdatePrompt ? { suppressStartupUpdatePrompt: true } : {}),
-      launchScope: await this.resolveTerminalWorkspaceLaunchScope(
-        `id:${worktree.id}`,
-        undefined,
-        { wslUserAct: opts.wslUserAct === true },
-        worktree,
-        resolvedTarget?.folderWorkspace
-      )
-    })
+    const startup = this.buildStartupForAgent(
+      repo,
+      opts.agent,
+      opts.prompt,
+      opts.launchPreferences,
+      {
+        ...(opts.extraAgentArgs ? { extraAgentArgs: opts.extraAgentArgs } : {}),
+        ...(opts.suppressStartupUpdatePrompt ? { suppressStartupUpdatePrompt: true } : {}),
+        launchScope: await this.resolveTerminalWorkspaceLaunchScope(
+          `id:${worktree.id}`,
+          undefined,
+          { wslUserAct: opts.wslUserAct === true },
+          worktree,
+          resolvedTarget?.folderWorkspace
+        )
+      }
+    )
     if (startup.launchRuntime instanceof Error) {
       throw startup.launchRuntime
     }
