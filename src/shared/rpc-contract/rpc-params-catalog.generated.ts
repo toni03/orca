@@ -77,6 +77,11 @@ import { CurrentRequestsParams } from './agent-session-current-requests-params'
 import { CreateAgentSessionParams, EnsureAgentSessionParams } from './agent-session-params'
 import { ReadVisualParams } from './agent-session-visual-params'
 import {
+  AgentTeamIssueCreateParams,
+  AgentTeamIssueListParams,
+  AgentTeamReportParams
+} from './agent-team-params'
+import {
   AiVaultDeleteSessionParams,
   AiVaultListSessionsParams,
   AiVaultPrepareSessionResumeParams,
@@ -1469,6 +1474,9 @@ export const RPC_PARAMS_BY_METHOD = {
   'ssh.updateTarget': SshTargetUpdate,
   'stats.summary': null,
   'status.get': StatusGetParams,
+  'team.issueCreate': AgentTeamIssueCreateParams,
+  'team.issues': AgentTeamIssueListParams,
+  'team.report': AgentTeamReportParams,
   'terminal.adoptOrphans': TerminalAdoptOrphans,
   'terminal.agentStatus': TerminalHandle,
   'terminal.clearBuffer': TerminalHandle,
