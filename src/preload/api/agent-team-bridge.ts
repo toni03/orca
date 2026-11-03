@@ -9,6 +9,7 @@ export const agentTeamApi = {
   readProjectSpec: (repoId) => ipcRenderer.invoke(AGENT_TEAM_CHANNELS.readProjectSpec, repoId),
   writeProjectSpec: (repoId, text) =>
     ipcRenderer.invoke(AGENT_TEAM_CHANNELS.writeProjectSpec, repoId, text),
+  launchManager: (args) => ipcRenderer.invoke(AGENT_TEAM_CHANNELS.launchManager, args),
   onChanged: (callback) => {
     const listener = (_event: Electron.IpcRendererEvent, state: AgentTeamState): void =>
       callback(state)

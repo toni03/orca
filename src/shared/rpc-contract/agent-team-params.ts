@@ -32,3 +32,5 @@ export const AgentTeamIssueCreateParams = z.object({
   trackerUrl: z.string().optional(),
   approved: z.boolean().optional()
 })
+
+export const AgentTeamContextParams = z.object({})

@@ -1,0 +1,19 @@
+import type { AgentTeamState } from './agent-team-types'
+
+/** What `orca team context` returns: everything the Manager needs in one read. */
+export type AgentTeamContext = {
+  projects: {
+    repoId: string
+    name: string
+    path: string
+    tracker: AgentTeamState['projects'][number]['tracker'] | null
+    spec: string
+  }[]
+  teams: {
+    id: string
+    name: string
+    steps: { name: string; role: string; stepType: string; seats: string[] }[]
+  }[]
+  workflow: AgentTeamState['workflow']
+  queue: { id: string; repoId: string; title: string; status: string; key: string | null }[]
+}

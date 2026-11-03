@@ -2,6 +2,7 @@ import { BrowserWindow, ipcMain } from 'electron'
 import type { AgentTeamCommand } from '../../shared/agent-team/agent-team-commands'
 import { AGENT_TEAM_CHANNELS } from '../../shared/agent-team/agent-team-ipc'
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
+import type { TuiAgent } from '../../shared/tui-agent'
 import type { AgentTeamService } from '../agent-team/agent-team-service'
 
 function broadcastAgentTeamState(state: AgentTeamState): void {
@@ -28,6 +29,11 @@ export function registerAgentTeamHandlers(service: AgentTeamService): () => void
   ipcMain.handle(AGENT_TEAM_CHANNELS.writeProjectSpec, (_event, repoId: string, text: string) =>
     service.writeProjectSpec(repoId, text)
   )
+  ipcMain.handle(
+    AGENT_TEAM_CHANNELS.launchManager,
+    (_event, args: { worktreeId: string; agent: TuiAgent; request: string }) =>
+      service.launchManager(args)
+  )
   const unsubscribe = service.subscribe(broadcastAgentTeamState)
   return () => {
     unsubscribe()
@@ -35,7 +41,8 @@ export function registerAgentTeamHandlers(service: AgentTeamService): () => void
       AGENT_TEAM_CHANNELS.getState,
       AGENT_TEAM_CHANNELS.execute,
       AGENT_TEAM_CHANNELS.readProjectSpec,
-      AGENT_TEAM_CHANNELS.writeProjectSpec
+      AGENT_TEAM_CHANNELS.writeProjectSpec,
+      AGENT_TEAM_CHANNELS.launchManager
     ]) {
       ipcMain.removeHandler(channel)
     }

@@ -77,6 +77,7 @@ import { CurrentRequestsParams } from './agent-session-current-requests-params'
 import { CreateAgentSessionParams, EnsureAgentSessionParams } from './agent-session-params'
 import { ReadVisualParams } from './agent-session-visual-params'
 import {
+  AgentTeamContextParams,
   AgentTeamIssueCreateParams,
   AgentTeamIssueListParams,
   AgentTeamReportParams
@@ -1474,6 +1475,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'ssh.updateTarget': SshTargetUpdate,
   'stats.summary': null,
   'status.get': StatusGetParams,
+  'team.context': AgentTeamContextParams,
   'team.issueCreate': AgentTeamIssueCreateParams,
   'team.issues': AgentTeamIssueListParams,
   'team.report': AgentTeamReportParams,

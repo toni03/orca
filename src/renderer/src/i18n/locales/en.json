@@ -19232,7 +19232,8 @@
           "newIssue": "New issue",
           "resume": "Resume team",
           "pause": "Pause team",
-          "pausedHint": "Paused: running steps finish, nothing new starts."
+          "pausedHint": "Paused: running steps finish, nothing new starts.",
+          "manager": "Manager"
         },
         "TeamDecisionDialog": {
           "sessionWaiting": "The session is still open. Answer it in its terminal and it continues; Resume only clears this item.",
@@ -19378,6 +19379,15 @@
         "TeamSidebarButton": {
           "label": "Team",
           "working": "{{count}} working"
+        },
+        "TeamManagerDialog": {
+          "title": "Talk to the Manager",
+          "description": "The Manager is an agent session that drafts issues, registers them in each project tracker following its spec, and adds them to the queue. It shows you a draft before creating anything.",
+          "workspace": "Runs in",
+          "agent": "Agent CLI",
+          "request": "What do you need? (optional)",
+          "cancel": "Cancel",
+          "start": "Start Manager"
         }
       }
     },

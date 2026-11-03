@@ -3,6 +3,12 @@ import { GLOBAL_FLAGS } from '../args'
 
 export const TEAM_COMMAND_SPECS: CommandSpec[] = [
   {
+    path: ['team', 'context'],
+    summary: 'Show projects, trackers, project specs, teams and the queue for the Manager',
+    usage: 'orca team context [--json]',
+    allowedFlags: [...GLOBAL_FLAGS]
+  },
+  {
     path: ['team', 'report'],
     summary: 'Report the result of an agent team step you were assigned',
     usage:

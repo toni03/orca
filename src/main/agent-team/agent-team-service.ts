@@ -17,6 +17,9 @@ import {
   readRepositoryProjectSpec
 } from './agent-team-runtime-launcher'
 import { AgentTeamStore } from './agent-team-store'
+import { buildAgentTeamContext, launchAgentTeamManager } from './agent-team-manager'
+import type { AgentTeamContext } from '../../shared/agent-team/agent-team-context'
+import type { TuiAgent } from '../../shared/tui-agent'
 
 const TICK_INTERVAL_MS = 30_000
 /** A seat runs `orca team report` before its turn ends; give that call time to land. */
@@ -85,6 +88,20 @@ export class AgentTeamService {
       }
       throw error
     }
+  }
+
+  context(): Promise<AgentTeamContext> {
+    return buildAgentTeamContext(this.store.get(), this.repos, (repoId) =>
+      this.readProjectSpec(repoId)
+    )
+  }
+
+  launchManager(args: {
+    worktreeId: string
+    agent: TuiAgent
+    request: string
+  }): Promise<{ worktreeId: string; terminalHandle: string }> {
+    return launchAgentTeamManager(this.runtime, args)
   }
 
   async readProjectSpec(repoId: string): Promise<AgentTeamProjectSpecRead> {

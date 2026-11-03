@@ -1,6 +1,7 @@
 import { defineMethod } from '../core'
 import {
   AgentTeamIssueCreateParams,
+  AgentTeamContextParams,
   AgentTeamIssueListParams,
   AgentTeamReportParams
 } from '../../../../shared/rpc-contract/agent-team-params'
@@ -26,6 +27,12 @@ function stepResult(params: {
 }
 
 export const AGENT_TEAM_METHODS = [
+  defineMethod({
+    name: 'team.context',
+    permission: 'workspace',
+    params: AgentTeamContextParams,
+    handler: () => requireAgentTeamService().context()
+  }),
   defineMethod({
     name: 'team.report',
     permission: 'workspace',

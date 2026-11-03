@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Pause, Play, Plus } from 'lucide-react'
+import { MessagesSquare, Pause, Play, Plus } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import type { AgentTeamIssue, AgentTeamState } from '../../../../shared/agent-te
 import { TeamIssueCard } from './TeamIssueCard'
 import { TeamNewIssueDialog } from './TeamNewIssueDialog'
 import { TeamDecisionDialog } from './TeamDecisionDialog'
+import { TeamManagerDialog } from './TeamManagerDialog'
 import { stepTypeLabel } from './team-labels'
 import { useAgentTeamCommand } from './use-agent-team-state'
 import { useNow } from './use-now'
@@ -81,6 +82,7 @@ export function TeamBoard({
   const now = useNow(30_000)
   const [teamFilter, setTeamFilter] = useState<string>(ALL_TEAMS)
   const [creating, setCreating] = useState(false)
+  const [managerOpen, setManagerOpen] = useState(false)
   const [deciding, setDeciding] = useState<AgentTeamIssue | null>(null)
   const waiting = useMemo(() => planAgentTeamAssignments(state).waiting, [state])
   const columns = useMemo(() => boardColumns(state, teamFilter), [state, teamFilter])
@@ -140,6 +142,10 @@ export function TeamBoard({
             ))}
           </SelectContent>
         </Select>
+        <Button size="sm" onClick={() => setManagerOpen(true)}>
+          <MessagesSquare />
+          {translate('auto.components.agentTeam.TeamBoard.manager', 'Manager')}
+        </Button>
         <Button size="sm" variant="outline" onClick={() => setCreating(true)}>
           <Plus />
           {translate('auto.components.agentTeam.TeamBoard.newIssue', 'New issue')}
@@ -203,6 +209,7 @@ export function TeamBoard({
           </section>
         ))}
       </div>
+      <TeamManagerDialog open={managerOpen} onOpenChange={setManagerOpen} />
       <TeamNewIssueDialog
         open={creating}
         onOpenChange={setCreating}

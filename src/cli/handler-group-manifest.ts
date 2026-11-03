@@ -298,7 +298,7 @@ export const HANDLER_GROUPS: readonly HandlerGroup[] = [
   },
   {
     name: 'team',
-    keys: ['team report', 'team issues', 'team issue add'],
+    keys: ['team context', 'team report', 'team issues', 'team issue add'],
     load: async () => (await import('./handlers/team.js')).TEAM_HANDLERS
   }
 ]
