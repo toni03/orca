@@ -35,4 +35,6 @@ Remotos: `origin` = `stablyai/orca` (nunca hagas push ahí), `fork` = `toni03/or
    - Hecho hoy: cambios, commits, respuestas publicadas e integración en Orca ITG.
    - Pendiente: lo que necesita una persona, con enlace al hilo o casilla.
 
+Al terminar, deja todo parado: justo antes del resumen, como último comando, ejecuta `git show fork/main:config/scripts/itg-stale-check-processes.mjs | node --input-type=module - --session --kill` (para el servidor TypeScript de esta sesión y cualquier check que siga en marcha) y anota en el resumen lo que pare.
+
 Reglas: no añadas trailers `Co-Authored-By` de Claude a los commits y no incluyas nombres de clientes ni datos personales en commits, comentarios o informes.

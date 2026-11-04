@@ -17,4 +17,6 @@ Remotos: `origin` = `stablyai/orca` (solo lectura, nunca hagas push ahí), `fork
 10. Actualiza la rama `main` local con `git fetch fork main:main` si no está en uso en ningún worktree; si lo está, déjala y dilo en el informe.
 11. Termina con un informe breve: versión upstream, número de commits traídos, conflictos y cómo se resolvieron, resultado de las comprobaciones, enlace a la release o motivo por el que no se publicó.
 
+Al terminar, publiques o no, deja todo parado: justo antes del informe, como último comando, ejecuta `node config/scripts/itg-stale-check-processes.mjs --session --kill` (para el servidor TypeScript de esta sesión y cualquier check que siga en marcha) y anota en el informe lo que pare.
+
 Reglas: no añadas trailers `Co-Authored-By` de Claude a los commits, no abras PRs ni comentes en `stablyai/orca`, y no incluyas nombres de clientes ni datos personales en commits o informes.

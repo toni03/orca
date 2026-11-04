@@ -40,7 +40,9 @@ Before each `check:changed`, both automations run `config/scripts/itg-stale-chec
 Windows does not stop a process's children with it, so a check whose agent shell ended (session
 closed, or stopped for low memory) keeps its `bun`, `tsgolint` and `tsc` workers running. The script
 stops only those trees whose launching shell is gone; agent TypeScript servers with a live session
-are left alone.
+are left alone. As their last command, both automations run it with `--session --kill`, which stops
+the heavy workers of their own session (its TypeScript server and any check still running), so a
+finished run leaves nothing behind.
 
 Only the `itg-*` workflows run in the fork. The upstream ones fail here (they need upstream secrets
 and runners) and burn Actions minutes, so they are disabled, and each sync disables any that a merge
