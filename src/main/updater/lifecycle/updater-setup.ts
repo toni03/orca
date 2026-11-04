@@ -22,6 +22,7 @@ import { UpdaterDownloadInstall } from './updater-download-install'
 import { configureMacShipItScheduling } from '../mac-install/macos-shipit-scheduling'
 import { handleElectronUpdaterProxyLogin } from './electron-updater-proxy-session'
 import { RELEASES_URL } from '../updater-release-repository'
+import { resolveWindowsUpdateInstallDirectory } from './windows-update-install-directory'
 import type { PreQuitCleanupFailureMode, UpdateInstallMode } from './updater-state'
 
 export type UpdaterSetupOptions = {
@@ -158,6 +159,14 @@ export class UpdaterSetup extends UpdaterDownloadInstall {
     autoUpdater.autoRunAppAfterInstall = this.updateInstallMode === 'interactive'
     // Keep native updater diagnostics visible through local logging.
     autoUpdater.logger = createUpdaterDiagnosticLogger() as never
+    const installDirectory = resolveWindowsUpdateInstallDirectory(
+      process.platform,
+      process.execPath
+    )
+    if (installDirectory) {
+      // NsisUpdater reads installDirectory, which the cross-platform AppUpdater type omits.
+      Object.assign(autoUpdater, { installDirectory })
+    }
 
     // Security: never re-add a verifyUpdateCodeSignature override — a no-op disables electron-updater's built-in Authenticode check and accepts any installer.
     if (this.activeUpdateSource === 'release') {
