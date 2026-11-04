@@ -36,7 +36,11 @@ runs `pnpm check:changed`, pushes, runs the release workflow and checks the publ
 stops without pushing when a conflict or a check failure needs a person. Orca must be running on the
 machine that owns the automation; missed runs start when Orca opens within the grace window.
 
-Before each `check:changed`, both automations run `config/scripts/itg-stale-check-processes.mjs --kill`.
+Both automations run `check:changed` with `--maxWorkers=1`, which on the fork runs one heavy check
+(typecheck, tests, type-aware quality) at a time. Upstream PR branches lack that change, so the PR
+review runs them through `config/scripts/itg-check-changed-sequential.mjs`, which patches it into a
+git-ignored copy of the branch's script. Before and after each `check:changed`, both automations run
+`config/scripts/itg-stale-check-processes.mjs --kill`.
 Windows does not stop a process's children with it, so a check whose agent shell ended (session
 closed, or stopped for low memory) keeps its `bun`, `tsgolint` and `tsc` workers running. The script
 stops only those trees whose launching shell is gone; agent TypeScript servers with a live session
