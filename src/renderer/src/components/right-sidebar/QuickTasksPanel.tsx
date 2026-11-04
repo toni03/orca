@@ -202,7 +202,7 @@ export default function QuickTasksPanel({
                 repoName={repoName(item.repoId)}
                 onOpen={() => openGitHubItem(item)}
                 onCreateWorkspace={() => openComposerForGitHubWorkItem(repos, openModal, item)}
-                onOpenExternal={() => openAppHttpLink(item.url)}
+                onOpenExternal={(event) => openAppHttpLink(item.url, { event })}
               />
             ))}
           </QuickTasksSection>
@@ -255,7 +255,7 @@ export default function QuickTasksPanel({
                 repoName={repoName(item.repoId)}
                 onOpen={() => openGitLabItem(item)}
                 onCreateWorkspace={() => openComposerForGitLabWorkItem(repos, openModal, item)}
-                onOpenExternal={() => openAppHttpLink(item.url)}
+                onOpenExternal={(event) => openAppHttpLink(item.url, { event })}
               />
             ))}
           </QuickTasksSection>
@@ -291,7 +291,7 @@ export default function QuickTasksPanel({
                 onCreateWorkspace={() =>
                   openComposerForJiraIssue(openModal, issue, taskRepos[0]?.id)
                 }
-                onOpenExternal={() => openAppHttpLink(issue.url)}
+                onOpenExternal={(event) => openAppHttpLink(issue.url, { event })}
               />
             ))}
           </QuickTasksSection>
