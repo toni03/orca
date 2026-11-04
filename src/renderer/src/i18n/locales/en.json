@@ -19346,6 +19346,8 @@
           "batchHint": "The Manager proposes approved issues when fewer than this many are queued.",
           "pausedAll": "Pause all teams",
           "pausedAllHint": "Running steps finish; no team starts anything new until you resume. To pause one team, use Settings › Teams.",
+          "syncTracker": "Keep trackers in step with the board",
+          "syncTrackerHint": "When an issue with a tracker key moves, Orca asks the Manager to update its labels or state following the project spec. Moves wait until a Manager session is open and idle.",
           "teams": "Teams",
           "roles": "Roles",
           "projects": "Projects",

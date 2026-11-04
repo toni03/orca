@@ -103,6 +103,26 @@ function WorkflowSettings({ state }: { state: AgentTeamState }): React.JSX.Eleme
           onCheckedChange={(paused) => void run({ kind: 'workflow.update', patch: { paused } })}
         />
       </label>
+      <label className="flex max-w-md items-center justify-between gap-3 text-sm">
+        <span>
+          {translate(
+            'auto.components.agentTeam.TeamSettings.syncTracker',
+            'Keep trackers in step with the board'
+          )}
+          <span className="block text-xs text-muted-foreground">
+            {translate(
+              'auto.components.agentTeam.TeamSettings.syncTrackerHint',
+              'When an issue with a tracker key moves, Orca asks the Manager to update its labels or state following the project spec. Moves wait until a Manager session is open and idle.'
+            )}
+          </span>
+        </span>
+        <Switch
+          checked={state.workflow.syncTracker !== false}
+          onCheckedChange={(syncTracker) =>
+            void run({ kind: 'workflow.update', patch: { syncTracker } })
+          }
+        />
+      </label>
     </div>
   )
 }

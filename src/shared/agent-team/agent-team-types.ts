@@ -149,6 +149,19 @@ export type AgentTeamWorkflow = {
   /** The Manager proposes the next batch when fewer queued issues remain. */
   batchThreshold: number
   paused: boolean
+  /** Absent means on: the Manager updates tracker labels as issues move. */
+  syncTracker?: boolean
+}
+
+/** A move the Manager still has to reflect in the tracker. */
+export type AgentTeamTrackerEvent = {
+  id: string
+  issueId: string
+  repoId: string
+  key: string
+  title: string
+  position: string
+  at: number
 }
 
 export type AgentTeamState = {
@@ -159,4 +172,6 @@ export type AgentTeamState = {
   projects: AgentTeamProject[]
   issues: AgentTeamIssue[]
   workflow: AgentTeamWorkflow
+  /** Optional so states saved before tracker sync still load. */
+  trackerEvents?: AgentTeamTrackerEvent[]
 }

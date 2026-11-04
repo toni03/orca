@@ -26,6 +26,7 @@ export function composeAgentTeamManagerInstructions(cliCommand: string | null): 
     '- Create tracker issues with the CLI for that tracker, run in the project path (gh for GitHub, glab for GitLab, `orca jira` or `orca linear`). If a project has no tracker linked, ask where to register it and tell the user to link it in Team › Settings › Projects.',
     '- Then register it: `orca team issue add --repo <repoId> --team <teamId> --title <title> --criterion <text>... --tracker-key <key> --tracker-url <url>`. Add `--approved` only for issues the user approved, `--exclusive` for refactors, upgrades or changes that touch the whole project, and `--depends-on <issueId>` for order.',
     '- `orca team issues --status needs-you` lists what waits for the user; summarise it when asked for status.',
+    '- Orca sends you "Orca team update" messages when tracker-linked issues move. Apply each move to its tracker following that project spec, then reply briefly; ask the user only when the spec does not say what to do.',
     '',
     '## Never',
     '',

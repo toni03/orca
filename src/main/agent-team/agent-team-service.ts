@@ -19,6 +19,7 @@ import {
 import { AgentTeamStore } from './agent-team-store'
 import { buildAgentTeamContext, launchAgentTeamManager } from './agent-team-manager'
 import { reconcileAgentTeamSessionsAfterRestart } from './agent-team-restart-reconcile'
+import { AgentTeamTrackerSync } from './agent-team-tracker-sync'
 import {
   startAgentTeamUsageCollector,
   type AgentTeamUsageSources
@@ -42,6 +43,7 @@ export type AgentTeamProjectSpecRead = {
 export class AgentTeamService {
   private readonly engine: AgentTeamEngine
   private readonly launcher: AgentTeamLauncher
+  private readonly trackerSync: AgentTeamTrackerSync
   private readonly disposers: (() => void)[] = []
 
   constructor(
@@ -51,12 +53,14 @@ export class AgentTeamService {
     private readonly usage: AgentTeamUsageSources
   ) {
     this.launcher = createAgentTeamRuntimeLauncher(runtime, repos)
+    this.trackerSync = new AgentTeamTrackerSync(store, runtime, repos)
     this.engine = new AgentTeamEngine(store, this.launcher)
   }
 
   start(): void {
     this.disposers.push(this.watchSessions())
     this.disposers.push(startAgentTeamUsageCollector(this.store, this.repos, this.usage))
+    this.disposers.push(this.trackerSync.start())
     const timer = setInterval(() => void this.engine.tick(), TICK_INTERVAL_MS)
     timer.unref?.()
     this.disposers.push(() => clearInterval(timer))
@@ -119,11 +123,20 @@ export class AgentTeamService {
     )
   }
 
-  launchManager(args: {
+  async launchManager(args: {
     agent: TuiAgent
     request: string
   }): Promise<{ worktreeId: string; terminalHandle: string }> {
-    return launchAgentTeamManager(this.runtime, args)
+    const pending = this.trackerSync.peekPending()
+    const launched = await launchAgentTeamManager(this.runtime, {
+      ...args,
+      ...(pending ? { pendingUpdates: pending.message } : {})
+    })
+    // A reused session gets pending moves from the delivery loop once it is idle.
+    if (pending && launched.startedNew) {
+      this.trackerSync.markSent(pending.events)
+    }
+    return { worktreeId: launched.worktreeId, terminalHandle: launched.terminalHandle }
   }
 
   async readProjectSpec(repoId: string): Promise<AgentTeamProjectSpecRead> {

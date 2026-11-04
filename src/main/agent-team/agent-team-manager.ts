@@ -57,16 +57,21 @@ export async function buildAgentTeamContext(
 }
 
 /** A live Manager session with the same agent, so Start Manager returns to it instead of opening another. */
-async function findLiveManagerSession(
+export async function findLiveManagerSession(
   runtime: OrcaRuntimeService,
   folder: string,
-  agent: TuiAgent
+  agent?: TuiAgent
 ): Promise<{ worktreeId: string; handle: string } | null> {
   const listed = await runtime
     .listTerminals(`path:${folder}`, 50, { requireFreshPtyLiveness: true })
     .catch(() => null)
   const live = (listed?.terminals ?? [])
-    .filter((terminal) => terminal.connected && terminal.agentIdentity === agent)
+    .filter(
+      (terminal) =>
+        terminal.connected &&
+        terminal.agentIdentity !== undefined &&
+        (agent === undefined || terminal.agentIdentity === agent)
+    )
     .sort((a, b) => (b.lastOutputAt ?? 0) - (a.lastOutputAt ?? 0))[0]
   return live ? { worktreeId: live.worktreeId, handle: live.handle } : null
 }
@@ -74,8 +79,8 @@ async function findLiveManagerSession(
 /** Opens the Manager in its own Orca-managed folder project, reusing a live session when there is one. */
 export async function launchAgentTeamManager(
   runtime: OrcaRuntimeService,
-  args: { agent: TuiAgent; request: string }
-): Promise<{ worktreeId: string; terminalHandle: string }> {
+  args: { agent: TuiAgent; request: string; pendingUpdates?: string }
+): Promise<{ worktreeId: string; terminalHandle: string; startedNew: boolean }> {
   const folder = await ensureAgentTeamManagerWorkspace(runtime)
   const existing = await findLiveManagerSession(runtime, folder, args.agent)
   if (existing) {
@@ -83,14 +88,16 @@ export async function launchAgentTeamManager(
     if (request) {
       await runtime.sendTerminalAgentPrompt(existing.handle, request, { inputKind: 'driving' })
     }
-    return { worktreeId: existing.worktreeId, terminalHandle: existing.handle }
+    return { worktreeId: existing.worktreeId, terminalHandle: existing.handle, startedNew: false }
   }
   const launched = await runtime.launchAgentTerminal(`path:${folder}`, {
     agent: args.agent,
-    prompt: composeAgentTeamManagerKickoff(args.request),
+    prompt: [composeAgentTeamManagerKickoff(args.request), args.pendingUpdates]
+      .filter(Boolean)
+      .join('\n\n'),
     title: 'Manager',
     suppressStartupUpdatePrompt: true,
     wslUserAct: true
   })
-  return { worktreeId: launched.worktreeId, terminalHandle: launched.handle }
+  return { worktreeId: launched.worktreeId, terminalHandle: launched.handle, startedNew: true }
 }

@@ -18843,7 +18843,9 @@
           "projects": "Proyectos",
           "workflow": "Flujo",
           "pausedAll": "Pausar todos los equipos",
-          "pausedAllHint": "Los pasos en curso terminan; ningún equipo empieza nada nuevo hasta que reanudes. Para pausar un solo equipo, usa Configuración › Equipos."
+          "pausedAllHint": "Los pasos en curso terminan; ningún equipo empieza nada nuevo hasta que reanudes. Para pausar un solo equipo, usa Configuración › Equipos.",
+          "syncTracker": "Mantener los gestores de tareas al día con el tablero",
+          "syncTrackerHint": "Cuando se mueve una issue con clave del gestor de tareas, Orca pide al Manager que actualice sus etiquetas o su estado según el prompt del proyecto. Los movimientos esperan hasta que haya una sesión del Manager abierta y libre."
         },
         "TeamSettingsProjects": {
           "spec": "Prompt del proyecto",
