@@ -4,6 +4,7 @@ import type { AgentTeamProject, AgentTeamSeat } from '../../shared/agent-team/ag
 import type { AgentLaunchPreferences } from '../../shared/agent-session/agent-session-host-authority'
 import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import { resolveAgentTeamCliCommand } from './agent-team-cli-command'
 import type { AgentTeamLauncher } from './agent-team-engine'
 
 /** Repository-stored specs live at this path in the project's main checkout. */
@@ -32,6 +33,7 @@ export function createAgentTeamRuntimeLauncher(
   const ptyIdByHandle = new Map<string, string>()
 
   return {
+    cliCommand: resolveAgentTeamCliCommand,
     async launchInNewWorktree({ repoId, name, seat, prompt, title }) {
       const created = await runtime.createManagedWorktree({
         repoSelector: `id:${repoId}`,

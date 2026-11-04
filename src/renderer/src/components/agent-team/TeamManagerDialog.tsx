@@ -74,7 +74,7 @@ function ManagerForm({ onOpenChange }: Props): React.JSX.Element {
         <DialogDescription>
           {translate(
             'auto.components.agentTeam.TeamManagerDialog.description',
-            'The Manager is an agent session that drafts issues, registers them in each project tracker following its spec, and adds them to the queue. It shows you a draft before creating anything. It runs in its own Agent Team Manager project, which Orca keeps in ~/.orca/agent-team/manager.'
+            'The Manager is an agent session that drafts issues, registers them in each project tracker following its spec, and adds them to the queue. It shows you a draft before creating anything. It runs in its own Agent Team Manager project, which Orca keeps in ~/.orca/agent-team/manager. If a Manager session with this agent is already open, Orca returns to it and sends your request there.'
           )}
         </DialogDescription>
       </DialogHeader>
@@ -121,7 +121,7 @@ function ManagerForm({ onOpenChange }: Props): React.JSX.Element {
           {translate('auto.components.agentTeam.TeamManagerDialog.cancel', 'Cancel')}
         </Button>
         <Button type="submit" disabled={starting || !agent}>
-          {translate('auto.components.agentTeam.TeamManagerDialog.start', 'Start Manager')}
+          {translate('auto.components.agentTeam.TeamManagerDialog.open', 'Open Manager')}
         </Button>
       </DialogFooter>
     </form>

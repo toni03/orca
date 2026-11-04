@@ -3,6 +3,7 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { composeAgentTeamManagerInstructions } from '../../shared/agent-team/agent-team-manager-prompt'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import { resolveAgentTeamCliCommand } from './agent-team-cli-command'
 
 export const AGENT_TEAM_MANAGER_PROJECT_NAME = 'Agent Team Manager'
 
@@ -26,7 +27,10 @@ export async function ensureAgentTeamManagerWorkspace(
 ): Promise<string> {
   const folder = agentTeamManagerFolder()
   await mkdir(folder, { recursive: true })
-  await writeIfChanged(join(folder, 'AGENTS.md'), composeAgentTeamManagerInstructions())
+  await writeIfChanged(
+    join(folder, 'AGENTS.md'),
+    composeAgentTeamManagerInstructions(resolveAgentTeamCliCommand())
+  )
   await writeIfChanged(join(folder, 'CLAUDE.md'), CLAUDE_POINTER)
   // Reuses the registration when the folder is already a project.
   await runtime.addRepo(folder, 'folder', undefined, AGENT_TEAM_MANAGER_PROJECT_NAME)

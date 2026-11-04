@@ -22,6 +22,8 @@ import type { AgentTeamStore } from './agent-team-store'
 
 /** What the engine needs from Orca to start a seat's session. */
 export type AgentTeamLauncher = {
+  /** Exact path of this app's CLI for report commands; null keeps the bare `orca`. */
+  cliCommand(): string | null
   /** Build step without a worktree yet: create one and start the agent in it. */
   launchInNewWorktree(args: {
     repoId: string
@@ -133,7 +135,8 @@ export class AgentTeamEngine {
         issue,
         assignment,
         projectSpec: await this.launcher.readProjectSpec(project, issue.repoId),
-        previousFindings: role.stepType === 'build' ? previousRoundFindings(issue) : null
+        previousFindings: role.stepType === 'build' ? previousRoundFindings(issue) : null,
+        cliCommand: this.launcher.cliCommand()
       })
       if (issue.worktreeId) {
         const launched = await this.launcher.launchInWorktree({

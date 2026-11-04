@@ -1,5 +1,8 @@
+import { orcaCliNote } from './agent-team-session-prompt'
+
 /** Standing instructions written to the Manager workspace's AGENTS.md; live state comes from `orca team context`. */
-export function composeAgentTeamManagerInstructions(): string {
+export function composeAgentTeamManagerInstructions(cliCommand: string | null): string {
+  const note = orcaCliNote(cliCommand)
   return [
     '# Agent team Manager',
     '',
@@ -9,6 +12,7 @@ export function composeAgentTeamManagerInstructions(): string {
     '',
     'This folder is only your home. The projects live elsewhere: `orca team context --json` gives each project path, and every git, tracker or file command for a project runs in that path.',
     '',
+    ...(note ? [note, ''] : []),
     '## What you do',
     '',
     '- Turn requests into well-scoped issues, register them in the right project tracker, and add them to the team queue.',

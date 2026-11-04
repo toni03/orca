@@ -19394,7 +19394,8 @@
           "agent": "Agent CLI",
           "request": "What do you need? (optional)",
           "cancel": "Cancel",
-          "start": "Start Manager"
+          "start": "Start Manager",
+          "open": "Open Manager"
         },
         "TeamPausedNotice": {
           "all": "All teams are paused: running steps finish, nothing new starts. Resume in Settings › Workflow.",

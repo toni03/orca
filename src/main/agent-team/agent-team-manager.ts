@@ -56,12 +56,35 @@ export async function buildAgentTeamContext(
   }
 }
 
-/** Starts the Manager as an agent session in its own Orca-managed folder project. */
+/** A live Manager session with the same agent, so Start Manager returns to it instead of opening another. */
+async function findLiveManagerSession(
+  runtime: OrcaRuntimeService,
+  folder: string,
+  agent: TuiAgent
+): Promise<{ worktreeId: string; handle: string } | null> {
+  const listed = await runtime
+    .listTerminals(`path:${folder}`, 50, { requireFreshPtyLiveness: true })
+    .catch(() => null)
+  const live = (listed?.terminals ?? [])
+    .filter((terminal) => terminal.connected && terminal.agentIdentity === agent)
+    .sort((a, b) => (b.lastOutputAt ?? 0) - (a.lastOutputAt ?? 0))[0]
+  return live ? { worktreeId: live.worktreeId, handle: live.handle } : null
+}
+
+/** Opens the Manager in its own Orca-managed folder project, reusing a live session when there is one. */
 export async function launchAgentTeamManager(
   runtime: OrcaRuntimeService,
   args: { agent: TuiAgent; request: string }
 ): Promise<{ worktreeId: string; terminalHandle: string }> {
   const folder = await ensureAgentTeamManagerWorkspace(runtime)
+  const existing = await findLiveManagerSession(runtime, folder, args.agent)
+  if (existing) {
+    const request = args.request.trim()
+    if (request) {
+      await runtime.sendTerminalAgentPrompt(existing.handle, request, { inputKind: 'driving' })
+    }
+    return { worktreeId: existing.worktreeId, terminalHandle: existing.handle }
+  }
   const launched = await runtime.launchAgentTerminal(`path:${folder}`, {
     agent: args.agent,
     prompt: composeAgentTeamManagerKickoff(args.request),
