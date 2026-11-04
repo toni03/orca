@@ -94,6 +94,17 @@ export type AgentTeamStepResult =
   | { kind: 'pass'; summary: string; findings?: AgentTeamFinding[] }
   | { kind: 'changes'; summary: string; findings: AgentTeamFinding[] }
 
+/** Tokens a session used, read from the agent's local transcripts after it ends. */
+export type AgentTeamAssignmentUsage =
+  | {
+      status: 'known'
+      inputTokens: number
+      outputTokens: number
+      cacheReadTokens: number
+      totalTokens: number
+    }
+  | { status: 'unavailable'; reason: string }
+
 export type AgentTeamAssignment = {
   id: string
   seatId: string
@@ -107,6 +118,7 @@ export type AgentTeamAssignment = {
   /** Set when the session stopped without reporting. */
   stopReason?: 'exited' | 'needs-input' | 'errored' | 'launch-failed' | 'cancelled'
   stopDetail?: string
+  usage?: AgentTeamAssignmentUsage
 }
 
 export type AgentTeamIssue = {

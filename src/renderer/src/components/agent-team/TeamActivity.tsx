@@ -6,6 +6,7 @@ import type {
   AgentTeamIssue,
   AgentTeamState
 } from '../../../../shared/agent-team/agent-team-types'
+import { formatTokens } from '@/components/stats/usage-formatters'
 import { formatDuration, issueKey } from './team-labels'
 import { useNow } from './use-now'
 
@@ -36,6 +37,37 @@ function resultLabel(assignment: AgentTeamAssignment): string {
     : '—'
 }
 
+function TokensCell({ assignment }: { assignment: AgentTeamAssignment }): React.JSX.Element {
+  const usage = assignment.usage
+  if (!usage) {
+    return (
+      <span className="text-muted-foreground">{assignment.endedAt === undefined ? '' : '…'}</span>
+    )
+  }
+  if (usage.status === 'unavailable') {
+    return (
+      <span className="text-muted-foreground" title={usage.reason}>
+        —
+      </span>
+    )
+  }
+  return (
+    <span
+      title={translate(
+        'auto.components.agentTeam.TeamActivity.tokensDetail',
+        'Input {{input}} · output {{output}} · cache read {{cache}}',
+        {
+          input: formatTokens(usage.inputTokens),
+          output: formatTokens(usage.outputTokens),
+          cache: formatTokens(usage.cacheReadTokens)
+        }
+      )}
+    >
+      {formatTokens(usage.totalTokens)}
+    </span>
+  )
+}
+
 export function TeamActivity({ state }: { state: AgentTeamState }): React.JSX.Element {
   const repos = useAppStore((s) => s.repos)
   const now = useNow(60_000)
@@ -57,6 +89,16 @@ export function TeamActivity({ state }: { state: AgentTeamState }): React.JSX.El
     }
     return totals
   }, [rows, now])
+  const weekTokensBySeat = useMemo(() => {
+    const totals = new Map<string, number>()
+    for (const { assignment } of rows) {
+      if (assignment.usage?.status === 'known' && (assignment.endedAt ?? 0) >= now - WEEK_MS) {
+        const total = (totals.get(assignment.seatId) ?? 0) + assignment.usage.totalTokens
+        totals.set(assignment.seatId, total)
+      }
+    }
+    return totals
+  }, [rows, now])
 
   if (rows.length === 0) {
     return (
@@ -73,7 +115,10 @@ export function TeamActivity({ state }: { state: AgentTeamState }): React.JSX.El
     <div className="flex flex-col gap-5">
       <section className="flex flex-col gap-2">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          {translate('auto.components.agentTeam.TeamActivity.week', 'Active time, last 7 days')}
+          {translate(
+            'auto.components.agentTeam.TeamActivity.weekWithTokens',
+            'Active time and tokens, last 7 days'
+          )}
         </h2>
         <div className="flex flex-wrap gap-2">
           {state.seats
@@ -83,6 +128,9 @@ export function TeamActivity({ state }: { state: AgentTeamState }): React.JSX.El
                 <div className="font-medium">{seat.name}</div>
                 <div className="font-mono text-xs text-muted-foreground">
                   {formatDuration(weekBySeat.get(seat.id) ?? 0)}
+                  {weekTokensBySeat.has(seat.id)
+                    ? ` · ${translate('auto.components.agentTeam.TeamActivity.tokens', '{{value}} tokens', { value: formatTokens(weekTokensBySeat.get(seat.id) ?? 0) })}`
+                    : ''}
                 </div>
               </div>
             ))}
@@ -114,6 +162,9 @@ export function TeamActivity({ state }: { state: AgentTeamState }): React.JSX.El
                 <th className="px-3 py-2 font-medium">
                   {translate('auto.components.agentTeam.TeamActivity.colTime', 'Active time')}
                 </th>
+                <th className="px-3 py-2 font-medium">
+                  {translate('auto.components.agentTeam.TeamActivity.colTokens', 'Tokens')}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -136,6 +187,9 @@ export function TeamActivity({ state }: { state: AgentTeamState }): React.JSX.El
                     <td className="px-3 py-2">{resultLabel(assignment)}</td>
                     <td className="px-3 py-2 font-mono">
                       {formatDuration((assignment.endedAt ?? now) - assignment.startedAt)}
+                    </td>
+                    <td className="px-3 py-2 font-mono">
+                      <TokensCell assignment={assignment} />
                     </td>
                   </tr>
                 )

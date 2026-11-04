@@ -18739,14 +18739,17 @@
           "stopped": "Detenida sin resultado",
           "running": "En curso",
           "empty": "Aún no hay sesiones. Las issues aprobadas arrancan cuando hay un puesto libre.",
-          "week": "Tiempo activo, últimos 7 días",
           "sessions": "Sesiones",
           "colIssue": "Issue",
           "colStep": "Paso",
           "colSeat": "Puesto",
           "colRound": "Ronda",
           "colResult": "Resultado",
-          "colTime": "Tiempo activo"
+          "colTime": "Tiempo activo",
+          "weekWithTokens": "Tiempo activo y tokens, últimos 7 días",
+          "tokens": "{{value}} tokens",
+          "colTokens": "Tokens",
+          "tokensDetail": "Entrada {{input}} · salida {{output}} · lectura de caché {{cache}}"
         },
         "TeamBoard": {
           "notApproved": "Sin aprobar",

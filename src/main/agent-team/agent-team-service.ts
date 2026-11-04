@@ -19,6 +19,10 @@ import {
 import { AgentTeamStore } from './agent-team-store'
 import { buildAgentTeamContext, launchAgentTeamManager } from './agent-team-manager'
 import { reconcileAgentTeamSessionsAfterRestart } from './agent-team-restart-reconcile'
+import {
+  startAgentTeamUsageCollector,
+  type AgentTeamUsageSources
+} from './agent-team-usage-collector'
 import { effectiveProjectSpecStorage } from '../../shared/agent-team/agent-team-spec-storage'
 import type { AgentTeamContext } from '../../shared/agent-team/agent-team-context'
 import type { TuiAgent } from '../../shared/tui-agent'
@@ -43,7 +47,8 @@ export class AgentTeamService {
   constructor(
     private readonly store: AgentTeamStore,
     private readonly runtime: OrcaRuntimeService,
-    private readonly repos: Store
+    private readonly repos: Store,
+    private readonly usage: AgentTeamUsageSources
   ) {
     this.launcher = createAgentTeamRuntimeLauncher(runtime, repos)
     this.engine = new AgentTeamEngine(store, this.launcher)
@@ -51,6 +56,7 @@ export class AgentTeamService {
 
   start(): void {
     this.disposers.push(this.watchSessions())
+    this.disposers.push(startAgentTeamUsageCollector(this.store, this.repos, this.usage))
     const timer = setInterval(() => void this.engine.tick(), TICK_INTERVAL_MS)
     timer.unref?.()
     this.disposers.push(() => clearInterval(timer))
@@ -206,7 +212,8 @@ export class AgentTeamService {
 
 export function createAgentTeamService(
   runtime: OrcaRuntimeService,
-  repos: Store
+  repos: Store,
+  usage: AgentTeamUsageSources
 ): AgentTeamService {
-  return new AgentTeamService(new AgentTeamStore(), runtime, repos)
+  return new AgentTeamService(new AgentTeamStore(), runtime, repos, usage)
 }

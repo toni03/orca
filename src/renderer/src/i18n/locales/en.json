@@ -19211,15 +19211,18 @@
           "cancelled": "Cancelled",
           "stopped": "Stopped without a result",
           "running": "Running",
+          "tokensDetail": "Input {{input}} · output {{output}} · cache read {{cache}}",
           "empty": "No sessions yet. Approved issues start when a seat is free.",
-          "week": "Active time, last 7 days",
+          "weekWithTokens": "Active time and tokens, last 7 days",
+          "tokens": "{{value}} tokens",
           "sessions": "Sessions",
           "colIssue": "Issue",
           "colStep": "Step",
           "colSeat": "Seat",
           "colRound": "Round",
           "colResult": "Result",
-          "colTime": "Active time"
+          "colTime": "Active time",
+          "colTokens": "Tokens"
         },
         "TeamBoard": {
           "notApproved": "Not approved",

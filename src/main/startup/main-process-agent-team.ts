@@ -10,7 +10,10 @@ export function initializeMainProcessAgentTeam(): void {
   if (!store || !runtime || state.isServeMode) {
     return
   }
-  const service = createAgentTeamService(runtime, store)
+  const service = createAgentTeamService(runtime, store, {
+    claude: () => state.claudeUsage,
+    codex: () => state.codexUsage
+  })
   setAgentTeamService(service)
   const unregister = registerAgentTeamHandlers(service)
   service.start()
