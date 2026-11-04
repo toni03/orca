@@ -43,6 +43,14 @@ export async function ensureDevLauncher(args: {
       mode: 0o755
     })
   }
+  if (args.commandName === DEV_COMMAND_NAME && args.platform === 'win32') {
+    // Why: Git Bash ignores `.cmd` for bare names, so agents typing `orca` would reach an installed release.
+    await writeFile(
+      join(dirname(launcherPath), 'orca'),
+      `#!/usr/bin/env sh\nexec "$(dirname "$0")/${DEV_COMMAND_NAME}.cmd" "$@"\n`,
+      { encoding: 'utf8' }
+    )
+  }
   return launcherPath
 }
 
