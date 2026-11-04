@@ -20,10 +20,11 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { AgentIcon, getAgentCatalog, getAgentLabel } from '@/lib/agent-catalog'
+import { AgentIcon, getAgentLabel } from '@/lib/agent-catalog'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import type { TuiAgent } from '../../../../shared/tui-agent'
 import { useAgentTeamCommand } from './use-agent-team-state'
+import { useEnabledAgents } from './use-enabled-agents'
 
 export type TeamSeatDialogTarget =
   | { kind: 'add'; teamId: string; stepId: string }
@@ -52,28 +53,31 @@ function SeatForm({
       ? state.seats.find((candidate) => candidate.id === target.seatId)
       : undefined
   const [name, setName] = useState(seat?.name ?? '')
-  const [agent, setAgent] = useState<TuiAgent>(seat?.agent ?? 'claude')
+  const enabled = useEnabledAgents()
+  const [agent, setAgent] = useState<TuiAgent | null>(seat?.agent ?? enabled.preferred)
   const [model, setModel] = useState(seat?.model ?? '')
   const [instructions, setInstructions] = useState(seat?.instructions ?? '')
 
   const save = async (): Promise<void> => {
-    const next =
-      target.kind === 'add'
-        ? await run({
-            kind: 'seat.add',
-            teamId: target.teamId,
-            stepId: target.stepId,
-            name,
-            agent,
-            model
-          })
-        : await run({
-            kind: 'seat.update',
-            seatId: target.seatId,
-            name,
-            model: model.trim() || null,
-            instructions
-          })
+    let next
+    if (target.kind === 'edit') {
+      next = await run({
+        kind: 'seat.update',
+        seatId: target.seatId,
+        name,
+        model: model.trim() || null,
+        instructions
+      })
+    } else if (agent) {
+      next = await run({
+        kind: 'seat.add',
+        teamId: target.teamId,
+        stepId: target.stepId,
+        name,
+        agent,
+        model
+      })
+    }
     if (next) {
       onClose()
     }
@@ -123,11 +127,18 @@ function SeatForm({
             <AgentIcon agent={seat.agent} />
             {getAgentLabel(seat.agent)}
           </div>
+        ) : enabled.agents.length === 0 ? (
+          <span className="text-sm text-muted-foreground">
+            {translate(
+              'auto.components.agentTeam.TeamSeatDialog.noAgents',
+              'No agent CLI is enabled. Turn one on in Settings › Agents.'
+            )}
+          </span>
         ) : (
           <Select
-            value={agent}
+            value={agent ?? undefined}
             onValueChange={(value) => {
-              const entry = getAgentCatalog().find((candidate) => candidate.id === value)
+              const entry = enabled.agents.find((candidate) => candidate.id === value)
               if (entry) {
                 setAgent(entry.id)
               }
@@ -137,7 +148,7 @@ function SeatForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {getAgentCatalog().map((entry) => (
+              {enabled.agents.map((entry) => (
                 <SelectItem key={entry.id} value={entry.id}>
                   <AgentIcon agent={entry.id} />
                   {entry.label}
@@ -205,7 +216,7 @@ function SeatForm({
         <Button type="button" variant="ghost" onClick={onClose}>
           {translate('auto.components.agentTeam.TeamSeatDialog.cancel', 'Cancel')}
         </Button>
-        <Button type="submit">
+        <Button type="submit" disabled={!seat && !agent}>
           {seat
             ? translate('auto.components.agentTeam.TeamSeatDialog.save', 'Save')
             : translate('auto.components.agentTeam.TeamSeatDialog.add', 'Add seat')}

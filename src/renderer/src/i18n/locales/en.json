@@ -19300,7 +19300,8 @@
           "retire": "Retire seat",
           "cancel": "Cancel",
           "save": "Save",
-          "add": "Add seat"
+          "add": "Add seat",
+          "noAgents": "No agent CLI is enabled. Turn one on in Settings › Agents."
         },
         "TeamSettings": {
           "workflowHelp": "How issues move for every team. Seats and steps are in Teams; trackers and project specs in Projects.",

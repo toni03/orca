@@ -21,9 +21,10 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { AgentIcon, getAgentCatalog } from '@/lib/agent-catalog'
+import { AgentIcon } from '@/lib/agent-catalog'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import type { TuiAgent } from '../../../../shared/tui-agent'
+import { useEnabledAgents } from './use-enabled-agents'
 
 type Props = { open: boolean; onOpenChange: (open: boolean) => void }
 
@@ -52,11 +53,15 @@ function ManagerForm({ onOpenChange }: Props): React.JSX.Element {
     [repos, worktreesByRepo]
   )
   const [worktreeId, setWorktreeId] = useState(workspaces[0]?.id ?? '')
-  const [agent, setAgent] = useState<TuiAgent>('claude')
+  const enabled = useEnabledAgents()
+  const [agent, setAgent] = useState<TuiAgent | null>(enabled.preferred)
   const [request, setRequest] = useState('')
   const [starting, setStarting] = useState(false)
 
   const start = async (): Promise<void> => {
+    if (!agent) {
+      return
+    }
     setStarting(true)
     try {
       const launched = await window.api.agentTeam.launchManager({ worktreeId, agent, request })
@@ -111,9 +116,9 @@ function ManagerForm({ onOpenChange }: Props): React.JSX.Element {
             {translate('auto.components.agentTeam.TeamManagerDialog.agent', 'Agent CLI')}
           </Label>
           <Select
-            value={agent}
+            value={agent ?? undefined}
             onValueChange={(value) => {
-              const entry = getAgentCatalog().find((candidate) => candidate.id === value)
+              const entry = enabled.agents.find((candidate) => candidate.id === value)
               if (entry) {
                 setAgent(entry.id)
               }
@@ -123,7 +128,7 @@ function ManagerForm({ onOpenChange }: Props): React.JSX.Element {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {getAgentCatalog().map((entry) => (
+              {enabled.agents.map((entry) => (
                 <SelectItem key={entry.id} value={entry.id}>
                   <AgentIcon agent={entry.id} />
                   {entry.label}
@@ -151,7 +156,7 @@ function ManagerForm({ onOpenChange }: Props): React.JSX.Element {
         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
           {translate('auto.components.agentTeam.TeamManagerDialog.cancel', 'Cancel')}
         </Button>
-        <Button type="submit" disabled={starting || !worktreeId}>
+        <Button type="submit" disabled={starting || !worktreeId || !agent}>
           {translate('auto.components.agentTeam.TeamManagerDialog.start', 'Start Manager')}
         </Button>
       </DialogFooter>
