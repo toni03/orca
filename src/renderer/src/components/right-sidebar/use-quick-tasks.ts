@@ -125,6 +125,11 @@ export function useQuickTasks({
         if (stale) {
           return
         }
+        // Why: undefined means a newer fetch superseded this one; keep the current items.
+        if (!result) {
+          setGithub((previous) => ({ ...previous, loading: false }))
+          return
+        }
         const failed = result.items.length === 0 && result.failedCount === githubRepos.length
         // Why: when no repo was detected as GitHub, total failure means "not a GitHub project", not an error.
         const hostDetected = githubRepos.some((repo) => getQuickTasksRepoHost(repo) === 'github')

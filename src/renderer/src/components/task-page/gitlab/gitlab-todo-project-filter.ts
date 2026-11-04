@@ -1,4 +1,4 @@
-import { splitGitRemoteKey } from '../../../../../shared/git-remote-identity'
+import { splitGitRemoteKey } from '../../../../../shared/git/remotes/git-remote-identity'
 import type { GitLabTodo } from '../../../../../shared/gitlab-types'
 import type { Repo } from '../../../../../shared/repo-types'
 
