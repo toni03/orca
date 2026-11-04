@@ -3,20 +3,19 @@ import { translate } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { EMPTY_PROJECT_SPEC } from '../../../../shared/agent-team/agent-team-builtin-templates'
-import type { AgentTeamProject } from '../../../../shared/agent-team/agent-team-types'
+import type { AgentTeamProjectSpecStorage } from '../../../../shared/agent-team/agent-team-types'
 
 export function TeamProjectSpecEditor({
   repoId,
-  project
+  storage
 }: {
   repoId: string
-  project: AgentTeamProject | undefined
+  storage: AgentTeamProjectSpecStorage
 }): React.JSX.Element {
   const [loaded, setLoaded] = useState<{ text: string; path: string | null } | null>(null)
   const [text, setText] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  const storage = project?.specStorage ?? 'repository'
 
   useEffect(() => {
     let cancelled = false

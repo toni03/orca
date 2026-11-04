@@ -4,6 +4,7 @@ import type { AgentTeamProject, AgentTeamSeat } from '../../shared/agent-team/ag
 import type { AgentLaunchPreferences } from '../../shared/agent-session/agent-session-host-authority'
 import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import { effectiveProjectSpecStorage } from '../../shared/agent-team/agent-team-spec-storage'
 import { resolveAgentTeamCliCommand } from './agent-team-cli-command'
 import type { AgentTeamLauncher } from './agent-team-engine'
 
@@ -83,12 +84,11 @@ export function createAgentTeamRuntimeLauncher(
     },
 
     async readProjectSpec(project: AgentTeamProject | undefined, repoId: string) {
-      if (project?.specStorage === 'local') {
-        return project.localSpec?.trim() ? project.localSpec : null
-      }
       const repo = store.getRepo(repoId)
-      // Remote checkouts are not readable from here; their seats run with role and AGENTS.md only.
-      if (!repo || repo.connectionId) {
+      if (effectiveProjectSpecStorage(project, repo) === 'local') {
+        return project?.localSpec?.trim() ? project.localSpec : null
+      }
+      if (!repo) {
         return null
       }
       return readRepositoryProjectSpec(repo.path)

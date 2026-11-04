@@ -18860,7 +18860,8 @@
           "storage": "Prompt guardado en",
           "repository": "Repositorio · .orca/agent-team.md",
           "local": "Este ordenador",
-          "noProjects": "Añade un proyecto git a Orca para usarlo con un equipo."
+          "noProjects": "Añade un proyecto git a Orca para usarlo con un equipo.",
+          "remoteStorageHint": "Proyecto remoto: su prompt se guarda en este ordenador, porque Orca todavía no puede leer desde aquí la copia remota."
         },
         "TeamSettingsRoles": {
           "builtin": "Integrado",

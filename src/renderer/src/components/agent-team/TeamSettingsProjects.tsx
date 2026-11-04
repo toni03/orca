@@ -14,6 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import { TASK_PROVIDERS, type TaskProvider } from '../../../../shared/task-providers'
+import { effectiveProjectSpecStorage } from '../../../../shared/agent-team/agent-team-spec-storage'
 import { TeamProjectSpecEditor } from './TeamProjectSpecEditor'
 import { TeamPromptPreview } from './TeamPromptPreview'
 import { useAgentTeamCommand } from './use-agent-team-state'
@@ -178,7 +179,8 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
                 type="single"
                 size="sm"
                 variant="outline"
-                value={project?.specStorage ?? 'repository'}
+                value={effectiveProjectSpecStorage(project, repo)}
+                disabled={Boolean(repo.connectionId)}
                 onValueChange={(value) => {
                   if (value === 'repository' || value === 'local') {
                     void run({
@@ -202,10 +204,22 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
                   )}
                 </ToggleGroupItem>
               </ToggleGroup>
+              {repo.connectionId ? (
+                <span className="text-xs text-muted-foreground">
+                  {translate(
+                    'auto.components.agentTeam.TeamSettingsProjects.remoteStorageHint',
+                    'Remote project: its spec is kept on this computer, because Orca cannot read the remote checkout from here yet.'
+                  )}
+                </span>
+              ) : null}
             </div>
           </div>
           <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-            <TeamProjectSpecEditor key={repo.id} repoId={repo.id} project={project} />
+            <TeamProjectSpecEditor
+              key={repo.id}
+              repoId={repo.id}
+              storage={effectiveProjectSpecStorage(project, repo)}
+            />
             <TeamPromptPreview state={state} specText={specForPreview} />
           </div>
         </section>

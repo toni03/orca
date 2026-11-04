@@ -19,6 +19,7 @@ import {
 import { AgentTeamStore } from './agent-team-store'
 import { buildAgentTeamContext, launchAgentTeamManager } from './agent-team-manager'
 import { reconcileAgentTeamSessionsAfterRestart } from './agent-team-restart-reconcile'
+import { effectiveProjectSpecStorage } from '../../shared/agent-team/agent-team-spec-storage'
 import type { AgentTeamContext } from '../../shared/agent-team/agent-team-context'
 import type { TuiAgent } from '../../shared/tui-agent'
 
@@ -121,11 +122,11 @@ export class AgentTeamService {
 
   async readProjectSpec(repoId: string): Promise<AgentTeamProjectSpecRead> {
     const project = this.store.get().projects.find((candidate) => candidate.repoId === repoId)
-    if (project?.specStorage === 'local') {
-      return { storage: 'local', text: project.localSpec ?? '', path: null }
-    }
     const repo = this.repos.getRepo(repoId)
-    if (!repo || repo.connectionId) {
+    if (effectiveProjectSpecStorage(project, repo) === 'local') {
+      return { storage: 'local', text: project?.localSpec ?? '', path: null }
+    }
+    if (!repo) {
       return { storage: 'repository', text: '', path: null }
     }
     return {
@@ -137,16 +138,13 @@ export class AgentTeamService {
 
   async writeProjectSpec(repoId: string, text: string): Promise<void> {
     const project = this.store.get().projects.find((candidate) => candidate.repoId === repoId)
-    if (project?.specStorage === 'local') {
+    const repo = this.repos.getRepo(repoId)
+    if (effectiveProjectSpecStorage(project, repo) === 'local') {
       this.execute({ kind: 'project.update', repoId, patch: { localSpec: text } })
       return
     }
-    const repo = this.repos.getRepo(repoId)
     if (!repo) {
       throw new Error('This project is no longer in Orca.')
-    }
-    if (repo.connectionId) {
-      throw new Error('Specs of remote projects can only be saved on this computer for now.')
     }
     const file = join(repo.path, AGENT_TEAM_PROJECT_SPEC_PATH)
     await mkdir(dirname(file), { recursive: true })

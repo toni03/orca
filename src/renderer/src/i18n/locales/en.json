@@ -19314,6 +19314,7 @@
           "storage": "Spec saved in",
           "repository": "Repository · .orca/agent-team.md",
           "local": "This computer",
+          "remoteStorageHint": "Remote project: its spec is kept on this computer, because Orca cannot read the remote checkout from here yet.",
           "noProjects": "Add a git project to Orca to use it with a team."
         },
         "TeamSeatDialog": {
