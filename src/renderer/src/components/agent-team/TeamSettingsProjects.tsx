@@ -14,6 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import { TASK_PROVIDERS, type TaskProvider } from '../../../../shared/task-providers'
+import { getRepoRoutingConnectionId } from '../../../../shared/execution-host'
 import { effectiveProjectSpecStorage } from '../../../../shared/agent-team/agent-team-spec-storage'
 import { TeamProjectSpecEditor } from './TeamProjectSpecEditor'
 import { TeamPromptPreview } from './TeamPromptPreview'
@@ -180,7 +181,7 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
                 size="sm"
                 variant="outline"
                 value={effectiveProjectSpecStorage(project, repo)}
-                disabled={Boolean(repo.connectionId)}
+                disabled={getRepoRoutingConnectionId(repo) !== null}
                 onValueChange={(value) => {
                   if (value === 'repository' || value === 'local') {
                     void run({
@@ -204,7 +205,7 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
                   )}
                 </ToggleGroupItem>
               </ToggleGroup>
-              {repo.connectionId ? (
+              {getRepoRoutingConnectionId(repo) !== null ? (
                 <span className="text-xs text-muted-foreground">
                   {translate(
                     'auto.components.agentTeam.TeamSettingsProjects.remoteStorageHint',

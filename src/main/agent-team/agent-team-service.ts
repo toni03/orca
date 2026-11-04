@@ -28,6 +28,7 @@ import {
 import { effectiveProjectSpecStorage } from '../../shared/agent-team/agent-team-spec-storage'
 import type { AgentTeamContext } from '../../shared/agent-team/agent-team-context'
 import type { TuiAgent } from '../../shared/tui-agent'
+import { getRepoRoutingConnectionId } from '../../shared/execution-host'
 
 const TICK_INTERVAL_MS = 30_000
 const RECONCILE_DELAY_MS = 15_000
@@ -60,7 +61,16 @@ export class AgentTeamService {
 
   start(): void {
     this.disposers.push(this.watchSessions())
-    this.disposers.push(startAgentTeamUsageCollector(this.store, this.repos, this.usage))
+    this.disposers.push(
+      startAgentTeamUsageCollector(
+        this.store,
+        (repoId) => {
+          const repo = this.repos.getRepo(repoId)
+          return repo ? getRepoRoutingConnectionId(repo) !== null : false
+        },
+        this.usage
+      )
+    )
     this.disposers.push(this.trackerSync.start())
     const timer = setInterval(() => void this.engine.tick(), TICK_INTERVAL_MS)
     timer.unref?.()

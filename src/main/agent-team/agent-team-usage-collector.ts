@@ -7,12 +7,13 @@ import type {
 import type { AutomationRunUsage } from '../../shared/automations-types'
 import type { ClaudeUsageStore } from '../claude-usage/store'
 import type { CodexUsageStore } from '../codex-usage/store'
-import type { Store } from '../persistence/loading-store/store'
 import type { AgentTeamStore } from './agent-team-store'
 
+type UsageLookup = Pick<ClaudeUsageStore | CodexUsageStore, 'getAutomationRunUsage'>
+
 export type AgentTeamUsageSources = {
-  claude: () => ClaudeUsageStore | null
-  codex: () => CodexUsageStore | null
+  claude: () => UsageLookup | null
+  codex: () => UsageLookup | null
 }
 
 // Transcripts flush after the session ends; reading too early misses the last turn.
@@ -50,8 +51,9 @@ async function lookUsage(
 
 /** Fills `usage` on finished assignments from the local Claude and Codex usage stores. */
 export function startAgentTeamUsageCollector(
-  store: AgentTeamStore,
-  repos: Store,
+  store: Pick<AgentTeamStore, 'get' | 'update'>,
+  /** Remote sessions write transcripts on their own host, out of reach here. */
+  isRemoteRepo: (repoId: string) => boolean,
   sources: AgentTeamUsageSources,
   now: () => number = Date.now
 ): () => void {
@@ -91,11 +93,10 @@ export function startAgentTeamUsageCollector(
 
   const collect = async (issue: AgentTeamIssue, assignment: AgentTeamAssignment): Promise<void> => {
     const seat = store.get().seats.find((candidate) => candidate.id === assignment.seatId)
-    const repo = repos.getRepo(issue.repoId)
     let usage: AgentTeamAssignmentUsage
     if (!seat || !issue.worktreeId || assignment.endedAt === undefined) {
       usage = { status: 'unavailable', reason: 'The session has no workspace to attribute.' }
-    } else if (repo?.connectionId) {
+    } else if (isRemoteRepo(issue.repoId)) {
       usage = { status: 'unavailable', reason: 'Remote sessions are counted on their own host.' }
     } else {
       usage = await lookUsage(sources, seat.agent, {

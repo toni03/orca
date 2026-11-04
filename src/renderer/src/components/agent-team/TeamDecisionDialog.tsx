@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { translate } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,8 +20,10 @@ type Props = { issue: AgentTeamIssue | null; state: AgentTeamState; onClose: () 
 
 export function TeamDecisionDialog({ issue, state, onClose }: Props): React.JSX.Element {
   const run = useAgentTeamCommand()
-  const [note, setNote] = useState('')
-  useEffect(() => setNote(''), [issue?.id])
+  // The draft belongs to one issue, so opening another starts empty.
+  const [draft, setDraft] = useState<{ issueId: string; note: string } | null>(null)
+  const note = draft && draft.issueId === issue?.id ? draft.note : ''
+  const setNote = (text: string): void => setDraft(issue ? { issueId: issue.id, note: text } : null)
   const live = issue ? (state.issues.find((candidate) => candidate.id === issue.id) ?? issue) : null
   const ready = live?.needsYou?.reason === 'ready'
   const sessionWaiting = live ? openAssignment(live) !== undefined : false
