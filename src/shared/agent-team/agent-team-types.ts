@@ -174,4 +174,6 @@ export type AgentTeamState = {
   workflow: AgentTeamWorkflow
   /** Optional so states saved before tracker sync still load. */
   trackerEvents?: AgentTeamTrackerEvent[]
+  /** The Manager's own folder project, kept out of team project lists. */
+  managerRepoId?: string
 }

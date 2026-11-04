@@ -18794,7 +18794,8 @@
           "exclusiveHint": "Para refactorizaciones o actualizaciones: ninguna otra issue de este proyecto se ejecuta a la vez.",
           "approved": "Aprobar ya",
           "cancel": "Cancelar",
-          "create": "Añadir issue"
+          "create": "Añadir issue",
+          "folderExclusiveHint": "Proyecto de carpeta: cada issue lo bloquea, porque todos los pasos trabajan en la misma carpeta."
         },
         "TeamNewTeamDialog": {
           "title": "Nuevo equipo",
@@ -18858,7 +18859,7 @@
           "previewHint": "Contrato de Orca, rol, prompt del proyecto, instrucciones del puesto y la issue, en ese orden. El agente también lee el AGENTS.md del repositorio.",
           "projects": "Proyectos",
           "noTracker": "Sin gestor de tareas vinculado",
-          "foldersHint": "Los proyectos de carpeta no aparecen: los pasos Build necesitan un worktree git.",
+          "foldersHint": "Los proyectos de carpeta no tienen worktrees git: sus issues van de una en una, directamente en la carpeta.",
           "tracker": "Gestor de tareas",
           "none": "Ninguno",
           "projectKey": "Clave del proyecto o equipo",

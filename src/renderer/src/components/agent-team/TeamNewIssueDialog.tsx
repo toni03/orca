@@ -44,15 +44,16 @@ export function TeamNewIssueDialog(props: Props): React.JSX.Element {
 // Mounted per opening so every field starts empty.
 function NewIssueForm({ onOpenChange, state, defaultTeamId }: Props): React.JSX.Element {
   const repos = useAppStore((s) => s.repos)
-  const gitRepos = repos.filter((repo) => repo.kind !== 'folder')
+  const teamRepos = repos.filter((repo) => repo.id !== state.managerRepoId)
   const run = useAgentTeamCommand()
-  const [repoId, setRepoId] = useState(() => gitRepos[0]?.id ?? '')
+  const [repoId, setRepoId] = useState(() => teamRepos[0]?.id ?? '')
   const [teamId, setTeamId] = useState(() => defaultTeamId ?? state.teams[0]?.id ?? '')
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [criteria, setCriteria] = useState('')
   const [trackerKey, setTrackerKey] = useState('')
   const [exclusive, setExclusive] = useState(false)
+  const isFolder = teamRepos.find((repo) => repo.id === repoId)?.kind === 'folder'
   const [approved, setApproved] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const tracker = state.projects.find((project) => project.repoId === repoId)?.tracker
@@ -66,7 +67,7 @@ function NewIssueForm({ onOpenChange, state, defaultTeamId }: Props): React.JSX.
       title,
       body,
       criteria: criteria.split('\n'),
-      scope: exclusive ? 'exclusive' : 'shared',
+      scope: exclusive || isFolder ? 'exclusive' : 'shared',
       approved,
       ...(tracker && trackerKey.trim()
         ? { tracker: { provider: tracker.provider, key: trackerKey.trim() } }
@@ -108,7 +109,7 @@ function NewIssueForm({ onOpenChange, state, defaultTeamId }: Props): React.JSX.
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {gitRepos.map((repo) => (
+                {teamRepos.map((repo) => (
                   <SelectItem key={repo.id} value={repo.id}>
                     {repo.displayName}
                   </SelectItem>
@@ -194,13 +195,22 @@ function NewIssueForm({ onOpenChange, state, defaultTeamId }: Props): React.JSX.
               'Locks the project'
             )}
             <span className="block text-xs text-muted-foreground">
-              {translate(
-                'auto.components.agentTeam.TeamNewIssueDialog.exclusiveHint',
-                'For refactors or upgrades: no other issue of this project runs beside it.'
-              )}
+              {isFolder
+                ? translate(
+                    'auto.components.agentTeam.TeamNewIssueDialog.folderExclusiveHint',
+                    'Folder project: every issue locks it, because all steps work in the same folder.'
+                  )
+                : translate(
+                    'auto.components.agentTeam.TeamNewIssueDialog.exclusiveHint',
+                    'For refactors or upgrades: no other issue of this project runs beside it.'
+                  )}
             </span>
           </span>
-          <Switch checked={exclusive} onCheckedChange={setExclusive} />
+          <Switch
+            checked={exclusive || isFolder}
+            disabled={isFolder}
+            onCheckedChange={setExclusive}
+          />
         </label>
         <label className="flex items-center justify-between gap-3 text-sm">
           {translate('auto.components.agentTeam.TeamNewIssueDialog.approved', 'Approve now')}

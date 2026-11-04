@@ -4,7 +4,8 @@ import { dirname, join } from 'node:path'
 import {
   applyAgentTeamStateCommand,
   isAgentTeamEngineCommand,
-  type AgentTeamCommand
+  type AgentTeamCommand,
+  type AgentTeamStateCommand
 } from '../../shared/agent-team/agent-team-commands'
 import { AgentTeamMutationError } from '../../shared/agent-team/agent-team-mutations'
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
@@ -104,8 +105,9 @@ export class AgentTeamService {
         }
         return this.store.get()
       }
+      const ruled = this.withFolderRules(command)
       const next = this.store.update((state) =>
-        applyAgentTeamStateCommand(state, command, { newId: randomUUID, now: Date.now() })
+        applyAgentTeamStateCommand(state, ruled, { newId: randomUUID, now: Date.now() })
       )
       void this.engine.tick()
       return next
@@ -132,11 +134,29 @@ export class AgentTeamService {
       ...args,
       ...(pending ? { pendingUpdates: pending.message } : {})
     })
+    if (this.store.get().managerRepoId !== launched.managerRepoId) {
+      this.store.update((state) => ({ ...state, managerRepoId: launched.managerRepoId }))
+    }
     // A reused session gets pending moves from the delivery loop once it is idle.
     if (pending && launched.startedNew) {
       this.trackerSync.markSent(pending.events)
     }
     return { worktreeId: launched.worktreeId, terminalHandle: launched.terminalHandle }
+  }
+
+  /** Folder projects share one directory, so their issues always lock the project. */
+  private withFolderRules(command: AgentTeamStateCommand): AgentTeamStateCommand {
+    const isFolder = (repoId: string): boolean => this.repos.getRepo(repoId)?.kind === 'folder'
+    if (command.kind === 'issue.create' && isFolder(command.repoId)) {
+      return { ...command, scope: 'exclusive' }
+    }
+    if (command.kind === 'issue.update' && command.scope === 'shared') {
+      const issue = this.store.get().issues.find((candidate) => candidate.id === command.issueId)
+      if (issue && isFolder(issue.repoId)) {
+        return { ...command, scope: 'exclusive' }
+      }
+    }
+    return command
   }
 
   async readProjectSpec(repoId: string): Promise<AgentTeamProjectSpecRead> {

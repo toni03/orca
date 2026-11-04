@@ -24,7 +24,7 @@ async function writeIfChanged(path: string, text: string): Promise<void> {
 /** Creates the Manager's own folder project, so its session never belongs to a user project. */
 export async function ensureAgentTeamManagerWorkspace(
   runtime: OrcaRuntimeService
-): Promise<string> {
+): Promise<{ folder: string; repoId: string }> {
   const folder = agentTeamManagerFolder()
   await mkdir(folder, { recursive: true })
   await writeIfChanged(
@@ -33,6 +33,6 @@ export async function ensureAgentTeamManagerWorkspace(
   )
   await writeIfChanged(join(folder, 'CLAUDE.md'), CLAUDE_POINTER)
   // Reuses the registration when the folder is already a project.
-  await runtime.addRepo(folder, 'folder', undefined, AGENT_TEAM_MANAGER_PROJECT_NAME)
-  return folder
+  const repo = await runtime.addRepo(folder, 'folder', undefined, AGENT_TEAM_MANAGER_PROJECT_NAME)
+  return { folder, repoId: repo.id }
 }

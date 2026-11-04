@@ -37,10 +37,10 @@ function providerLabel(provider: TaskProvider): string {
 export function TeamSettingsProjects({ state }: { state: AgentTeamState }): React.JSX.Element {
   const repos = useAppStore((s) => s.repos)
   const run = useAgentTeamCommand()
-  const gitRepos = repos.filter((repo) => repo.kind !== 'folder')
+  const teamRepos = repos.filter((repo) => repo.id !== state.managerRepoId)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [specForPreview, setSpecForPreview] = useState<string | null>(null)
-  const repo = gitRepos.find((candidate) => candidate.id === selectedId) ?? gitRepos[0]
+  const repo = teamRepos.find((candidate) => candidate.id === selectedId) ?? teamRepos[0]
   const project = repo
     ? state.projects.find((candidate) => candidate.repoId === repo.id)
     : undefined
@@ -66,7 +66,7 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
         <h2 className="mb-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
           {translate('auto.components.agentTeam.TeamSettingsProjects.projects', 'Projects')}
         </h2>
-        {gitRepos.map((candidate) => {
+        {teamRepos.map((candidate) => {
           const tracker = state.projects.find((entry) => entry.repoId === candidate.id)?.tracker
           return (
             <button
@@ -94,7 +94,7 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
         <p className="mt-2 text-xs text-muted-foreground">
           {translate(
             'auto.components.agentTeam.TeamSettingsProjects.foldersHint',
-            'Folder projects are not listed: Build steps need a git worktree.'
+            'Folder projects have no git worktrees: their issues run one at a time, directly in the folder.'
           )}
         </p>
       </section>

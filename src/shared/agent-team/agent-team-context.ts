@@ -7,6 +7,8 @@ export type AgentTeamContext = {
     name: string
     path: string
     tracker: AgentTeamState['projects'][number]['tracker'] | null
+    /** Folder projects run one issue at a time, in the folder itself. */
+    folder: boolean
     spec: string
   }[]
   teams: {

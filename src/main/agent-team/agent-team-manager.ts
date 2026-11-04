@@ -6,7 +6,11 @@ import type { TuiAgent } from '../../shared/tui-agent'
 import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import type { AgentTeamProjectSpecRead } from './agent-team-service'
-import { ensureAgentTeamManagerWorkspace } from './agent-team-manager-workspace'
+import { runtimePathsEqual } from '../runtime/runtime-worktree-path-identity'
+import {
+  agentTeamManagerFolder,
+  ensureAgentTeamManagerWorkspace
+} from './agent-team-manager-workspace'
 
 /** Everything the Manager needs in one read, so it never guesses ids. */
 export async function buildAgentTeamContext(
@@ -14,12 +18,19 @@ export async function buildAgentTeamContext(
   repos: Store,
   readSpec: (repoId: string) => Promise<AgentTeamProjectSpecRead>
 ): Promise<AgentTeamContext> {
-  const gitRepos = repos.getRepos().filter((repo) => repo.kind !== 'folder')
+  // The Manager's own folder is not a team project.
+  const teamRepos = repos
+    .getRepos()
+    .filter(
+      (repo) =>
+        repo.id !== state.managerRepoId && !runtimePathsEqual(repo.path, agentTeamManagerFolder())
+    )
   const projects = await Promise.all(
-    gitRepos.map(async (repo) => ({
+    teamRepos.map(async (repo) => ({
       repoId: repo.id,
       name: repo.displayName,
       path: repo.path,
+      folder: repo.kind === 'folder',
       tracker: state.projects.find((project) => project.repoId === repo.id)?.tracker ?? null,
       spec: (await readSpec(repo.id).catch(() => null))?.text ?? ''
     }))
@@ -80,15 +91,25 @@ export async function findLiveManagerSession(
 export async function launchAgentTeamManager(
   runtime: OrcaRuntimeService,
   args: { agent: TuiAgent; request: string; pendingUpdates?: string }
-): Promise<{ worktreeId: string; terminalHandle: string; startedNew: boolean }> {
-  const folder = await ensureAgentTeamManagerWorkspace(runtime)
+): Promise<{
+  worktreeId: string
+  terminalHandle: string
+  startedNew: boolean
+  managerRepoId: string
+}> {
+  const { folder, repoId } = await ensureAgentTeamManagerWorkspace(runtime)
   const existing = await findLiveManagerSession(runtime, folder, args.agent)
   if (existing) {
     const request = args.request.trim()
     if (request) {
       await runtime.sendTerminalAgentPrompt(existing.handle, request, { inputKind: 'driving' })
     }
-    return { worktreeId: existing.worktreeId, terminalHandle: existing.handle, startedNew: false }
+    return {
+      worktreeId: existing.worktreeId,
+      terminalHandle: existing.handle,
+      startedNew: false,
+      managerRepoId: repoId
+    }
   }
   const launched = await runtime.launchAgentTerminal(`path:${folder}`, {
     agent: args.agent,
@@ -99,5 +120,10 @@ export async function launchAgentTeamManager(
     suppressStartupUpdatePrompt: true,
     wslUserAct: true
   })
-  return { worktreeId: launched.worktreeId, terminalHandle: launched.handle, startedNew: true }
+  return {
+    worktreeId: launched.worktreeId,
+    terminalHandle: launched.handle,
+    startedNew: true,
+    managerRepoId: repoId
+  }
 }

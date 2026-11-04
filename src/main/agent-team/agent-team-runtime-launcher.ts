@@ -36,6 +36,21 @@ export function createAgentTeamRuntimeLauncher(
   return {
     cliCommand: resolveAgentTeamCliCommand,
     async launchInNewWorktree({ repoId, name, seat, prompt, title }) {
+      const repo = store.getRepo(repoId)
+      if (repo?.kind === 'folder') {
+        // No git to isolate a worktree: Build works in the folder, and every issue locks the project.
+        const launched = await runtime.launchAgentTerminal(`path:${repo.path}`, {
+          agent: seat.agent,
+          prompt,
+          title,
+          suppressStartupUpdatePrompt: true,
+          ...(launchPreferences(seat) ? { launchPreferences: launchPreferences(seat) } : {})
+        })
+        if (launched.ptyId) {
+          ptyIdByHandle.set(launched.handle, launched.ptyId)
+        }
+        return { worktreeId: launched.worktreeId, terminalHandle: launched.handle }
+      }
       const created = await runtime.createManagedWorktree({
         repoSelector: `id:${repoId}`,
         name,
