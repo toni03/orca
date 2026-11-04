@@ -10,7 +10,7 @@ import { AgentTeamMutationError } from '../../shared/agent-team/agent-team-mutat
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
 import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
-import { AgentTeamEngine, AgentTeamError } from './agent-team-engine'
+import { AgentTeamEngine, AgentTeamError, type AgentTeamLauncher } from './agent-team-engine'
 import {
   AGENT_TEAM_PROJECT_SPEC_PATH,
   createAgentTeamRuntimeLauncher,
@@ -18,10 +18,12 @@ import {
 } from './agent-team-runtime-launcher'
 import { AgentTeamStore } from './agent-team-store'
 import { buildAgentTeamContext, launchAgentTeamManager } from './agent-team-manager'
+import { reconcileAgentTeamSessionsAfterRestart } from './agent-team-restart-reconcile'
 import type { AgentTeamContext } from '../../shared/agent-team/agent-team-context'
 import type { TuiAgent } from '../../shared/tui-agent'
 
 const TICK_INTERVAL_MS = 30_000
+const RECONCILE_DELAY_MS = 15_000
 /** A seat runs `orca team report` before its turn ends; give that call time to land. */
 const UNREPORTED_TURN_GRACE_MS = 20_000
 
@@ -34,6 +36,7 @@ export type AgentTeamProjectSpecRead = {
 
 export class AgentTeamService {
   private readonly engine: AgentTeamEngine
+  private readonly launcher: AgentTeamLauncher
   private readonly disposers: (() => void)[] = []
 
   constructor(
@@ -41,7 +44,8 @@ export class AgentTeamService {
     private readonly runtime: OrcaRuntimeService,
     private readonly repos: Store
   ) {
-    this.engine = new AgentTeamEngine(store, createAgentTeamRuntimeLauncher(runtime, repos))
+    this.launcher = createAgentTeamRuntimeLauncher(runtime, repos)
+    this.engine = new AgentTeamEngine(store, this.launcher)
   }
 
   start(): void {
@@ -50,6 +54,18 @@ export class AgentTeamService {
     timer.unref?.()
     this.disposers.push(() => clearInterval(timer))
     void this.engine.tick()
+    // Give the terminal host time to re-attach surviving sessions before judging them.
+    const reconcile = setTimeout(
+      () =>
+        void reconcileAgentTeamSessionsAfterRestart({
+          state: () => this.store.get(),
+          launcher: this.launcher,
+          stopAssignment: (id, reason, detail) => this.engine.stopAssignment(id, reason, detail)
+        }).then(() => this.engine.tick()),
+      RECONCILE_DELAY_MS
+    )
+    reconcile.unref?.()
+    this.disposers.push(() => clearTimeout(reconcile))
   }
 
   stop(): void {

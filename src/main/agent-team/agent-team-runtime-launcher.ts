@@ -94,8 +94,21 @@ export function createAgentTeamRuntimeLauncher(
       return readRepositoryProjectSpec(repo.path)
     },
 
-    watchExit(terminalHandle, onExit) {
-      const ptyId = ptyIdByHandle.get(terminalHandle)
+    async liveTerminals(handles) {
+      const listed = await runtime
+        .listTerminals(undefined, handles.length, { handles, requireFreshPtyLiveness: true })
+        .catch(() => null)
+      if (!listed) {
+        return null
+      }
+      return new Map(
+        listed.terminals
+          .filter((terminal) => terminal.connected)
+          .map((terminal) => [terminal.handle, terminal.ptyId])
+      )
+    },
+    watchExit(terminalHandle, onExit, knownPtyId) {
+      const ptyId = ptyIdByHandle.get(terminalHandle) ?? knownPtyId
       if (!ptyId) {
         return
       }

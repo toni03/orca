@@ -40,8 +40,10 @@ export type AgentTeamLauncher = {
     title: string
   }): Promise<{ terminalHandle: string }>
   readProjectSpec(project: AgentTeamProject | undefined, repoId: string): Promise<string | null>
-  /** Resolves when the session's process exits. */
-  watchExit(terminalHandle: string, onExit: () => void): void
+  /** Resolves when the session's process exits; ptyId adopts a session started before a restart. */
+  watchExit(terminalHandle: string, onExit: () => void, ptyId?: string): void
+  /** Live terminals among these handles with their PTY ids; null when liveness cannot be read. */
+  liveTerminals(handles: string[]): Promise<Map<string, string | null> | null>
 }
 
 export class AgentTeamError extends Error {
