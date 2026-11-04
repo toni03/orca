@@ -66,6 +66,8 @@ export type AgentTeamProject = {
   /** Only used when `specStorage` is `local`; repository specs live in the repo file. */
   localSpec?: string
   specTemplateId?: string
+  /** Branch new worktrees start from and merge requests target; absent uses the repo default. */
+  baseBranch?: string
 }
 
 export type AgentTeamIssueStatus =
@@ -89,7 +91,7 @@ export type AgentTeamFinding = {
 }
 
 export type AgentTeamStepResult =
-  | { kind: 'done'; summary: string }
+  | { kind: 'done'; summary: string; mergeRequestUrl?: string }
   | { kind: 'blocked'; summary: string; questions?: string[] }
   | { kind: 'pass'; summary: string; findings?: AgentTeamFinding[] }
   | { kind: 'changes'; summary: string; findings: AgentTeamFinding[] }
@@ -140,6 +142,8 @@ export type AgentTeamIssue = {
   branch?: string
   assignments: AgentTeamAssignment[]
   needsYou?: { reason: AgentTeamNeedsYouReason; detail: string; at: number }
+  /** Merge or pull request the Build step opened for review. */
+  mergeRequest?: { url: string }
   createdAt: number
   updatedAt: number
 }

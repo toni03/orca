@@ -9,6 +9,8 @@ export type AgentTeamContext = {
     tracker: AgentTeamState['projects'][number]['tracker'] | null
     /** Folder projects run one issue at a time, in the folder itself. */
     folder: boolean
+    /** Branch issue worktrees start from and merge requests target; null is the repo default. */
+    baseBranch: string | null
     spec: string
   }[]
   teams: {

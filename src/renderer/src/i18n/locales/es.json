@@ -18763,12 +18763,14 @@
           "newIssue": "Nueva issue"
         },
         "TeamDecisionDialog": {
-          "sessionWaiting": "La sesión sigue abierta. Respóndele en su terminal y continuará; Reanudar solo quita este aviso.",
           "note": "Cambios que pides",
           "discard": "Descartar",
           "requestChanges": "Pedir cambios",
           "done": "Marcar como hecha",
-          "resume": "Reanudar"
+          "resume": "Reanudar",
+          "sessionStillOpen": "La sesión sigue abierta: tu respuesta se escribe en ella y continúa. Reanudar solo quita este aviso.",
+          "answer": "Tu respuesta",
+          "sendAnswer": "Responder y continuar"
         },
         "TeamIssueCard": {
           "openTracker": "Abrir {{key}} en el gestor de tareas",
@@ -18777,7 +18779,9 @@
           "review": "Revisar",
           "approve": "Aprobar",
           "moveUp": "Subir en la cola",
-          "moveDown": "Bajar en la cola"
+          "moveDown": "Bajar en la cola",
+          "openMergeRequest": "Abrir la merge request",
+          "history": "Ver el historial de trabajo"
         },
         "TeamNewIssueDialog": {
           "title": "Nueva issue",
@@ -18867,7 +18871,9 @@
           "repository": "Repositorio · .orca/agent-team.md",
           "local": "Este ordenador",
           "noProjects": "Añade un proyecto git a Orca para usarlo con un equipo.",
-          "remoteStorageHint": "Proyecto remoto: su prompt se guarda en este ordenador, porque Orca todavía no puede leer desde aquí la copia remota."
+          "remoteStorageHint": "Proyecto remoto: su prompt se guarda en este ordenador, porque Orca todavía no puede leer desde aquí la copia remota.",
+          "baseBranch": "Rama base",
+          "baseBranchDefault": "La del proyecto"
         },
         "TeamSettingsRoles": {
           "builtin": "Integrado",
@@ -18930,6 +18936,11 @@
           "agent": "CLI del agente",
           "request": "¿Qué necesitas? (opcional)",
           "start": "Iniciar el Manager"
+        },
+        "TeamIssueHistoryDialog": {
+          "round": "Ronda {{round}}",
+          "openWorktree": "Abrir el worktree",
+          "empty": "Ninguna sesión ha trabajado todavía en esta issue."
         }
       }
     },

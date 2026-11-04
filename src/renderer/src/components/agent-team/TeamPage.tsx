@@ -5,6 +5,7 @@ import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TeamBoard } from './TeamBoard'
+import { TeamIconButton } from './TeamIconButton'
 import { TeamActivity } from './TeamActivity'
 import { TeamSettings } from './TeamSettings'
 import { TeamManagerPanel } from './TeamManagerPanel'
@@ -46,14 +47,14 @@ export default function TeamPage(): React.JSX.Element {
           <MessagesSquare />
           {translate('auto.components.agentTeam.TeamPage.manager', 'Manager')}
         </Button>
-        <Button
+        <TeamIconButton
           variant="ghost"
           size="icon-sm"
-          aria-label={translate('auto.components.agentTeam.TeamPage.close', 'Close Team')}
+          label={translate('auto.components.agentTeam.TeamPage.close', 'Close Team')}
           onClick={closeTeamPage}
         >
           <X />
-        </Button>
+        </TeamIconButton>
       </div>
       {loadError ? (
         <p className="px-5 py-4 text-sm text-destructive">

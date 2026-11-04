@@ -7,18 +7,24 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { composeAgentTeamSessionPrompt } from '../../../../shared/agent-team/agent-team-session-prompt'
+import {
+  composeAgentTeamSessionPrompt,
+  type AgentTeamDelivery
+} from '../../../../shared/agent-team/agent-team-session-prompt'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 
 export function TeamPromptPreview({
   state,
-  specText
+  specText,
+  delivery
 }: {
   state: AgentTeamState
   specText: string | null
+  delivery: AgentTeamDelivery
 }): React.JSX.Element {
   const [roleId, setRoleId] = useState(state.roles[0]?.id ?? '')
   const role = state.roles.find((candidate) => candidate.id === roleId)
+  const { folder, baseBranch } = delivery
   const prompt = useMemo(() => {
     if (!role) {
       return ''
@@ -48,9 +54,10 @@ export function TeamPromptPreview({
       },
       assignment: { id: '<assignment>' },
       projectSpec: specText,
-      previousFindings: null
+      previousFindings: null,
+      delivery: { folder, baseBranch }
     })
-  }, [role, specText])
+  }, [role, specText, folder, baseBranch])
 
   return (
     <div className="flex min-w-0 flex-col gap-2">

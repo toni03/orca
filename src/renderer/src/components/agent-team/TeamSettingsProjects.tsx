@@ -169,6 +169,36 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
                 />
               </div>
             ) : null}
+            {repo.kind === 'folder' ? null : (
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="agent-team-base-branch">
+                  {translate(
+                    'auto.components.agentTeam.TeamSettingsProjects.baseBranch',
+                    'Base branch'
+                  )}
+                </Label>
+                <Input
+                  id="agent-team-base-branch"
+                  key={`${repo.id}:${project?.baseBranch ?? ''}`}
+                  defaultValue={project?.baseBranch ?? ''}
+                  placeholder={translate(
+                    'auto.components.agentTeam.TeamSettingsProjects.baseBranchDefault',
+                    'Project default'
+                  )}
+                  className="h-8 w-40"
+                  onBlur={(event) => {
+                    const next = event.target.value.trim()
+                    if (next !== (project?.baseBranch ?? '')) {
+                      void run({
+                        kind: 'project.update',
+                        repoId: repo.id,
+                        patch: { baseBranch: next || undefined }
+                      })
+                    }
+                  }}
+                />
+              </div>
+            )}
             <div className="flex flex-col gap-1.5">
               <Label>
                 {translate(
@@ -221,7 +251,14 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
               repoId={repo.id}
               storage={effectiveProjectSpecStorage(project, repo)}
             />
-            <TeamPromptPreview state={state} specText={specForPreview} />
+            <TeamPromptPreview
+              state={state}
+              specText={specForPreview}
+              delivery={{
+                folder: repo.kind === 'folder',
+                baseBranch: project?.baseBranch?.trim() || null
+              }}
+            />
           </div>
         </section>
       ) : (

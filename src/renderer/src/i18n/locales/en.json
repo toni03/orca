@@ -19236,12 +19236,14 @@
           "newIssue": "New issue"
         },
         "TeamDecisionDialog": {
-          "sessionWaiting": "The session is still open. Answer it in its terminal and it continues; Resume only clears this item.",
           "note": "Changes to request",
           "discard": "Discard",
           "requestChanges": "Request changes",
           "done": "Mark done",
-          "resume": "Resume"
+          "resume": "Resume",
+          "sessionStillOpen": "The session is still open: your answer is typed into it and it continues. Resume only clears this item.",
+          "answer": "Your answer",
+          "sendAnswer": "Answer and continue"
         },
         "TeamIssueCard": {
           "openTracker": "Open {{key}} in the tracker",
@@ -19250,7 +19252,9 @@
           "review": "Review",
           "approve": "Approve",
           "moveUp": "Move up in the queue",
-          "moveDown": "Move down in the queue"
+          "moveDown": "Move down in the queue",
+          "openMergeRequest": "Open the merge request",
+          "history": "Show the work history"
         },
         "TeamManagerPanel": {
           "title": "Manager",
@@ -19322,7 +19326,9 @@
           "repository": "Repository · .orca/agent-team.md",
           "local": "This computer",
           "remoteStorageHint": "Remote project: its spec is kept on this computer, because Orca cannot read the remote checkout from here yet.",
-          "noProjects": "Add a git project to Orca to use it with a team."
+          "noProjects": "Add a git project to Orca to use it with a team.",
+          "baseBranch": "Base branch",
+          "baseBranchDefault": "Project default"
         },
         "TeamSeatDialog": {
           "addTitle": "Add seat",
@@ -19403,6 +19409,11 @@
         "TeamSidebarButton": {
           "label": "Team",
           "working": "{{count}} working"
+        },
+        "TeamIssueHistoryDialog": {
+          "round": "Round {{round}}",
+          "openWorktree": "Open the worktree",
+          "empty": "No session has worked on this issue yet."
         }
       }
     },

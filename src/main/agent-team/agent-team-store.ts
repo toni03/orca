@@ -34,16 +34,27 @@ function isAgentTeamState(value: unknown): value is AgentTeamState {
   )
 }
 
-/** Built-in roles shipped after the file was written still show up. */
+/** Built-in roles shipped after the file was written show up, and unedited ones follow prompt updates. */
 function withBuiltinRoles(state: AgentTeamState, now: number): AgentTeamState {
   const known = new Set(state.roles.map((role) => role.id))
   const missing = BUILTIN_ROLE_TEMPLATES.filter((template) => !known.has(template.id))
-  return missing.length === 0
-    ? state
-    : {
-        ...state,
-        roles: [...state.roles, ...missing.map((template) => builtinRole(template, now))]
-      }
+  const roles = state.roles.map((role) => {
+    const template = BUILTIN_ROLE_TEMPLATES.find((candidate) => candidate.id === role.templateId)
+    const shipped = template?.version ?? 1
+    if (!template || role.origin !== 'builtin' || (role.templateVersion ?? 1) >= shipped) {
+      return role
+    }
+    return {
+      ...role,
+      prompt: template.prompt,
+      version: role.version + 1,
+      templateVersion: shipped
+    }
+  })
+  return {
+    ...state,
+    roles: [...roles, ...missing.map((template) => builtinRole(template, now))]
+  }
 }
 
 export function readAgentTeamState(file: string, now: number): AgentTeamState {

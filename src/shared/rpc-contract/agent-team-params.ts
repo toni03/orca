@@ -13,6 +13,7 @@ export const AgentTeamReportParams = z.object({
   result: z.enum(['done', 'blocked', 'pass', 'changes']),
   summary: requiredString('Missing --summary'),
   questions: z.array(z.string()).optional(),
+  mergeRequestUrl: z.string().optional(),
   findings: z.array(Finding).optional()
 })
 
@@ -34,3 +35,8 @@ export const AgentTeamIssueCreateParams = z.object({
 })
 
 export const AgentTeamContextParams = z.object({})
+
+export const AgentTeamIssueAnswerParams = z.object({
+  issueId: requiredString('Missing --issue'),
+  text: requiredString('Missing --text')
+})

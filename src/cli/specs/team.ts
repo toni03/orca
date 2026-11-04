@@ -12,11 +12,20 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
     path: ['team', 'report'],
     summary: 'Report the result of an agent team step you were assigned',
     usage:
-      'orca team report --assignment <id> --result <done|blocked|pass|changes> --summary <text> [--question <text>]... [--findings <file.json>] [--json]',
-    allowedFlags: [...GLOBAL_FLAGS, 'assignment', 'result', 'summary', 'question', 'findings'],
+      'orca team report --assignment <id> --result <done|blocked|pass|changes> --summary <text> [--question <text>]... [--merge-request <url>] [--findings <file.json>] [--json]',
+    allowedFlags: [
+      ...GLOBAL_FLAGS,
+      'assignment',
+      'result',
+      'summary',
+      'question',
+      'merge-request',
+      'findings'
+    ],
     repeatableFlags: ['question'],
     notes: [
       'Build steps report done or blocked; Check steps report pass or changes.',
+      'A Build step that opened a merge or pull request passes its URL with --merge-request.',
       'findings.json is an array of {"severity":"blocker|major|minor|info","message":"…","file":"…","line":1}.',
       'The assignment id is in the instructions Orca gave the session.'
     ],
@@ -31,6 +40,15 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
     usage:
       'orca team issues [--status <registered|queued|working|needs-you|done|discarded>] [--json]',
     allowedFlags: [...GLOBAL_FLAGS, 'status']
+  },
+  {
+    path: ['team', 'issue', 'answer'],
+    summary: 'Answer an issue that waits for you, so its step continues',
+    usage: 'orca team issue answer --issue <issueId> --text <answer> [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'issue', 'text'],
+    notes: [
+      'A session still waiting gets the answer typed in; otherwise the same step starts again with it.'
+    ]
   },
   {
     path: ['team', 'issue', 'add'],

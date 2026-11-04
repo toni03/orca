@@ -2,6 +2,7 @@ import { defineMethod } from '../core'
 import {
   AgentTeamIssueCreateParams,
   AgentTeamContextParams,
+  AgentTeamIssueAnswerParams,
   AgentTeamIssueListParams,
   AgentTeamReportParams
 } from '../../../../shared/rpc-contract/agent-team-params'
@@ -12,11 +13,16 @@ function stepResult(params: {
   result: 'done' | 'blocked' | 'pass' | 'changes'
   summary: string
   questions?: string[]
+  mergeRequestUrl?: string
   findings?: Extract<AgentTeamStepResult, { kind: 'changes' }>['findings']
 }): AgentTeamStepResult {
   switch (params.result) {
     case 'done':
-      return { kind: 'done', summary: params.summary }
+      return {
+        kind: 'done',
+        summary: params.summary,
+        ...(params.mergeRequestUrl ? { mergeRequestUrl: params.mergeRequestUrl } : {})
+      }
     case 'blocked':
       return { kind: 'blocked', summary: params.summary, questions: params.questions ?? [] }
     case 'pass':
@@ -45,6 +51,19 @@ export const AGENT_TEAM_METHODS = [
         result: stepResult(params)
       })
       return { reported: true }
+    }
+  }),
+  defineMethod({
+    name: 'team.issueAnswer',
+    permission: 'workspace',
+    params: AgentTeamIssueAnswerParams,
+    handler: (params) => {
+      requireAgentTeamService().execute({
+        kind: 'issue.decide',
+        issueId: params.issueId,
+        decision: { kind: 'answer', note: params.text }
+      })
+      return { answered: true }
     }
   }),
   defineMethod({

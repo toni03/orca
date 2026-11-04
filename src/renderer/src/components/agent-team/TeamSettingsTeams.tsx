@@ -20,6 +20,7 @@ import type {
   AgentTeamState
 } from '../../../../shared/agent-team/agent-team-types'
 import { TeamNewTeamDialog } from './TeamNewTeamDialog'
+import { TeamIconButton } from './TeamIconButton'
 import { TeamSeatDialog, type TeamSeatDialogTarget } from './TeamSeatDialog'
 import { stepTypeLabel } from './team-labels'
 import { useAgentTeamCommand } from './use-agent-team-state'
@@ -84,10 +85,10 @@ function TeamPipeline({
                         {stepTypeLabel(role.stepType)}
                       </Badge>
                     ) : null}
-                    <Button
+                    <TeamIconButton
                       size="icon-xs"
                       variant="ghost"
-                      aria-label={translate(
+                      label={translate(
                         'auto.components.agentTeam.TeamSettingsTeams.removeStep',
                         'Remove step {{name}}',
                         {
@@ -99,7 +100,7 @@ function TeamPipeline({
                       }
                     >
                       <Trash2 />
-                    </Button>
+                    </TeamIconButton>
                   </div>
                   <Input
                     key={`${step.id}:${step.name}`}

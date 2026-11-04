@@ -11,7 +11,8 @@ import { AgentTeamMutationError } from '../../shared/agent-team/agent-team-mutat
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
 import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
-import { AgentTeamEngine, AgentTeamError, type AgentTeamLauncher } from './agent-team-engine'
+import { AgentTeamEngine, AgentTeamError } from './agent-team-engine'
+import type { AgentTeamLauncher } from './agent-team-launcher'
 import {
   AGENT_TEAM_PROJECT_SPEC_PATH,
   createAgentTeamRuntimeLauncher,

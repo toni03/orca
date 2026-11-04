@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { SquareTerminal, X } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
-import { Button } from '@/components/ui/button'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import NativeChatView from '../native-chat/NativeChatView'
 import type { AgentTeamManagerSession } from '../../../../shared/agent-team/agent-team-ipc'
 import { TeamManagerStartForm } from './TeamManagerStartForm'
+import { TeamIconButton } from './TeamIconButton'
 
 // Picks up a Manager that exits or one started from its workspace without a push signal.
 const SESSION_POLL_MS = 15_000
@@ -65,26 +65,26 @@ export function TeamManagerPanel({ onClose }: { onClose: () => void }): React.JS
           {translate('auto.components.agentTeam.TeamManagerPanel.title', 'Manager')}
         </h2>
         {session ? (
-          <Button
+          <TeamIconButton
             variant="ghost"
             size="icon-sm"
-            aria-label={translate(
+            label={translate(
               'auto.components.agentTeam.TeamManagerPanel.openTerminal',
               'Open the Manager terminal'
             )}
             onClick={() => activateAndRevealWorktree(session.worktreeId)}
           >
             <SquareTerminal />
-          </Button>
+          </TeamIconButton>
         ) : null}
-        <Button
+        <TeamIconButton
           variant="ghost"
           size="icon-sm"
-          aria-label={translate('auto.components.agentTeam.TeamManagerPanel.close', 'Hide Manager')}
+          label={translate('auto.components.agentTeam.TeamManagerPanel.close', 'Hide Manager')}
           onClick={onClose}
         >
           <X />
-        </Button>
+        </TeamIconButton>
       </div>
       <div className="flex min-h-0 flex-1 flex-col">
         {loading ? null : session && chatReady ? (

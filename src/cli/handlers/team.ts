@@ -68,11 +68,13 @@ export const TEAM_HANDLERS: Record<string, CommandHandler> = {
       throw new Error(`--result must be one of ${RESULTS.join(', ')}.`)
     }
     const findingsPath = getOptionalStringFlag(flags, 'findings')
+    const mergeRequestUrl = getOptionalStringFlag(flags, 'merge-request')
     const response = await client.call<{ reported: boolean }>('team.report', {
       assignmentId: getRequiredStringFlag(flags, 'assignment'),
       result,
       summary: getRequiredStringFlag(flags, 'summary'),
       questions: getRepeatedStringFlag(flags, 'question'),
+      ...(mergeRequestUrl ? { mergeRequestUrl } : {}),
       ...(findingsPath ? { findings: await readFindings(findingsPath, cwd) } : {})
     })
     printResult(response, json, () => 'Reported. Orca moves the issue to its next step.')
@@ -84,6 +86,13 @@ export const TEAM_HANDLERS: Record<string, CommandHandler> = {
       teams: { id: string; name: string }[]
     }>('team.issues', status ? { status } : {})
     printResult(response, json, formatIssues)
+  },
+  'team issue answer': async ({ flags, client, json }) => {
+    const response = await client.call<{ answered: boolean }>('team.issueAnswer', {
+      issueId: getRequiredStringFlag(flags, 'issue'),
+      text: getRequiredStringFlag(flags, 'text')
+    })
+    printResult(response, json, () => 'Answered. The step continues with your answer.')
   },
   'team issue add': async ({ flags, client, json }) => {
     const body = getOptionalStringFlag(flags, 'body')

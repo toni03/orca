@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, ExternalLink } from 'lucide-react'
+import { ArrowDown, ArrowUp, ExternalLink, GitPullRequest, History } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -7,6 +7,7 @@ import { openAssignment } from '../../../../shared/agent-team/agent-team-pipelin
 import type { AgentTeamWaitReason } from '../../../../shared/agent-team/agent-team-scheduler'
 import type { AgentTeamIssue, AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import { formatDuration, issueKey, needsYouLabel, waitReasonLabel } from './team-labels'
+import { TeamIconButton, TeamIconLink } from './TeamIconButton'
 
 type Props = {
   issue: AgentTeamIssue
@@ -16,6 +17,7 @@ type Props = {
   onApprove?: () => void
   onMove?: (direction: -1 | 1) => void
   onDecide?: (issue: AgentTeamIssue) => void
+  onOpenHistory?: (issue: AgentTeamIssue) => void
   now: number
 }
 
@@ -27,12 +29,15 @@ export function TeamIssueCard({
   onApprove,
   onMove,
   onDecide,
+  onOpenHistory,
   now
 }: Props): React.JSX.Element {
   const open = openAssignment(issue)
   const seat = open ? state.seats.find((candidate) => candidate.id === open.seatId) : undefined
   const team = state.teams.find((candidate) => candidate.id === issue.teamId)
   const needsYou = issue.status === 'needs-you' && issue.needsYou
+  const linkClass = 'inline-flex items-center hover:text-foreground'
+  const showHistory = onOpenHistory !== undefined && issue.assignments.length > 0
 
   return (
     <article
@@ -44,23 +49,33 @@ export function TeamIssueCard({
       <div className="flex items-center gap-2 text-2xs text-muted-foreground">
         <span className="truncate font-medium text-foreground">{projectName}</span>
         <span className="font-mono">{issueKey(issue)}</span>
-        {issue.tracker?.url ? (
-          <a
-            href={issue.tracker.url}
-            target="_blank"
-            rel="noreferrer"
-            className="ml-auto inline-flex items-center gap-0.5 hover:text-foreground"
-            aria-label={translate(
-              'auto.components.agentTeam.TeamIssueCard.openTracker',
-              'Open {{key}} in the tracker',
-              {
-                key: issueKey(issue)
-              }
-            )}
-          >
-            <ExternalLink className="size-3" />
-          </a>
-        ) : null}
+        <span className="ml-auto flex items-center gap-1.5">
+          {issue.mergeRequest ? (
+            <TeamIconLink
+              href={issue.mergeRequest.url}
+              className={linkClass}
+              label={translate(
+                'auto.components.agentTeam.TeamIssueCard.openMergeRequest',
+                'Open the merge request'
+              )}
+            >
+              <GitPullRequest className="size-3" />
+            </TeamIconLink>
+          ) : null}
+          {issue.tracker?.url ? (
+            <TeamIconLink
+              href={issue.tracker.url}
+              className={linkClass}
+              label={translate(
+                'auto.components.agentTeam.TeamIssueCard.openTracker',
+                'Open {{key}} in the tracker',
+                { key: issueKey(issue) }
+              )}
+            >
+              <ExternalLink className="size-3" />
+            </TeamIconLink>
+          ) : null}
+        </span>
       </div>
       <div className="text-sm font-medium leading-snug">{issue.title}</div>
       <div className="flex flex-wrap items-center gap-1.5 text-2xs text-muted-foreground">
@@ -95,52 +110,55 @@ export function TeamIssueCard({
           <p className="line-clamp-4 whitespace-pre-wrap text-xs text-muted-foreground">
             {needsYou.detail}
           </p>
-          {onDecide ? (
-            <Button
-              size="xs"
-              variant="secondary"
-              className="self-start"
-              onClick={() => onDecide(issue)}
-            >
+        </div>
+      ) : null}
+      {onApprove || onMove || showHistory || (needsYou && onDecide) ? (
+        <div className="flex items-center gap-1">
+          {needsYou && onDecide ? (
+            <Button size="xs" variant="secondary" onClick={() => onDecide(issue)}>
               {translate('auto.components.agentTeam.TeamIssueCard.review', 'Review')}
             </Button>
           ) : null}
-        </div>
-      ) : null}
-      {onApprove || onMove ? (
-        <div className="flex items-center gap-1">
           {onApprove ? (
             <Button size="xs" variant="secondary" onClick={onApprove}>
               {translate('auto.components.agentTeam.TeamIssueCard.approve', 'Approve')}
             </Button>
           ) : null}
-          {onMove ? (
-            <>
-              <Button
-                size="icon-xs"
-                variant="ghost"
-                className="ml-auto"
-                aria-label={translate(
-                  'auto.components.agentTeam.TeamIssueCard.moveUp',
-                  'Move up in the queue'
+          <span className="ml-auto flex items-center gap-1">
+            {onOpenHistory && showHistory ? (
+              <TeamIconButton
+                label={translate(
+                  'auto.components.agentTeam.TeamIssueCard.history',
+                  'Show the work history'
                 )}
-                onClick={() => onMove(-1)}
+                onClick={() => onOpenHistory(issue)}
               >
-                <ArrowUp />
-              </Button>
-              <Button
-                size="icon-xs"
-                variant="ghost"
-                aria-label={translate(
-                  'auto.components.agentTeam.TeamIssueCard.moveDown',
-                  'Move down in the queue'
-                )}
-                onClick={() => onMove(1)}
-              >
-                <ArrowDown />
-              </Button>
-            </>
-          ) : null}
+                <History />
+              </TeamIconButton>
+            ) : null}
+            {onMove ? (
+              <>
+                <TeamIconButton
+                  label={translate(
+                    'auto.components.agentTeam.TeamIssueCard.moveUp',
+                    'Move up in the queue'
+                  )}
+                  onClick={() => onMove(-1)}
+                >
+                  <ArrowUp />
+                </TeamIconButton>
+                <TeamIconButton
+                  label={translate(
+                    'auto.components.agentTeam.TeamIssueCard.moveDown',
+                    'Move down in the queue'
+                  )}
+                  onClick={() => onMove(1)}
+                >
+                  <ArrowDown />
+                </TeamIconButton>
+              </>
+            ) : null}
+          </span>
         </div>
       ) : null}
     </article>

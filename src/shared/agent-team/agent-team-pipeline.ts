@@ -80,6 +80,13 @@ export function applyAgentTeamStepResult(args: {
   const issue = closeAssignment(args.issue, args.assignmentId, { result }, now)
   switch (result.kind) {
     case 'done':
+      return advance(
+        result.mergeRequestUrl
+          ? { ...issue, mergeRequest: { url: result.mergeRequestUrl } }
+          : issue,
+        team,
+        now
+      )
     case 'pass':
       return advance(issue, team, now)
     case 'blocked':
@@ -151,6 +158,8 @@ export function applyAgentTeamSessionStop(args: {
 
 export type AgentTeamUserDecision =
   | { kind: 'resume' }
+  /** Answers a blocked or stopped step; the same step runs again with the answer. */
+  | { kind: 'answer'; note: string }
   | { kind: 'request-changes'; note: string }
   | { kind: 'done' }
   | { kind: 'discard' }
@@ -166,6 +175,7 @@ export function applyAgentTeamUserDecision(args: {
   const { team, roles, decision, now } = args
   const open = openAssignment(args.issue)
   // Every decision but resume ends the session that was waiting, so its late report is ignored.
+  // The engine sends an answer straight to a session that is still waiting instead.
   const issue =
     open && decision.kind !== 'resume'
       ? closeAssignment(args.issue, open.id, { stopReason: 'cancelled' }, now)
@@ -181,6 +191,15 @@ export function applyAgentTeamUserDecision(args: {
         status: 'working',
         stepIndex: Math.min(issue.stepIndex, team.steps.length - 1)
       }
+    case 'answer': {
+      const note = decision.note.trim()
+      return {
+        ...base,
+        status: 'working',
+        stepIndex: Math.min(issue.stepIndex, team.steps.length - 1),
+        body: note ? `${issue.body.trim()}\n\nAnswer from the user:\n${note}` : issue.body
+      }
+    }
     case 'request-changes': {
       const from = Math.min(issue.stepIndex, team.steps.length)
       const note = decision.note.trim()

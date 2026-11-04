@@ -13,38 +13,16 @@ import { composeAgentTeamSessionPrompt } from '../../shared/agent-team/agent-tea
 import type {
   AgentTeamAssignment,
   AgentTeamIssue,
-  AgentTeamProject,
-  AgentTeamSeat,
   AgentTeamState,
   AgentTeamStepResult
 } from '../../shared/agent-team/agent-team-types'
+import {
+  agentTeamWorktreeName,
+  closeAgentTeamSession,
+  removeFinishedAgentTeamWorktree,
+  type AgentTeamLauncher
+} from './agent-team-launcher'
 import type { AgentTeamStore } from './agent-team-store'
-
-/** What the engine needs from Orca to start a seat's session. */
-export type AgentTeamLauncher = {
-  /** Exact path of this app's CLI for report commands; null keeps the bare `orca`. */
-  cliCommand(): string | null
-  /** Build step without a worktree yet: create one and start the agent in it. */
-  launchInNewWorktree(args: {
-    repoId: string
-    name: string
-    seat: AgentTeamSeat
-    prompt: string
-    title: string
-  }): Promise<{ worktreeId: string; branch?: string; terminalHandle: string }>
-  /** Any later step: start the agent in the issue's worktree. */
-  launchInWorktree(args: {
-    worktreeId: string
-    seat: AgentTeamSeat
-    prompt: string
-    title: string
-  }): Promise<{ terminalHandle: string }>
-  readProjectSpec(project: AgentTeamProject | undefined, repoId: string): Promise<string | null>
-  /** Resolves when the session's process exits; ptyId adopts a session started before a restart. */
-  watchExit(terminalHandle: string, onExit: () => void, ptyId?: string): void
-  /** Live terminals among these handles with their PTY ids; null when liveness cannot be read. */
-  liveTerminals(handles: string[]): Promise<Map<string, string | null> | null>
-}
 
 export class AgentTeamError extends Error {
   constructor(
@@ -53,16 +31,6 @@ export class AgentTeamError extends Error {
   ) {
     super(message)
   }
-}
-
-function worktreeName(issue: AgentTeamIssue): string {
-  const key = (issue.tracker?.key ?? issue.id.slice(0, 8)).replace(/[^A-Za-z0-9]+/g, '')
-  const slug = issue.title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 40)
-  return [key.toLowerCase(), slug].filter(Boolean).join('-') || `team-${issue.id.slice(0, 8)}`
 }
 
 function replaceIssue(state: AgentTeamState, next: AgentTeamIssue): AgentTeamState {
@@ -130,6 +98,7 @@ export class AgentTeamEngine {
     const project = state.projects.find((candidate) => candidate.repoId === issue.repoId)
     const step = team.steps[issue.stepIndex]
     const title = `${seat.name} · ${issue.tracker?.key ?? issue.title}`
+    const baseBranch = project?.baseBranch?.trim() || undefined
     try {
       const prompt = composeAgentTeamSessionPrompt({
         role,
@@ -138,7 +107,12 @@ export class AgentTeamEngine {
         assignment,
         projectSpec: await this.launcher.readProjectSpec(project, issue.repoId),
         previousFindings: role.stepType === 'build' ? previousRoundFindings(issue) : null,
-        cliCommand: this.launcher.cliCommand()
+        cliCommand: this.launcher.cliCommand(),
+        delivery: {
+          folder: this.launcher.isFolderProject(issue.repoId),
+          baseBranch: baseBranch ?? null,
+          ...(issue.mergeRequest ? { mergeRequestUrl: issue.mergeRequest.url } : {})
+        }
       })
       if (issue.worktreeId) {
         const launched = await this.launcher.launchInWorktree({
@@ -156,7 +130,8 @@ export class AgentTeamEngine {
         }
         const launched = await this.launcher.launchInNewWorktree({
           repoId: issue.repoId,
-          name: worktreeName(issue),
+          name: agentTeamWorktreeName(issue),
+          ...(baseBranch ? { baseBranch } : {}),
           seat,
           prompt,
           title
@@ -240,6 +215,8 @@ export class AgentTeamEngine {
       now: this.now()
     })
     this.store.update((current) => replaceIssue(current, next))
+    // The step is over: its record lives in the issue history and the tracker, not an open tab.
+    closeAgentTeamSession(this.launcher, found.assignment)
     void this.tick()
     return next
   }
@@ -306,6 +283,22 @@ export class AgentTeamEngine {
     if (decision.kind !== 'discard' && issue.status !== 'needs-you') {
       throw new AgentTeamError('invalid_state', 'Only issues waiting for you take this decision.')
     }
+    const waiting = openAssignment(issue)
+    if (decision.kind === 'answer' && waiting?.terminalHandle && decision.note.trim()) {
+      // The session is still open and asking: answer it there so it keeps its context.
+      const sent = this.launcher.sendToSession(waiting.terminalHandle, decision.note.trim())
+      void sent.catch((error: unknown) =>
+        this.stopAssignment(waiting.id, 'errored', `Could not send the answer: ${String(error)}`)
+      )
+      const resumed: AgentTeamIssue = {
+        ...issue,
+        status: 'working',
+        needsYou: undefined,
+        updatedAt: this.now()
+      }
+      this.store.update((current) => replaceIssue(current, resumed))
+      return resumed
+    }
     const next = applyAgentTeamUserDecision({
       issue,
       team,
@@ -314,6 +307,10 @@ export class AgentTeamEngine {
       now: this.now()
     })
     this.store.update((current) => replaceIssue(current, next))
+    if (decision.kind !== 'resume' && waiting) {
+      closeAgentTeamSession(this.launcher, waiting)
+    }
+    removeFinishedAgentTeamWorktree(this.launcher, next)
     void this.tick()
     return next
   }

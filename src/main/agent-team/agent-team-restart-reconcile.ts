@@ -1,6 +1,6 @@
 import { openAssignment } from '../../shared/agent-team/agent-team-pipeline'
 import type { AgentTeamAssignment, AgentTeamState } from '../../shared/agent-team/agent-team-types'
-import type { AgentTeamLauncher } from './agent-team-engine'
+import type { AgentTeamLauncher } from './agent-team-launcher'
 
 type ReconcileDeps = {
   state: () => AgentTeamState

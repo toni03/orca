@@ -5,6 +5,8 @@ type BuiltinRoleTemplate = {
   name: string
   stepType: AgentTeamStepType
   prompt: string
+  /** Bumped when the shipped prompt changes, so unedited copies pick it up. */
+  version?: number
 }
 
 export const BUILTIN_ROLE_TEMPLATES: readonly BuiltinRoleTemplate[] = [
@@ -12,13 +14,14 @@ export const BUILTIN_ROLE_TEMPLATES: readonly BuiltinRoleTemplate[] = [
     id: 'builtin:developer',
     name: 'Developer',
     stepType: 'build',
+    version: 2,
     prompt: [
       'You implement one issue in its own worktree.',
       'Read AGENTS.md first and follow the project conventions.',
       'Keep the change focused; add tests for new behaviour.',
       'Follow the project spec for checks, branches and tracker rules.',
       'If the issue is ambiguous, stop and report blocked with your questions.',
-      'Never push, never touch CI or secrets.'
+      'Deliver through a merge or pull request as the Orca rules say; never touch CI or secrets.'
     ].join('\n')
   },
   {
@@ -110,7 +113,7 @@ export function builtinRole(template: BuiltinRoleTemplate, now: number): AgentTe
     version: 1,
     origin: 'builtin',
     templateId: template.id,
-    templateVersion: 1,
+    templateVersion: template.version ?? 1,
     updatedAt: now
   }
 }

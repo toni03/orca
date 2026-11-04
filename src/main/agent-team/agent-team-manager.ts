@@ -35,6 +35,8 @@ export async function buildAgentTeamContext(
       path: repo.path,
       folder: repo.kind === 'folder',
       tracker: state.projects.find((project) => project.repoId === repo.id)?.tracker ?? null,
+      baseBranch:
+        state.projects.find((project) => project.repoId === repo.id)?.baseBranch?.trim() || null,
       spec: (await readSpec(repo.id).catch(() => null))?.text ?? ''
     }))
   )

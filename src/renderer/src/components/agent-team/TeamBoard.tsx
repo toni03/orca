@@ -16,6 +16,7 @@ import type { AgentTeamIssue, AgentTeamState } from '../../../../shared/agent-te
 import { TeamIssueCard } from './TeamIssueCard'
 import { TeamNewIssueDialog } from './TeamNewIssueDialog'
 import { TeamDecisionDialog } from './TeamDecisionDialog'
+import { TeamIssueHistoryDialog } from './TeamIssueHistoryDialog'
 import { TeamPausedNotice } from './TeamPausedNotice'
 import { stepTypeLabel } from './team-labels'
 import { useAgentTeamCommand } from './use-agent-team-state'
@@ -83,6 +84,7 @@ export function TeamBoard({
   const [teamFilter, setTeamFilter] = useState<string>(ALL_TEAMS)
   const [creating, setCreating] = useState(false)
   const [deciding, setDeciding] = useState<AgentTeamIssue | null>(null)
+  const [historyId, setHistoryId] = useState<string | null>(null)
   const waiting = useMemo(() => planAgentTeamAssignments(state).waiting, [state])
   const columns = useMemo(() => boardColumns(state, teamFilter), [state, teamFilter])
   const queueOrder = columns.find((column) => column.id === 'queue')?.issues ?? []
@@ -176,6 +178,7 @@ export function TeamBoard({
                 }
                 onMove={column.id === 'queue' ? (direction) => move(issue, direction) : undefined}
                 onDecide={column.id === 'needs-you' ? setDeciding : undefined}
+                onOpenHistory={(target) => setHistoryId(target.id)}
               />
             ))}
             {column.issues.length === 0 ? (
@@ -191,6 +194,11 @@ export function TeamBoard({
         defaultTeamId={teamFilter === ALL_TEAMS ? state.teams[0]?.id : teamFilter}
       />
       <TeamDecisionDialog issue={deciding} state={state} onClose={() => setDeciding(null)} />
+      <TeamIssueHistoryDialog
+        issueId={historyId}
+        state={state}
+        onClose={() => setHistoryId(null)}
+      />
     </div>
   )
 }

@@ -6,7 +6,10 @@ import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import { effectiveProjectSpecStorage } from '../../shared/agent-team/agent-team-spec-storage'
 import { resolveAgentTeamCliCommand } from './agent-team-cli-command'
-import type { AgentTeamLauncher } from './agent-team-engine'
+import type { AgentTeamLauncher } from './agent-team-launcher'
+
+/** Lets the report command print its answer before the tab goes away. */
+const CLOSE_AFTER_REPORT_MS = 5_000
 
 /** Repository-stored specs live at this path in the project's main checkout. */
 export const AGENT_TEAM_PROJECT_SPEC_PATH = join('.orca', 'agent-team.md')
@@ -35,7 +38,8 @@ export function createAgentTeamRuntimeLauncher(
 
   return {
     cliCommand: resolveAgentTeamCliCommand,
-    async launchInNewWorktree({ repoId, name, seat, prompt, title }) {
+    isFolderProject: (repoId) => store.getRepo(repoId)?.kind === 'folder',
+    async launchInNewWorktree({ repoId, name, baseBranch, seat, prompt, title }) {
       const repo = store.getRepo(repoId)
       if (repo?.kind === 'folder') {
         // No git to isolate a worktree: Build works in the folder, and every issue locks the project.
@@ -54,6 +58,7 @@ export function createAgentTeamRuntimeLauncher(
       const created = await runtime.createManagedWorktree({
         repoSelector: `id:${repoId}`,
         name,
+        ...(baseBranch ? { baseBranch } : {}),
         displayName: title,
         displayNameKind: 'user',
         runHooks: false,
@@ -121,6 +126,18 @@ export function createAgentTeamRuntimeLauncher(
           .filter((terminal) => terminal.connected)
           .map((terminal) => [terminal.handle, terminal.ptyId])
       )
+    },
+    async sendToSession(terminalHandle, text) {
+      await runtime.sendTerminalAgentPrompt(terminalHandle, text, {
+        inputKind: 'driving'
+      })
+    },
+    async closeSession(terminalHandle) {
+      await new Promise((resolve) => setTimeout(resolve, CLOSE_AFTER_REPORT_MS))
+      await runtime.closeTerminal(terminalHandle)
+    },
+    async removeWorktree(worktreeId) {
+      await runtime.removeManagedWorktree(`id:${worktreeId}`)
     },
     watchExit(terminalHandle, onExit, knownPtyId) {
       const ptyId = ptyIdByHandle.get(terminalHandle) ?? knownPtyId

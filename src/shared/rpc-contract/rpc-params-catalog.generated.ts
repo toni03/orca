@@ -78,6 +78,7 @@ import { CreateAgentSessionParams, EnsureAgentSessionParams } from './agent-sess
 import { ReadVisualParams } from './agent-session-visual-params'
 import {
   AgentTeamContextParams,
+  AgentTeamIssueAnswerParams,
   AgentTeamIssueCreateParams,
   AgentTeamIssueListParams,
   AgentTeamReportParams
@@ -1476,6 +1477,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'stats.summary': null,
   'status.get': StatusGetParams,
   'team.context': AgentTeamContextParams,
+  'team.issueAnswer': AgentTeamIssueAnswerParams,
   'team.issueCreate': AgentTeamIssueCreateParams,
   'team.issues': AgentTeamIssueListParams,
   'team.report': AgentTeamReportParams,

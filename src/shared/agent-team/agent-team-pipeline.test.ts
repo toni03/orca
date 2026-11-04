@@ -139,6 +139,22 @@ describe('agent team pipeline', () => {
     expect(next).toMatchObject({ stepIndex: 0, round: 2, status: 'working' })
     expect(next.body).toContain('Rename the flag')
   })
+
+  it('runs a blocked step again in the same round with the user answer', () => {
+    const blocked = started('i1', 'd1', { status: 'needs-you' })
+    const next = applyAgentTeamUserDecision({
+      issue: {
+        ...blocked,
+        assignments: blocked.assignments.map((a) => ({ ...a, endedAt: 1 }))
+      },
+      team,
+      roles,
+      decision: { kind: 'answer', note: 'Work from develop' },
+      now: 2
+    })
+    expect(next).toMatchObject({ stepIndex: 0, round: 1, status: 'working' })
+    expect(next.body).toContain('Work from develop')
+  })
 })
 
 describe('agent team scheduler', () => {
