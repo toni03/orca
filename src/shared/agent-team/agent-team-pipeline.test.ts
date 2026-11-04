@@ -184,6 +184,13 @@ describe('agent team scheduler', () => {
     expect(plan.waiting.b).toEqual({ kind: 'dependency', issueId: 'a' })
   })
 
+  it('starts nothing new for a paused team', () => {
+    const paused = { ...state([issue('a')]), teams: [{ ...team, paused: true }] }
+    const plan = planAgentTeamAssignments(paused)
+    expect(plan.assignments).toEqual([])
+    expect(plan.waiting.a).toEqual({ kind: 'team-paused' })
+  })
+
   it('returns a reworked issue to the developer who built it', () => {
     const reworked = issue('i1', {
       status: 'working',

@@ -90,11 +90,11 @@ function WorkflowSettings({ state }: { state: AgentTeamState }): React.JSX.Eleme
       />
       <label className="flex max-w-md items-center justify-between gap-3 text-sm">
         <span>
-          {translate('auto.components.agentTeam.TeamSettings.paused', 'Pause the team')}
+          {translate('auto.components.agentTeam.TeamSettings.pausedAll', 'Pause all teams')}
           <span className="block text-xs text-muted-foreground">
             {translate(
-              'auto.components.agentTeam.TeamSettings.pausedHint',
-              'Running steps finish; nothing new starts until you resume.'
+              'auto.components.agentTeam.TeamSettings.pausedAllHint',
+              'Running steps finish; no team starts anything new until you resume. To pause one team, use Settings › Teams.'
             )}
           </span>
         </span>

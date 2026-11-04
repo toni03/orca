@@ -9,6 +9,7 @@ export type AgentTeamPlannedAssignment = {
 
 export type AgentTeamWaitReason =
   | { kind: 'paused' }
+  | { kind: 'team-paused' }
   | { kind: 'dependency'; issueId: string }
   | { kind: 'project-locked'; byIssueId: string }
   | { kind: 'no-free-seat'; stepId: string }
@@ -91,6 +92,10 @@ export function planAgentTeamAssignments(state: AgentTeamState): AgentTeamSchedu
     const step = team?.steps[issue.stepIndex]
     if (!team || !step) {
       waiting[issue.id] = { kind: 'missing-team' }
+      continue
+    }
+    if (team.paused) {
+      waiting[issue.id] = { kind: 'team-paused' }
       continue
     }
     const blockingDependency = issue.dependsOn.find((id) => issuesById.get(id)?.status !== 'done')

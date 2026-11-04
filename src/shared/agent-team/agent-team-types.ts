@@ -34,6 +34,8 @@ export type AgentTeam = {
   /** Build and Check steps in order; Needs you always follows the last one. */
   steps: AgentTeamStep[]
   templateId?: string
+  /** A paused team takes no new steps; running sessions finish. */
+  paused?: boolean
   createdAt: number
 }
 

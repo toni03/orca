@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { MessagesSquare, Pause, Play, Plus } from 'lucide-react'
+import { MessagesSquare, Plus } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,7 @@ import { TeamIssueCard } from './TeamIssueCard'
 import { TeamNewIssueDialog } from './TeamNewIssueDialog'
 import { TeamDecisionDialog } from './TeamDecisionDialog'
 import { TeamManagerDialog } from './TeamManagerDialog'
+import { TeamPausedNotice } from './TeamPausedNotice'
 import { stepTypeLabel } from './team-labels'
 import { useAgentTeamCommand } from './use-agent-team-state'
 import { useNow } from './use-now'
@@ -150,28 +151,8 @@ export function TeamBoard({
           <Plus />
           {translate('auto.components.agentTeam.TeamBoard.newIssue', 'New issue')}
         </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="ml-auto"
-          onClick={() =>
-            void run({ kind: 'workflow.update', patch: { paused: !state.workflow.paused } })
-          }
-        >
-          {state.workflow.paused ? <Play /> : <Pause />}
-          {state.workflow.paused
-            ? translate('auto.components.agentTeam.TeamBoard.resume', 'Resume team')
-            : translate('auto.components.agentTeam.TeamBoard.pause', 'Pause team')}
-        </Button>
       </div>
-      {state.workflow.paused ? (
-        <p className="text-xs text-muted-foreground">
-          {translate(
-            'auto.components.agentTeam.TeamBoard.pausedHint',
-            'Paused: running steps finish, nothing new starts.'
-          )}
-        </p>
-      ) : null}
+      <TeamPausedNotice state={state} teamFilter={teamFilter} />
       <div
         className="grid min-h-0 gap-3"
         style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(200px, 1fr))` }}

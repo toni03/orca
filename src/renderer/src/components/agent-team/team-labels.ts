@@ -39,6 +39,11 @@ export function waitReasonLabel(reason: AgentTeamWaitReason, state: AgentTeamSta
   }
   switch (reason.kind) {
     case 'paused':
+      return translate(
+        'auto.components.agentTeam.labels.waitPausedAll',
+        'Waiting · all teams paused'
+      )
+    case 'team-paused':
       return translate('auto.components.agentTeam.labels.waitPaused', 'Waiting · team paused')
     case 'dependency':
       return translate(

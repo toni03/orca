@@ -6,6 +6,7 @@ import {
   deleteTeam,
   removeTeamStep,
   renameTeam,
+  setTeamPaused,
   retireSeat,
   updateSeat,
   updateTeamStep
@@ -40,6 +41,7 @@ import type { TuiAgent } from '../tui-agent'
 export type AgentTeamStateCommand =
   | { kind: 'team.create'; name: string; templateId?: string }
   | { kind: 'team.rename'; teamId: string; name: string }
+  | { kind: 'team.pause'; teamId: string; paused: boolean }
   | { kind: 'team.delete'; teamId: string }
   | { kind: 'step.add'; teamId: string; name: string; roleId: string }
   | { kind: 'step.update'; teamId: string; stepId: string; name?: string; roleId?: string }
@@ -109,6 +111,8 @@ export function applyAgentTeamStateCommand(
       return createTeam(state, command, ids)
     case 'team.rename':
       return renameTeam(state, command.teamId, command.name)
+    case 'team.pause':
+      return setTeamPaused(state, command.teamId, command.paused)
     case 'team.delete':
       return deleteTeam(state, command.teamId, ids.now)
     case 'step.add':

@@ -19200,7 +19200,8 @@
           "waitNoSeat": "Waiting · this step has no seats",
           "waitTeam": "Waiting · its team or step was removed",
           "minutes": "{{count}}m",
-          "hours": "{{hours}}h {{minutes}}m"
+          "hours": "{{hours}}h {{minutes}}m",
+          "waitPausedAll": "Waiting · all teams paused"
         },
         "TeamActivity": {
           "done": "Done",
@@ -19315,7 +19316,9 @@
           "teams": "Teams",
           "roles": "Roles",
           "projects": "Projects",
-          "workflow": "Workflow"
+          "workflow": "Workflow",
+          "pausedAll": "Pause all teams",
+          "pausedAllHint": "Running steps finish; no team starts anything new until you resume. To pause one team, use Settings › Teams."
         },
         "TeamSettingsProjects": {
           "spec": "Project spec",
@@ -19376,7 +19379,9 @@
           "teamName": "Team name",
           "deleteTeam": "Delete team",
           "help": "A team is a pipeline of steps. Each step has a role (what to do) and seats (who does it). Orca only looks at the step type: Build gets its own worktree and changes code; Check reviews that worktree and passes the issue on or sends it back to the Build step for a new round.",
-          "noTeams": "No teams yet. Start from a template with New team."
+          "noTeams": "No teams yet. Start from a template with New team.",
+          "pausedBadge": "Paused",
+          "pause": "Paused"
         },
         "TeamSidebarButton": {
           "label": "Team",
@@ -19390,6 +19395,10 @@
           "request": "What do you need? (optional)",
           "cancel": "Cancel",
           "start": "Start Manager"
+        },
+        "TeamPausedNotice": {
+          "all": "All teams are paused: running steps finish, nothing new starts. Resume in Settings › Workflow.",
+          "teams": "Paused: {{teams}}. Running steps finish, nothing new starts. Resume in Settings › Teams."
         }
       }
     },

@@ -4,6 +4,7 @@ import { translate } from '@/i18n/i18n'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import {
   Select,
   SelectContent,
@@ -254,7 +255,14 @@ export function TeamSettingsTeams({ state }: { state: AgentTeamState }): React.J
               candidate.id === team?.id && 'bg-accent'
             )}
           >
-            <span className="block font-medium">{candidate.name}</span>
+            <span className="flex items-center gap-2 font-medium">
+              {candidate.name}
+              {candidate.paused ? (
+                <Badge variant="secondary">
+                  {translate('auto.components.agentTeam.TeamSettingsTeams.pausedBadge', 'Paused')}
+                </Badge>
+              ) : null}
+            </span>
             <span className="block text-2xs text-muted-foreground">
               {translate(
                 'auto.components.agentTeam.TeamSettingsTeams.teamSummary',
@@ -285,10 +293,18 @@ export function TeamSettingsTeams({ state }: { state: AgentTeamState }): React.J
                 }
               }}
             />
+            <label className="ml-auto flex items-center gap-2 text-sm">
+              <Switch
+                checked={team.paused === true}
+                onCheckedChange={(paused) =>
+                  void run({ kind: 'team.pause', teamId: team.id, paused })
+                }
+              />
+              {translate('auto.components.agentTeam.TeamSettingsTeams.pause', 'Paused')}
+            </label>
             <Button
               size="sm"
               variant="ghost"
-              className="ml-auto"
               onClick={() => void run({ kind: 'team.delete', teamId: team.id })}
             >
               {translate('auto.components.agentTeam.TeamSettingsTeams.deleteTeam', 'Delete team')}

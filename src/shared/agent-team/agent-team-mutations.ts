@@ -58,6 +58,14 @@ export function renameTeam(state: AgentTeamState, teamId: string, name: string):
   return replaceTeam(state, { ...requireTeam(state, teamId), name: trimmed })
 }
 
+export function setTeamPaused(
+  state: AgentTeamState,
+  teamId: string,
+  paused: boolean
+): AgentTeamState {
+  return replaceTeam(state, { ...requireTeam(state, teamId), paused })
+}
+
 export function deleteTeam(state: AgentTeamState, teamId: string, now: number): AgentTeamState {
   if (teamHasActiveIssues(state, teamId)) {
     throw new AgentTeamMutationError(
