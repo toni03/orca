@@ -97,7 +97,6 @@ export class AgentTeamService {
   }
 
   launchManager(args: {
-    worktreeId: string
     agent: TuiAgent
     request: string
   }): Promise<{ worktreeId: string; terminalHandle: string }> {

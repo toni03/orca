@@ -14,7 +14,6 @@ export type AgentTeamApi = {
   readProjectSpec: (repoId: string) => Promise<AgentTeamProjectSpecRead>
   writeProjectSpec: (repoId: string, text: string) => Promise<void>
   launchManager: (args: {
-    worktreeId: string
     agent: TuiAgent
     request: string
   }) => Promise<{ worktreeId: string; terminalHandle: string }>

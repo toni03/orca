@@ -1,8 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-import { selectWorktreesByRepo } from '@/store/workspace-record-selectors'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -39,20 +37,6 @@ export function TeamManagerDialog(props: Props): React.JSX.Element {
 }
 
 function ManagerForm({ onOpenChange }: Props): React.JSX.Element {
-  const repos = useAppStore((s) => s.repos)
-  const worktreesByRepo = useAppStore(selectWorktreesByRepo)
-  const workspaces = useMemo(
-    () =>
-      repos
-        .filter((repo) => repo.kind !== 'folder')
-        .flatMap((repo) =>
-          (worktreesByRepo[repo.id] ?? [])
-            .filter((worktree) => worktree.isMainWorktree)
-            .map((worktree) => ({ id: worktree.id, label: repo.displayName }))
-        ),
-    [repos, worktreesByRepo]
-  )
-  const [worktreeId, setWorktreeId] = useState(workspaces[0]?.id ?? '')
   const enabled = useEnabledAgents()
   const [picked, setAgent] = useState<TuiAgent | null>(null)
   const agent = enabled.agents.some((entry) => entry.id === picked) ? picked : enabled.preferred
@@ -65,7 +49,7 @@ function ManagerForm({ onOpenChange }: Props): React.JSX.Element {
     }
     setStarting(true)
     try {
-      const launched = await window.api.agentTeam.launchManager({ worktreeId, agent, request })
+      const launched = await window.api.agentTeam.launchManager({ agent, request })
       onOpenChange(false)
       activateAndRevealWorktree(launched.worktreeId)
     } catch (error) {
@@ -90,54 +74,33 @@ function ManagerForm({ onOpenChange }: Props): React.JSX.Element {
         <DialogDescription>
           {translate(
             'auto.components.agentTeam.TeamManagerDialog.description',
-            'The Manager is an agent session that drafts issues, registers them in each project tracker following its spec, and adds them to the queue. It shows you a draft before creating anything.'
+            'The Manager is an agent session that drafts issues, registers them in each project tracker following its spec, and adds them to the queue. It shows you a draft before creating anything. It runs in its own Agent Team Manager project, which Orca keeps in ~/.orca/agent-team/manager.'
           )}
         </DialogDescription>
       </DialogHeader>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-1.5">
-          <Label>
-            {translate('auto.components.agentTeam.TeamManagerDialog.workspace', 'Runs in')}
-          </Label>
-          <Select value={worktreeId} onValueChange={setWorktreeId}>
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {workspaces.map((workspace) => (
-                <SelectItem key={workspace.id} value={workspace.id}>
-                  {workspace.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label>
-            {translate('auto.components.agentTeam.TeamManagerDialog.agent', 'Agent CLI')}
-          </Label>
-          <Select
-            value={agent ?? undefined}
-            onValueChange={(value) => {
-              const entry = enabled.agents.find((candidate) => candidate.id === value)
-              if (entry) {
-                setAgent(entry.id)
-              }
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {enabled.agents.map((entry) => (
-                <SelectItem key={entry.id} value={entry.id}>
-                  <AgentIcon agent={entry.id} />
-                  {entry.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="flex flex-col gap-1.5">
+        <Label>{translate('auto.components.agentTeam.TeamManagerDialog.agent', 'Agent CLI')}</Label>
+        <Select
+          value={agent ?? undefined}
+          onValueChange={(value) => {
+            const entry = enabled.agents.find((candidate) => candidate.id === value)
+            if (entry) {
+              setAgent(entry.id)
+            }
+          }}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {enabled.agents.map((entry) => (
+              <SelectItem key={entry.id} value={entry.id}>
+                <AgentIcon agent={entry.id} />
+                {entry.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="agent-team-manager-request">
@@ -157,7 +120,7 @@ function ManagerForm({ onOpenChange }: Props): React.JSX.Element {
         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
           {translate('auto.components.agentTeam.TeamManagerDialog.cancel', 'Cancel')}
         </Button>
-        <Button type="submit" disabled={starting || !worktreeId || !agent}>
+        <Button type="submit" disabled={starting || !agent}>
           {translate('auto.components.agentTeam.TeamManagerDialog.start', 'Start Manager')}
         </Button>
       </DialogFooter>

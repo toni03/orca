@@ -43,7 +43,8 @@ function formatContext(context: AgentTeamContext): string {
     return `${project.repoId}  ${project.name}  ${tracker}${project.spec ? '  spec' : ''}`
   })
   const teams = context.teams.map(
-    (team) => `${team.id}  ${team.name}: ${team.steps.map((step) => step.name).join(' -> ')}`
+    (team) =>
+      `${team.id}  ${team.name}${team.paused ? ' (paused)' : ''}: ${team.steps.map((step) => step.name).join(' -> ')}`
   )
   return [
     'Projects:',

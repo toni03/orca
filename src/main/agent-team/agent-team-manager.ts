@@ -1,4 +1,4 @@
-import { composeAgentTeamManagerPrompt } from '../../shared/agent-team/agent-team-manager-prompt'
+import { composeAgentTeamManagerKickoff } from '../../shared/agent-team/agent-team-manager-prompt'
 import { stepRole } from '../../shared/agent-team/agent-team-pipeline'
 import type { AgentTeamContext } from '../../shared/agent-team/agent-team-context'
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
@@ -6,6 +6,7 @@ import type { TuiAgent } from '../../shared/tui-agent'
 import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import type { AgentTeamProjectSpecRead } from './agent-team-service'
+import { ensureAgentTeamManagerWorkspace } from './agent-team-manager-workspace'
 
 /** Everything the Manager needs in one read, so it never guesses ids. */
 export async function buildAgentTeamContext(
@@ -28,6 +29,7 @@ export async function buildAgentTeamContext(
     teams: state.teams.map((team) => ({
       id: team.id,
       name: team.name,
+      paused: team.paused === true,
       steps: team.steps.map((step, index) => {
         const role = stepRole(team, index, state.roles)
         return {
@@ -54,14 +56,15 @@ export async function buildAgentTeamContext(
   }
 }
 
-/** Starts the Manager as an agent session in a workspace the user picked. */
+/** Starts the Manager as an agent session in its own Orca-managed folder project. */
 export async function launchAgentTeamManager(
   runtime: OrcaRuntimeService,
-  args: { worktreeId: string; agent: TuiAgent; request: string }
+  args: { agent: TuiAgent; request: string }
 ): Promise<{ worktreeId: string; terminalHandle: string }> {
-  const launched = await runtime.launchAgentTerminal(`id:${args.worktreeId}`, {
+  const folder = await ensureAgentTeamManagerWorkspace(runtime)
+  const launched = await runtime.launchAgentTerminal(`path:${folder}`, {
     agent: args.agent,
-    prompt: composeAgentTeamManagerPrompt(args.request),
+    prompt: composeAgentTeamManagerKickoff(args.request),
     title: 'Manager',
     suppressStartupUpdatePrompt: true,
     wslUserAct: true

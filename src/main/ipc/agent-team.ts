@@ -31,8 +31,7 @@ export function registerAgentTeamHandlers(service: AgentTeamService): () => void
   )
   ipcMain.handle(
     AGENT_TEAM_CHANNELS.launchManager,
-    (_event, args: { worktreeId: string; agent: TuiAgent; request: string }) =>
-      service.launchManager(args)
+    (_event, args: { agent: TuiAgent; request: string }) => service.launchManager(args)
   )
   const unsubscribe = service.subscribe(broadcastAgentTeamState)
   return () => {

@@ -12,6 +12,7 @@ export type AgentTeamContext = {
   teams: {
     id: string
     name: string
+    paused: boolean
     steps: { name: string; role: string; stepType: string; seats: string[] }[]
   }[]
   workflow: AgentTeamState['workflow']
