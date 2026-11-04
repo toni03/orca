@@ -54,7 +54,8 @@ function SeatForm({
       : undefined
   const [name, setName] = useState(seat?.name ?? '')
   const enabled = useEnabledAgents()
-  const [agent, setAgent] = useState<TuiAgent | null>(seat?.agent ?? enabled.preferred)
+  const [picked, setAgent] = useState<TuiAgent | null>(null)
+  const agent = enabled.agents.some((entry) => entry.id === picked) ? picked : enabled.preferred
   const [model, setModel] = useState(seat?.model ?? '')
   const [instructions, setInstructions] = useState(seat?.instructions ?? '')
 
@@ -127,11 +128,18 @@ function SeatForm({
             <AgentIcon agent={seat.agent} />
             {getAgentLabel(seat.agent)}
           </div>
+        ) : enabled.agents.length === 0 && enabled.detecting ? (
+          <span className="text-sm text-muted-foreground">
+            {translate(
+              'auto.components.agentTeam.TeamSeatDialog.detecting',
+              'Detecting agent CLIs…'
+            )}
+          </span>
         ) : enabled.agents.length === 0 ? (
           <span className="text-sm text-muted-foreground">
             {translate(
               'auto.components.agentTeam.TeamSeatDialog.noAgents',
-              'No agent CLI is enabled. Turn one on in Settings › Agents.'
+              'No agent CLI is installed and enabled on this computer. Check Settings › Agents.'
             )}
           </span>
         ) : (

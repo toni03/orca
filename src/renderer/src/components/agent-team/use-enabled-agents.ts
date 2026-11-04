@@ -1,16 +1,26 @@
+import { useEffect } from 'react'
 import { useAppStore } from '@/store'
 import { getAgentCatalog } from '@/lib/agent-catalog'
 import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import type { TuiAgent } from '../../../../shared/tui-agent'
 
-/** Agent CLIs switched on in Settings › Agents, plus the preferred one to preselect. */
+/** Agent CLIs installed on this computer and switched on in Settings › Agents. */
 export function useEnabledAgents(): {
   agents: ReturnType<typeof getAgentCatalog>
   preferred: TuiAgent | null
+  detecting: boolean
 } {
   const settings = useAppStore((s) => s.settings)
-  const agents = getAgentCatalog().filter((entry) =>
-    isTuiAgentEnabled(entry.id, settings?.disabledTuiAgents)
+  const detectedIds = useAppStore((s) => s.detectedAgentIds)
+  const ensureDetectedAgents = useAppStore((s) => s.ensureDetectedAgents)
+  useEffect(() => {
+    void ensureDetectedAgents().catch(() => undefined)
+  }, [ensureDetectedAgents])
+
+  const agents = getAgentCatalog().filter(
+    (entry) =>
+      detectedIds?.includes(entry.id) === true &&
+      isTuiAgentEnabled(entry.id, settings?.disabledTuiAgents)
   )
   const fallback = settings?.defaultTuiAgent
   const preferred =
@@ -18,5 +28,5 @@ export function useEnabledAgents(): {
     agents.find((entry) => entry.id === 'claude')?.id ??
     agents[0]?.id ??
     null
-  return { agents, preferred }
+  return { agents, preferred, detecting: detectedIds === null }
 }

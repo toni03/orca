@@ -19301,7 +19301,8 @@
           "cancel": "Cancel",
           "save": "Save",
           "add": "Add seat",
-          "noAgents": "No agent CLI is enabled. Turn one on in Settings › Agents."
+          "noAgents": "No agent CLI is enabled. Turn one on in Settings › Agents.",
+          "detecting": "Detecting agent CLIs…"
         },
         "TeamSettings": {
           "workflowHelp": "How issues move for every team. Seats and steps are in Teams; trackers and project specs in Projects.",

@@ -54,7 +54,8 @@ function ManagerForm({ onOpenChange }: Props): React.JSX.Element {
   )
   const [worktreeId, setWorktreeId] = useState(workspaces[0]?.id ?? '')
   const enabled = useEnabledAgents()
-  const [agent, setAgent] = useState<TuiAgent | null>(enabled.preferred)
+  const [picked, setAgent] = useState<TuiAgent | null>(null)
+  const agent = enabled.agents.some((entry) => entry.id === picked) ? picked : enabled.preferred
   const [request, setRequest] = useState('')
   const [starting, setStarting] = useState(false)
 
