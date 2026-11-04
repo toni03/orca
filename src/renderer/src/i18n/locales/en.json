@@ -19193,6 +19193,7 @@
           "blocked": "Blocked",
           "question": "Waiting for you",
           "failed": "Stopped",
+          "waitPausedAll": "Waiting · all teams paused",
           "waitPaused": "Waiting · team paused",
           "waitDependency": "Waiting · after {{key}}",
           "waitLocked": "Waiting · project locked by {{key}}",
@@ -19200,8 +19201,7 @@
           "waitNoSeat": "Waiting · this step has no seats",
           "waitTeam": "Waiting · its team or step was removed",
           "minutes": "{{count}}m",
-          "hours": "{{hours}}h {{minutes}}m",
-          "waitPausedAll": "Waiting · all teams paused"
+          "hours": "{{hours}}h {{minutes}}m"
         },
         "TeamActivity": {
           "done": "Done",
@@ -19230,11 +19230,8 @@
           "openSettings": "Open team settings",
           "teamFilter": "Team",
           "allTeams": "All teams",
-          "newIssue": "New issue",
-          "resume": "Resume team",
-          "pause": "Pause team",
-          "pausedHint": "Paused: running steps finish, nothing new starts.",
-          "manager": "Manager"
+          "manager": "Manager",
+          "newIssue": "New issue"
         },
         "TeamDecisionDialog": {
           "sessionWaiting": "The session is still open. Answer it in its terminal and it continues; Resume only clears this item.",
@@ -19252,6 +19249,14 @@
           "approve": "Approve",
           "moveUp": "Move up in the queue",
           "moveDown": "Move down in the queue"
+        },
+        "TeamManagerDialog": {
+          "title": "Talk to the Manager",
+          "description": "The Manager is an agent session that drafts issues, registers them in each project tracker following its spec, and adds them to the queue. It shows you a draft before creating anything. It runs in its own Agent Team Manager project, which Orca keeps in ~/.orca/agent-team/manager. If a Manager session with this agent is already open, Orca returns to it and sends your request there.",
+          "agent": "Agent CLI",
+          "request": "What do you need? (optional)",
+          "cancel": "Cancel",
+          "open": "Open Manager"
         },
         "TeamNewIssueDialog": {
           "title": "New issue",
@@ -19287,38 +19292,9 @@
           "tabActivity": "Activity",
           "tabSettings": "Settings"
         },
-        "TeamSeatDialog": {
-          "addTitle": "Add seat",
-          "description": "A seat is one agent that takes issues for this step, in any project.",
-          "name": "Name",
-          "namePlaceholder": "Dev 1",
-          "agent": "Agent CLI",
-          "agentHint": "Fixed once the seat exists: correction rounds resume the same kind of session.",
-          "model": "Model",
-          "modelPlaceholder": "The agent's default",
-          "modelHint": "Applies from the next session.",
-          "instructions": "Extra instructions for this seat",
-          "retire": "Retire seat",
-          "cancel": "Cancel",
-          "save": "Save",
-          "add": "Add seat",
-          "noAgents": "No agent CLI is enabled. Turn one on in Settings › Agents.",
-          "detecting": "Detecting agent CLIs…"
-        },
-        "TeamSettings": {
-          "workflowHelp": "How issues move for every team. Seats and steps are in Teams; trackers and project specs in Projects.",
-          "rounds": "Rounds per issue",
-          "roundsHint": "A rejected check starts a new round. After the last one the issue goes to Needs you.",
-          "batch": "Propose the next batch below",
-          "batchHint": "The Manager proposes approved issues when fewer than this many are queued.",
-          "paused": "Pause the team",
-          "pausedHint": "Running steps finish; nothing new starts until you resume.",
-          "teams": "Teams",
-          "roles": "Roles",
-          "projects": "Projects",
-          "workflow": "Workflow",
-          "pausedAll": "Pause all teams",
-          "pausedAllHint": "Running steps finish; no team starts anything new until you resume. To pause one team, use Settings › Teams."
+        "TeamPausedNotice": {
+          "all": "All teams are paused: running steps finish, nothing new starts. Resume in Settings › Workflow.",
+          "teams": "Paused: {{teams}}. Running steps finish, nothing new starts. Resume in Settings › Teams."
         },
         "TeamSettingsProjects": {
           "spec": "Project spec",
@@ -19339,6 +19315,37 @@
           "repository": "Repository · .orca/agent-team.md",
           "local": "This computer",
           "noProjects": "Add a git project to Orca to use it with a team."
+        },
+        "TeamSeatDialog": {
+          "addTitle": "Add seat",
+          "description": "A seat is one agent that takes issues for this step, in any project.",
+          "name": "Name",
+          "namePlaceholder": "Dev 1",
+          "agent": "Agent CLI",
+          "detecting": "Detecting agent CLIs…",
+          "noAgents": "No agent CLI is installed and enabled on this computer. Check Settings › Agents.",
+          "agentHint": "Fixed once the seat exists: correction rounds resume the same kind of session.",
+          "model": "Model",
+          "modelPlaceholder": "The agent's default",
+          "modelHint": "Applies from the next session.",
+          "instructions": "Extra instructions for this seat",
+          "retire": "Retire seat",
+          "cancel": "Cancel",
+          "save": "Save",
+          "add": "Add seat"
+        },
+        "TeamSettings": {
+          "workflowHelp": "How issues move for every team. Seats and steps are in Teams; trackers and project specs in Projects.",
+          "rounds": "Rounds per issue",
+          "roundsHint": "A rejected check starts a new round. After the last one the issue goes to Needs you.",
+          "batch": "Propose the next batch below",
+          "batchHint": "The Manager proposes approved issues when fewer than this many are queued.",
+          "pausedAll": "Pause all teams",
+          "pausedAllHint": "Running steps finish; no team starts anything new until you resume. To pause one team, use Settings › Teams.",
+          "teams": "Teams",
+          "roles": "Roles",
+          "projects": "Projects",
+          "workflow": "Workflow"
         },
         "TeamSettingsRoles": {
           "builtin": "Built-in",
@@ -19375,31 +19382,17 @@
           "addStep": "Add step",
           "teams": "Teams",
           "newTeam": "New team",
+          "pausedBadge": "Paused",
           "teamSummary": "{{steps}} steps · {{seats}} seats",
           "teamName": "Team name",
+          "pause": "Paused",
           "deleteTeam": "Delete team",
           "help": "A team is a pipeline of steps. Each step has a role (what to do) and seats (who does it). Orca only looks at the step type: Build gets its own worktree and changes code; Check reviews that worktree and passes the issue on or sends it back to the Build step for a new round.",
-          "noTeams": "No teams yet. Start from a template with New team.",
-          "pausedBadge": "Paused",
-          "pause": "Paused"
+          "noTeams": "No teams yet. Start from a template with New team."
         },
         "TeamSidebarButton": {
           "label": "Team",
           "working": "{{count}} working"
-        },
-        "TeamManagerDialog": {
-          "title": "Talk to the Manager",
-          "description": "The Manager is an agent session that drafts issues, registers them in each project tracker following its spec, and adds them to the queue. It shows you a draft before creating anything.",
-          "workspace": "Runs in",
-          "agent": "Agent CLI",
-          "request": "What do you need? (optional)",
-          "cancel": "Cancel",
-          "start": "Start Manager",
-          "open": "Open Manager"
-        },
-        "TeamPausedNotice": {
-          "all": "All teams are paused: running steps finish, nothing new starts. Resume in Settings › Workflow.",
-          "teams": "Paused: {{teams}}. Running steps finish, nothing new starts. Resume in Settings › Teams."
         }
       }
     },
