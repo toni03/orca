@@ -18,7 +18,13 @@ import {
   readRepositoryProjectSpec
 } from './agent-team-runtime-launcher'
 import { AgentTeamStore } from './agent-team-store'
-import { buildAgentTeamContext, launchAgentTeamManager } from './agent-team-manager'
+import {
+  buildAgentTeamContext,
+  findLiveManagerSession,
+  launchAgentTeamManager
+} from './agent-team-manager'
+import { agentTeamManagerFolder } from './agent-team-manager-workspace'
+import type { AgentTeamManagerSession } from '../../shared/agent-team/agent-team-ipc'
 import { reconcileAgentTeamSessionsAfterRestart } from './agent-team-restart-reconcile'
 import { AgentTeamTrackerSync } from './agent-team-tracker-sync'
 import {
@@ -138,7 +144,7 @@ export class AgentTeamService {
   async launchManager(args: {
     agent: TuiAgent
     request: string
-  }): Promise<{ worktreeId: string; terminalHandle: string }> {
+  }): Promise<AgentTeamManagerSession> {
     const pending = this.trackerSync.peekPending()
     const launched = await launchAgentTeamManager(this.runtime, {
       ...args,
@@ -151,7 +157,12 @@ export class AgentTeamService {
     if (pending && launched.startedNew) {
       this.trackerSync.markSent(pending.events)
     }
-    return { worktreeId: launched.worktreeId, terminalHandle: launched.terminalHandle }
+    return launched.session
+  }
+
+  /** The live Manager session, so the Team page can show it without starting one. */
+  managerSession(): Promise<AgentTeamManagerSession | null> {
+    return findLiveManagerSession(this.runtime, agentTeamManagerFolder())
   }
 
   /** Folder projects share one directory, so their issues always lock the project. */

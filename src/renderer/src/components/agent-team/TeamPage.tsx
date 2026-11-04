@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X } from 'lucide-react'
+import { MessagesSquare, X } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TeamBoard } from './TeamBoard'
 import { TeamActivity } from './TeamActivity'
 import { TeamSettings } from './TeamSettings'
+import { TeamManagerPanel } from './TeamManagerPanel'
 import { useAgentTeamState } from './use-agent-team-state'
 
 type TeamTab = 'board' | 'activity' | 'settings'
@@ -19,6 +20,7 @@ export default function TeamPage(): React.JSX.Element {
   const { state, loadError } = useAgentTeamState()
   const closeTeamPage = useAppStore((s) => s.closeTeamPage)
   const [tab, setTab] = useState<TeamTab>('board')
+  const [managerOpen, setManagerOpen] = useState(false)
   const working = state?.issues.filter((issue) => issue.status === 'working').length ?? 0
 
   return (
@@ -35,9 +37,18 @@ export default function TeamPage(): React.JSX.Element {
           </span>
         ) : null}
         <Button
+          size="sm"
+          variant={managerOpen ? 'secondary' : 'default'}
+          className="ml-auto"
+          aria-pressed={managerOpen}
+          onClick={() => setManagerOpen((open) => !open)}
+        >
+          <MessagesSquare />
+          {translate('auto.components.agentTeam.TeamPage.manager', 'Manager')}
+        </Button>
+        <Button
           variant="ghost"
           size="icon-sm"
-          className="ml-auto"
           aria-label={translate('auto.components.agentTeam.TeamPage.close', 'Close Team')}
           onClick={closeTeamPage}
         >
@@ -53,42 +64,45 @@ export default function TeamPage(): React.JSX.Element {
           )}
         </p>
       ) : !state ? null : (
-        <Tabs
-          value={tab}
-          onValueChange={(value) => {
-            if (isTeamTab(value)) {
-              setTab(value)
-            }
-          }}
-          className="flex min-h-0 flex-1 flex-col"
-        >
-          <TabsList className="mx-5 mt-3">
-            <TabsTrigger value="board">
-              {translate('auto.components.agentTeam.TeamPage.tabBoard', 'Board')}
-            </TabsTrigger>
-            <TabsTrigger value="activity">
-              {translate('auto.components.agentTeam.TeamPage.tabActivity', 'Activity')}
-            </TabsTrigger>
-            <TabsTrigger value="settings">
-              {translate('auto.components.agentTeam.TeamPage.tabSettings', 'Settings')}
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="board" className="min-h-0 flex-1">
-            <div className="h-full overflow-auto px-5 py-4 scrollbar-sleek">
-              <TeamBoard state={state} onOpenSettings={() => setTab('settings')} />
-            </div>
-          </TabsContent>
-          <TabsContent value="activity" className="min-h-0 flex-1">
-            <div className="h-full overflow-auto px-5 py-4 scrollbar-sleek">
-              <TeamActivity state={state} />
-            </div>
-          </TabsContent>
-          <TabsContent value="settings" className="min-h-0 flex-1">
-            <div className="h-full overflow-auto px-5 py-4 scrollbar-sleek">
-              <TeamSettings state={state} />
-            </div>
-          </TabsContent>
-        </Tabs>
+        <div className="flex min-h-0 flex-1">
+          <Tabs
+            value={tab}
+            onValueChange={(value) => {
+              if (isTeamTab(value)) {
+                setTab(value)
+              }
+            }}
+            className="flex min-h-0 min-w-0 flex-1 flex-col"
+          >
+            <TabsList className="mx-5 mt-3">
+              <TabsTrigger value="board">
+                {translate('auto.components.agentTeam.TeamPage.tabBoard', 'Board')}
+              </TabsTrigger>
+              <TabsTrigger value="activity">
+                {translate('auto.components.agentTeam.TeamPage.tabActivity', 'Activity')}
+              </TabsTrigger>
+              <TabsTrigger value="settings">
+                {translate('auto.components.agentTeam.TeamPage.tabSettings', 'Settings')}
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="board" className="min-h-0 flex-1">
+              <div className="h-full overflow-auto px-5 py-4 scrollbar-sleek">
+                <TeamBoard state={state} onOpenSettings={() => setTab('settings')} />
+              </div>
+            </TabsContent>
+            <TabsContent value="activity" className="min-h-0 flex-1">
+              <div className="h-full overflow-auto px-5 py-4 scrollbar-sleek">
+                <TeamActivity state={state} />
+              </div>
+            </TabsContent>
+            <TabsContent value="settings" className="min-h-0 flex-1">
+              <div className="h-full overflow-auto px-5 py-4 scrollbar-sleek">
+                <TeamSettings state={state} />
+              </div>
+            </TabsContent>
+          </Tabs>
+          {managerOpen ? <TeamManagerPanel onClose={() => setManagerOpen(false)} /> : null}
+        </div>
       )}
     </div>
   )

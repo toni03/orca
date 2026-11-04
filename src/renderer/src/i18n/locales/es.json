@@ -18760,8 +18760,7 @@
           "openSettings": "Abrir la configuración del equipo",
           "teamFilter": "Equipo",
           "allTeams": "Todos los equipos",
-          "newIssue": "Nueva issue",
-          "manager": "Manager"
+          "newIssue": "Nueva issue"
         },
         "TeamDecisionDialog": {
           "sessionWaiting": "La sesión sigue abierta. Respóndele en su terminal y continuará; Reanudar solo quita este aviso.",
@@ -18813,7 +18812,8 @@
           "loadError": "Los equipos de agentes no están disponibles en esta ventana: {{message}}",
           "tabBoard": "Tablero",
           "tabActivity": "Actividad",
-          "tabSettings": "Configuración"
+          "tabSettings": "Configuración",
+          "manager": "Manager"
         },
         "TeamSeatDialog": {
           "addTitle": "Añadir puesto",
@@ -18916,17 +18916,20 @@
           "label": "Team",
           "working": "{{count}} trabajando"
         },
-        "TeamManagerDialog": {
-          "title": "Hablar con el Manager",
-          "description": "El Manager es una sesión de agente que redacta issues, las registra en el gestor de tareas de cada proyecto según su prompt y las añade a la cola. Te enseña un borrador antes de crear nada. Funciona en su propio proyecto Agent Team Manager, que Orca guarda en ~/.orca/agent-team/manager. Si ya hay una sesión del Manager abierta con este agente, Orca vuelve a ella y le envía tu petición.",
-          "agent": "CLI del agente",
-          "request": "¿Qué necesitas? (opcional)",
-          "cancel": "Cancelar",
-          "open": "Abrir el Manager"
-        },
         "TeamPausedNotice": {
           "all": "Todos los equipos están en pausa: los pasos en curso terminan y no empieza nada nuevo. Reanúdalos en Configuración › Flujo.",
           "teams": "En pausa: {{teams}}. Los pasos en curso terminan y no empieza nada nuevo. Reanúdalos en Configuración › Equipos."
+        },
+        "TeamManagerPanel": {
+          "title": "Manager",
+          "openTerminal": "Abrir la terminal del Manager",
+          "close": "Ocultar el Manager"
+        },
+        "TeamManagerStartForm": {
+          "description": "El Manager redacta issues, las registra en el gestor de tareas de cada proyecto según su prompt y las añade a la cola. Te enseña un borrador antes de crear nada. Funciona en su propio proyecto Agent Team Manager (~/.orca/agent-team/manager).",
+          "agent": "CLI del agente",
+          "request": "¿Qué necesitas? (opcional)",
+          "start": "Iniciar el Manager"
         }
       }
     },

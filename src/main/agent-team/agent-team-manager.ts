@@ -1,3 +1,6 @@
+import type { AgentTeamManagerSession } from '../../shared/agent-team/agent-team-ipc'
+import { makePaneKey } from '../../shared/stable-pane-id'
+import { isTuiAgent } from '../../shared/tui-agent-config'
 import { composeAgentTeamManagerKickoff } from '../../shared/agent-team/agent-team-manager-prompt'
 import { stepRole } from '../../shared/agent-team/agent-team-pipeline'
 import type { AgentTeamContext } from '../../shared/agent-team/agent-team-context'
@@ -72,7 +75,7 @@ export async function findLiveManagerSession(
   runtime: OrcaRuntimeService,
   folder: string,
   agent?: TuiAgent
-): Promise<{ worktreeId: string; handle: string } | null> {
+): Promise<AgentTeamManagerSession | null> {
   const listed = await runtime
     .listTerminals(`path:${folder}`, 50, { requireFreshPtyLiveness: true })
     .catch(() => null)
@@ -80,36 +83,38 @@ export async function findLiveManagerSession(
     .filter(
       (terminal) =>
         terminal.connected &&
-        terminal.agentIdentity !== undefined &&
+        isTuiAgent(terminal.agentIdentity) &&
         (agent === undefined || terminal.agentIdentity === agent)
     )
     .sort((a, b) => (b.lastOutputAt ?? 0) - (a.lastOutputAt ?? 0))[0]
-  return live ? { worktreeId: live.worktreeId, handle: live.handle } : null
+  if (!live || !isTuiAgent(live.agentIdentity)) {
+    return null
+  }
+  return {
+    worktreeId: live.worktreeId,
+    terminalHandle: live.handle,
+    tabId: live.tabId,
+    paneKey: makePaneKey(live.tabId, live.leafId),
+    ptyId: live.ptyId,
+    agent: live.agentIdentity
+  }
 }
 
 /** Opens the Manager in its own Orca-managed folder project, reusing a live session when there is one. */
 export async function launchAgentTeamManager(
   runtime: OrcaRuntimeService,
   args: { agent: TuiAgent; request: string; pendingUpdates?: string }
-): Promise<{
-  worktreeId: string
-  terminalHandle: string
-  startedNew: boolean
-  managerRepoId: string
-}> {
+): Promise<{ session: AgentTeamManagerSession; startedNew: boolean; managerRepoId: string }> {
   const { folder, repoId } = await ensureAgentTeamManagerWorkspace(runtime)
   const existing = await findLiveManagerSession(runtime, folder, args.agent)
   if (existing) {
     const request = args.request.trim()
     if (request) {
-      await runtime.sendTerminalAgentPrompt(existing.handle, request, { inputKind: 'driving' })
+      await runtime.sendTerminalAgentPrompt(existing.terminalHandle, request, {
+        inputKind: 'driving'
+      })
     }
-    return {
-      worktreeId: existing.worktreeId,
-      terminalHandle: existing.handle,
-      startedNew: false,
-      managerRepoId: repoId
-    }
+    return { session: existing, startedNew: false, managerRepoId: repoId }
   }
   const launched = await runtime.launchAgentTerminal(`path:${folder}`, {
     agent: args.agent,
@@ -121,8 +126,14 @@ export async function launchAgentTeamManager(
     wslUserAct: true
   })
   return {
-    worktreeId: launched.worktreeId,
-    terminalHandle: launched.handle,
+    session: {
+      worktreeId: launched.worktreeId,
+      terminalHandle: launched.handle,
+      tabId: launched.tabId ?? null,
+      paneKey: launched.paneKey ?? null,
+      ptyId: launched.ptyId ?? null,
+      agent: args.agent
+    },
     startedNew: true,
     managerRepoId: repoId
   }

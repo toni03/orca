@@ -83,11 +83,13 @@ export class AgentTeamTrackerSync {
         return
       }
       // A busy Manager would get the update mid-turn; wait for it to go idle.
-      const status = await this.runtime.getTerminalAgentStatus(session.handle).catch(() => null)
+      const status = await this.runtime
+        .getTerminalAgentStatus(session.terminalHandle)
+        .catch(() => null)
       if (status?.status !== 'idle') {
         return
       }
-      await this.runtime.sendTerminalAgentPrompt(session.handle, this.message(events), {
+      await this.runtime.sendTerminalAgentPrompt(session.terminalHandle, this.message(events), {
         inputKind: 'driving'
       })
       this.clear(events)

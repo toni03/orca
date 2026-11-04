@@ -19233,7 +19233,6 @@
           "openSettings": "Open team settings",
           "teamFilter": "Team",
           "allTeams": "All teams",
-          "manager": "Manager",
           "newIssue": "New issue"
         },
         "TeamDecisionDialog": {
@@ -19253,13 +19252,16 @@
           "moveUp": "Move up in the queue",
           "moveDown": "Move down in the queue"
         },
-        "TeamManagerDialog": {
-          "title": "Talk to the Manager",
-          "description": "The Manager is an agent session that drafts issues, registers them in each project tracker following its spec, and adds them to the queue. It shows you a draft before creating anything. It runs in its own Agent Team Manager project, which Orca keeps in ~/.orca/agent-team/manager. If a Manager session with this agent is already open, Orca returns to it and sends your request there.",
+        "TeamManagerPanel": {
+          "title": "Manager",
+          "openTerminal": "Open the Manager terminal",
+          "close": "Hide Manager"
+        },
+        "TeamManagerStartForm": {
+          "description": "The Manager drafts issues, registers them in each project tracker following its spec and adds them to the queue. It shows you a draft before creating anything. It runs in its own Agent Team Manager project (~/.orca/agent-team/manager).",
           "agent": "Agent CLI",
           "request": "What do you need? (optional)",
-          "cancel": "Cancel",
-          "open": "Open Manager"
+          "start": "Start the Manager"
         },
         "TeamNewIssueDialog": {
           "title": "New issue",
@@ -19290,6 +19292,7 @@
         "TeamPage": {
           "title": "Team",
           "working": "{{count}} working",
+          "manager": "Manager",
           "close": "Close Team",
           "loadError": "Agent teams are not available in this window: {{message}}",
           "tabBoard": "Board",
