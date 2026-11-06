@@ -3,7 +3,13 @@ Sincroniza Orca ITG (fork `toni03/orca`) con la última versión estable de `sta
 Remotos: `origin` = `stablyai/orca` (solo lectura, nunca hagas push ahí), `fork` = `toni03/orca`. Lee antes `docs/readme/itg-windows-release.md`.
 
 1. Ejecuta `node config/scripts/itg-upstream-release-pending.mjs toni03/orca`. Si no termina con código 0, no hay versión nueva: termina informando de su salida.
-2. `git fetch origin main --tags` y `git fetch fork main`. Trabaja en la rama `auto/itg-upstream-sync` de este worktree. Si tiene cambios sin commitear o commits que no están en `fork/main` (`git log fork/main..HEAD`), son de una ejecución anterior sin publicar: detente y explícalo. Si no, ponla en `fork/main` con `git switch -C auto/itg-upstream-sync fork/main`. No crees otras ramas ni toques el checkout principal del repositorio.
+2. `git fetch origin main --tags` y `git fetch fork main`. Trabaja en la rama `auto/itg-upstream-sync` de este worktree y arranca siempre de un estado limpio en `fork/main`; lo que haya de una ejecución anterior sin publicar se descarta, porque puede estar incompleto o corrupto:
+   - Antes de limpiar, anota para el informe `git status --short` y `git log --oneline fork/main..HEAD` (lo que se va a descartar).
+   - Si hay un merge, rebase o cherry-pick a medias, abórtalo (`git merge --abort`, `git rebase --abort`, `git cherry-pick --abort`, según el caso).
+   - `git reset --hard`, `git clean -fd` (no borra `node_modules` ni otros ficheros ignorados) y `git switch -C auto/itg-upstream-sync fork/main`.
+   - `git worktree prune` y borra con `git worktree remove --force` los worktrees temporales de comparación que hayan quedado de ejecuciones anteriores (nunca el checkout principal ni otros worktrees de Orca).
+   - Comprueba que `git status --short` sale vacío y que `HEAD` es `fork/main`; si no, detente y explícalo.
+     No crees otras ramas ni toques el checkout principal del repositorio.
 3. Haz merge de `origin/main` (no del tag de release) con `git merge --no-ff origin/main -m "Merge upstream main for v<versión>"`.
 4. Si hay conflictos, resuélvelos conservando el comportamiento de las dos partes:
    - Los cambios exclusivos del ITG (distribución del fork, updater, `config/release-distribution.cjs`, `config/electron-builder.config.cjs`, `src/shared/release-distribution.ts`, `.github/workflows/itg-release-windows.yml`, `config/scripts/itg-*`, `docs/readme/itg-*`) deben seguir funcionando.
