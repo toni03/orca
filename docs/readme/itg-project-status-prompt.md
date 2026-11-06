@@ -1,14 +1,18 @@
-Saca el estado del proyecto Orca ITG: funcionalidades abiertas, PRs abiertas en `stablyai/orca` y worktrees de este repositorio, con las acciones necesarias en cada caso. Es un informe de solo lectura: trabaja sin pedir confirmación y no cambies nada.
+Saca el estado del proyecto Orca ITG: funcionalidades abiertas, PRs abiertas en `stablyai/orca` y worktrees de este repositorio, con las acciones necesarias en cada caso. Es un informe de solo lectura: trabaja sin pedir confirmación y no cambies nada, salvo la limpieza de este worktree del paso 1.
 
 Remotos: `origin` = `stablyai/orca`, `fork` = `toni03/orca` (el `main` del fork es Orca ITG). Convención de ramas: `feature/<nombre>` para desarrollar; `toni03/<nombre>` solo cuando tiene PR en upstream; `auto/*` son los worktrees de las automatizaciones; `wip/*` son copias de respaldo.
 
 Reglas de solo lectura:
 
 - Solo puedes ejecutar `git fetch` (para actualizar referencias remotas), comandos de git que solo lean (`worktree list`, `for-each-ref`, `rev-list`, `log`, `status`, `merge-base`, `ls-remote`) y llamadas de `gh` que solo lean.
-- No cambies de rama, no hagas merge, rebase, commit, push, stash ni reset, y no borres ramas ni worktrees. No edites archivos, no comentes ni resuelvas hilos en GitHub, no cambies PRs y no lances `pnpm install`, checks, tests ni builds. Si una acción es necesaria, solo la propones.
+- Fuera del paso 1, no cambies de rama, no hagas merge, rebase, commit, push, stash ni reset, y no borres ramas ni worktrees. No edites archivos, no comentes ni resuelvas hilos en GitHub, no cambies PRs y no lances `pnpm install`, checks, tests ni builds. Si una acción es necesaria, solo la propones.
 - No menciones con `@` a nadie y no incluyas nombres de clientes ni datos personales en el informe.
 
-1. Actualiza las referencias: `git fetch fork --prune` y `git fetch origin main`.
+1. Empieza siempre con este worktree limpio y actualizado, para no partir de un estado corrupto o antiguo de una ejecución anterior. Afecta solo al worktree en el que se ejecuta la automatización, nunca al checkout principal ni a otros worktrees:
+   - Actualiza las referencias: `git fetch fork --prune` y `git fetch origin main`.
+   - Antes de limpiar, anota para el informe lo que vas a descartar: rama actual, `git status --short` y los commits de la rama actual que no estén en su remoto ni en `fork/main`. Los commits que ya están en otra rama siguen en ella; si la rama actual es `auto/itg-pr-review` y tiene commits que no están en `fork/main`, guárdalos antes con `git branch wip/itg-project-status-<AAAA-MM-DD> HEAD`.
+   - Cancela cualquier operación a medias (`git merge --abort`, `git rebase --abort`, `git cherry-pick --abort`; ignora los errores si no hay ninguna), descarta los cambios con `git reset --hard` y `git clean -fd` (sin `-x`, para conservar `node_modules`), y ejecuta `git switch -C auto/itg-pr-review fork/main`.
+   - Comprueba que `git status --short` sale vacío y que `HEAD` es `fork/main`. Si no, detente y explícalo.
 2. PRs abiertas: `gh pr list --repo stablyai/orca --author toni03 --state open --json number,title,headRefName,baseRefName,isDraft,url`. Para cada una recoge:
    - estado (borrador o lista), `reviewDecision` y si tiene conflictos con `main` (`gh pr view <n> --repo stablyai/orca --json mergeable,mergeStateStatus,reviewDecision`); si `mergeable` es `UNKNOWN`, repite la consulta una vez;
    - checks (`gh pr checks <n> --repo stablyai/orca`): fallidos, con el motivo según `gh run view <run-id> --log-failed --repo stablyai/orca`, o «no ejecutados» si solo pasan `clean` y CodeRabbit;

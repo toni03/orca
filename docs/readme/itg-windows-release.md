@@ -59,8 +59,9 @@ A Claude session follows [`itg-project-status-prompt.md`](./itg-project-status-p
 reports, read-only, the open `stablyai/orca` PRs by `toni03` (review, checks, conflicts, unresolved
 threads, commits missing from Orca ITG), the open feature branches and the repository's worktrees.
 Each item is classified into a fixed list of scenarios with the action it needs and whether a
-person or an on-demand session should do it (Automations → ITG project status → run history). It
-only fetches; it never switches branches, merges, pushes, comments or runs checks.
+person or an on-demand session should do it (Automations → ITG project status → run history). Each
+run first resets its own worktree to a clean `auto/itg-pr-review` on `fork/main` (reporting what it
+discarded); beyond that it only fetches and never merges, pushes, comments or runs checks.
 
 Download link for the team: `https://github.com/<owner>/<repo>/releases/latest/download/orca-itg-windows-setup.exe`.
 
