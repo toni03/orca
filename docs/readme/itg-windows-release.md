@@ -52,16 +52,15 @@ Only the `itg-*` workflows run in the fork. The upstream ones fail here (they ne
 and runners) and burn Actions minutes, so they are disabled, and each sync disables any that a merge
 adds.
 
-### Daily PR review
+### Daily project status
 
-A second automation, "ITG PR review", runs every day at 07:30 Europe/Madrid with no precheck. A
-Claude session follows [`itg-pr-review-prompt.md`](./itg-pr-review-prompt.md) over the open
-`stablyai/orca` PRs by `toni03`: it fixes clear review comments, conflicts with `main` and failing
-checks on the PR branches in the fork, and answers the threads it addressed. An open PR (draft or
-not) counts as a stable ITG feature, so it then merges any pushed PR branch commits missing from the
-fork's `main` and pushes `main` (fast-forward only, no release). It ends with a status table of the
-open PRs (Automations → ITG PR review → run history). It never marks PRs ready, merges or closes
-them upstream, or force-pushes; anything needing a person stays in the summary.
+A second automation, "ITG project status", runs every day at 07:30 Europe/Madrid with no precheck.
+A Claude session follows [`itg-project-status-prompt.md`](./itg-project-status-prompt.md) and
+reports, read-only, the open `stablyai/orca` PRs by `toni03` (review, checks, conflicts, unresolved
+threads, commits missing from Orca ITG), the open feature branches and the repository's worktrees.
+Each item is classified into a fixed list of scenarios with the action it needs and whether a
+person or an on-demand session should do it (Automations → ITG project status → run history). It
+only fetches; it never switches branches, merges, pushes, comments or runs checks.
 
 Download link for the team: `https://github.com/<owner>/<repo>/releases/latest/download/orca-itg-windows-setup.exe`.
 
