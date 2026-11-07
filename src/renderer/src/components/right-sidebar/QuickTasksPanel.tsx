@@ -10,7 +10,7 @@ import { JiraIcon } from '@/components/icons/JiraIcon'
 import { getTaskPageRepoSourceContext } from '@/components/task-page/task-page-source-context'
 import { getJiraPresets } from '@/components/task-page/task-page-localized-options'
 import { getWorkItemRepo } from '@/lib/work-item-repo-row'
-import { openAppHttpLink } from '@/lib/app-http-link-open'
+import { openAppHttpLink } from '@/lib/browser/navigation/app-http-link-open'
 import {
   openComposerForGitHubWorkItem,
   openComposerForGitLabWorkItem,
