@@ -3,7 +3,7 @@ import type { TaskPageComposerActionsModel } from '../use-task-page-composer-act
 import { getIntlLocale, translate } from '@/i18n/i18n'
 import { ExternalLink } from 'lucide-react'
 import { filterGitLabTodosForRepos } from './gitlab-todo-project-filter'
-import { openAppHttpLink } from '@/lib/app-http-link-open'
+import { openAppHttpLink } from '@/lib/browser/navigation/app-http-link-open'
 export function TaskPageGitLabTodoList({
   model
 }: {
