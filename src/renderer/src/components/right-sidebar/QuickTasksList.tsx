@@ -2,7 +2,7 @@ import { ExternalLink, LoaderCircle, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
+import { useTranslate } from '@/i18n/use-translate'
 
 export function QuickTasksToggle<Value extends string>({
   value,
@@ -56,6 +56,7 @@ export function QuickTaskRow({
   onCreateWorkspace,
   onOpenExternal
 }: QuickTaskRowProps): React.JSX.Element {
+  const t = useTranslate()
   return (
     <div className="group flex items-start gap-2 px-3 py-1.5 hover:bg-accent/50">
       <button
@@ -78,7 +79,7 @@ export function QuickTaskRow({
             <Button
               variant="ghost"
               size="icon-xs"
-              aria-label={translate(
+              aria-label={t(
                 'auto.components.rightSidebar.QuickTasksPanel.createWorkspace',
                 'Create workspace'
               )}
@@ -88,10 +89,7 @@ export function QuickTaskRow({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {translate(
-              'auto.components.rightSidebar.QuickTasksPanel.createWorkspace',
-              'Create workspace'
-            )}
+            {t('auto.components.rightSidebar.QuickTasksPanel.createWorkspace', 'Create workspace')}
           </TooltipContent>
         </Tooltip>
         <Tooltip>
@@ -99,7 +97,7 @@ export function QuickTaskRow({
             <Button
               variant="ghost"
               size="icon-xs"
-              aria-label={translate(
+              aria-label={t(
                 'auto.components.rightSidebar.QuickTasksPanel.openInBrowser',
                 'Open in browser'
               )}
@@ -109,10 +107,7 @@ export function QuickTaskRow({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {translate(
-              'auto.components.rightSidebar.QuickTasksPanel.openInBrowser',
-              'Open in browser'
-            )}
+            {t('auto.components.rightSidebar.QuickTasksPanel.openInBrowser', 'Open in browser')}
           </TooltipContent>
         </Tooltip>
       </div>
@@ -139,6 +134,7 @@ export function QuickTasksSection({
   toggle: React.ReactNode
   children: React.ReactNode
 }): React.JSX.Element {
+  const t = useTranslate()
   return (
     <section className="py-1">
       <div className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-muted-foreground">
@@ -153,14 +149,11 @@ export function QuickTasksSection({
           className="flex items-center justify-center gap-2 px-3 py-6 text-xs text-muted-foreground"
         >
           <LoaderCircle className="size-4 animate-spin" />
-          {translate('auto.components.rightSidebar.QuickTasksPanel.loading', 'Loading…')}
+          {t('auto.components.rightSidebar.QuickTasksPanel.loading', 'Loading…')}
         </div>
       ) : failed ? (
         <div className="px-3 py-2 text-xs text-muted-foreground">
-          {translate(
-            'auto.components.rightSidebar.QuickTasksPanel.loadFailed',
-            'Could not load tasks.'
-          )}
+          {t('auto.components.rightSidebar.QuickTasksPanel.loadFailed', 'Could not load tasks.')}
         </div>
       ) : !loading && count === 0 ? (
         <div className="px-3 py-2 text-xs text-muted-foreground">{emptyLabel}</div>

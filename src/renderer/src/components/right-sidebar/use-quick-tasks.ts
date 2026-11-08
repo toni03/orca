@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppStore } from '@/store'
 import { PER_REPO_FETCH_LIMIT } from '@/lib/new-workspace'
-import { gitLabApiFor } from '@/runtime/gitlab-owner-api'
+import { gitLabApiFor } from '@/runtime/repository-gitlab/gitlab-owner-api'
 import { useTaskProviderConnections } from '@/components/feature-wall/use-integration-connection-status'
 import { getTaskPageRepoSourceContext } from '@/components/task-page/task-page-source-context'
 import {
@@ -92,6 +92,11 @@ export function useQuickTasks({
   const gitlabReposKey = reposKeyOf(hostRepos.gitlab)
   const githubListKey = `${githubKind}|${githubReposKey}`
   const gitlabListKey = `${gitlabKind}|${gitlabReposKey}`
+  // Why: the list keys name the repos the fetches read; keying the effects off the array refs would refetch on every parent render.
+  const hostReposRef = useRef(hostRepos)
+  useEffect(() => {
+    hostReposRef.current = hostRepos
+  }, [hostRepos])
   const jiraListKey = jiraPreset
   const [github, setGithub] = useState<ProviderList<GitHubWorkItem>>(() => emptyList(false))
   const [gitlab, setGitlab] = useState<ProviderList<GitLabWorkItem>>(() => emptyList(false))
@@ -101,7 +106,7 @@ export function useQuickTasks({
     if (!isVisible) {
       return
     }
-    const githubRepos = hostRepos.github
+    const githubRepos = hostReposRef.current.github
     if (!githubEnabled || githubRepos.length === 0) {
       setGithub(emptyList(false))
       return
@@ -155,12 +160,11 @@ export function useQuickTasks({
     return () => {
       stale = true
     }
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- githubReposKey covers every repos field read above; keying off the array ref would refetch on every parent render.
   }, [
     fetchWorkItemsAcrossRepos,
     githubEnabled,
     githubKind,
-    githubReposKey,
+    githubListKey,
     isVisible,
     refreshNonce,
     workItemsInvalidationNonce
@@ -170,7 +174,7 @@ export function useQuickTasks({
     if (!isVisible) {
       return
     }
-    const gitlabRepos = hostRepos.gitlab
+    const gitlabRepos = hostReposRef.current.gitlab
     if (!gitlabEnabled || gitlabRepos.length === 0) {
       setGitlab(emptyList(false))
       return
@@ -223,8 +227,7 @@ export function useQuickTasks({
     return () => {
       stale = true
     }
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- gitlabReposKey covers every repos field read above; keying off the array ref would refetch on every parent render.
-  }, [gitlabEnabled, gitlabKind, gitlabReposKey, isVisible, refreshNonce])
+  }, [gitlabEnabled, gitlabKind, gitlabListKey, isVisible, refreshNonce])
 
   useEffect(() => {
     if (!isVisible) {

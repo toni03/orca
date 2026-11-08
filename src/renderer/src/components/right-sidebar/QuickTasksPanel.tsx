@@ -2,10 +2,10 @@ import { useMemo, useState } from 'react'
 import { CircleDot, Github, Gitlab, GitPullRequest, LoaderCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
+import { useTranslate } from '@/i18n/use-translate'
 import { useAppStore } from '@/store'
-import { useActiveRepo } from '@/store/selectors'
-import { selectFolderWorkspaces } from '@/store/workspace-record-selectors'
+import { useActiveRepo } from '@/store/repos/use-repository-catalog'
+import { selectFolderWorkspaces } from '@/store/workspaces/catalog/workspace-record-fields'
 import { JiraIcon } from '@/components/icons/JiraIcon'
 import { getTaskPageRepoSourceContext } from '@/components/task-page/task-page-source-context'
 import { getJiraPresets } from '@/components/task-page/task-page-localized-options'
@@ -34,6 +34,7 @@ export default function QuickTasksPanel({
 }: {
   isVisible?: boolean
 }): React.JSX.Element {
+  const t = useTranslate()
   const activeWorkspaceKey = useAppStore((s) => s.activeWorkspaceKey ?? s.activeWorktreeId)
   const activeRepo = useActiveRepo()
   const folderWorkspaces = useAppStore((s) => selectFolderWorkspaces(s))
@@ -65,8 +66,8 @@ export default function QuickTasksPanel({
     isVisible,
     refreshNonce
   })
-  const issuesLabel = translate('auto.components.rightSidebar.QuickTasksPanel.issues', 'Issues')
-  const emptyIssuesLabel = translate(
+  const issuesLabel = t('auto.components.rightSidebar.QuickTasksPanel.issues', 'Issues')
+  const emptyIssuesLabel = t(
     'auto.components.rightSidebar.QuickTasksPanel.empty',
     'No open issues.'
   )
@@ -107,7 +108,7 @@ export default function QuickTasksPanel({
   if (taskRepos.length === 0 && !jira.enabled) {
     return (
       <div className="flex min-h-0 flex-1 items-center justify-center p-6 text-center text-sm text-muted-foreground">
-        {translate(
+        {t(
           'auto.components.rightSidebar.QuickTasksPanel.noRepos',
           'Open a git workspace to see its tasks here.'
         )}
@@ -126,17 +127,14 @@ export default function QuickTasksPanel({
             <Button
               variant="ghost"
               size="icon-xs"
-              aria-label={translate(
-                'auto.components.rightSidebar.QuickTasksPanel.refresh',
-                'Refresh'
-              )}
+              aria-label={t('auto.components.rightSidebar.QuickTasksPanel.refresh', 'Refresh')}
               onClick={() => setRefreshNonce((value) => value + 1)}
             >
               <RefreshCw />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {translate('auto.components.rightSidebar.QuickTasksPanel.refresh', 'Refresh')}
+            {t('auto.components.rightSidebar.QuickTasksPanel.refresh', 'Refresh')}
           </TooltipContent>
         </Tooltip>
       </div>
@@ -148,7 +146,7 @@ export default function QuickTasksPanel({
           </div>
         ) : noSource ? (
           <div className="p-6 text-center text-sm text-muted-foreground">
-            {translate(
+            {t(
               'auto.components.rightSidebar.QuickTasksPanel.noSource',
               'Sign in to GitHub, GitLab or Jira to see this project’s tasks.'
             )}
@@ -158,14 +156,14 @@ export default function QuickTasksPanel({
         {github.enabled ? (
           <QuickTasksSection
             icon={<Github className="size-3.5" />}
-            label={translate('auto.components.TaskPage.acef77f7ca', 'GitHub')}
+            label={t('auto.components.TaskPage.acef77f7ca', 'GitHub')}
             loading={github.loading}
             failed={github.failed}
             count={github.items.length}
             emptyLabel={
               githubKind === 'issues'
                 ? emptyIssuesLabel
-                : translate(
+                : t(
                     'auto.components.rightSidebar.QuickTasksPanel.emptyPullRequests',
                     'No open pull requests.'
                   )
@@ -178,10 +176,7 @@ export default function QuickTasksPanel({
                   { value: 'issues', label: issuesLabel },
                   {
                     value: 'reviews',
-                    label: translate(
-                      'auto.components.rightSidebar.QuickTasksPanel.pullRequests',
-                      'PRs'
-                    )
+                    label: t('auto.components.rightSidebar.QuickTasksPanel.pullRequests', 'PRs')
                   }
                 ]}
               />
@@ -211,14 +206,14 @@ export default function QuickTasksPanel({
         {gitlab.enabled ? (
           <QuickTasksSection
             icon={<Gitlab className="size-3.5" />}
-            label={translate('auto.components.TaskPage.11a828abf8', 'GitLab')}
+            label={t('auto.components.TaskPage.11a828abf8', 'GitLab')}
             loading={gitlab.loading}
             failed={gitlab.failed}
             count={gitlab.items.length}
             emptyLabel={
               gitlabKind === 'issues'
                 ? emptyIssuesLabel
-                : translate(
+                : t(
                     'auto.components.rightSidebar.QuickTasksPanel.emptyReviews',
                     'No open merge requests.'
                   )
@@ -231,10 +226,7 @@ export default function QuickTasksPanel({
                   { value: 'issues', label: issuesLabel },
                   {
                     value: 'reviews',
-                    label: translate(
-                      'auto.components.rightSidebar.QuickTasksPanel.mergeRequests',
-                      'MRs'
-                    )
+                    label: t('auto.components.rightSidebar.QuickTasksPanel.mergeRequests', 'MRs')
                   }
                 ]}
               />
@@ -264,11 +256,11 @@ export default function QuickTasksPanel({
         {jira.enabled ? (
           <QuickTasksSection
             icon={<JiraIcon className="size-3.5" />}
-            label={translate('auto.components.TaskPage.9cd11ba218', 'Jira')}
+            label={t('auto.components.TaskPage.9cd11ba218', 'Jira')}
             loading={jira.loading}
             failed={jira.failed}
             count={jira.items.length}
-            emptyLabel={translate(
+            emptyLabel={t(
               'auto.components.rightSidebar.QuickTasksPanel.emptyJira',
               'No matching issues.'
             )}

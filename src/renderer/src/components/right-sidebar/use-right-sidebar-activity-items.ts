@@ -117,7 +117,7 @@ export function useRightSidebarActivityItems({
       {
         id: 'tasks',
         icon: ListTodo,
-        title: translate('auto.components.right.sidebar.index.quickTasks', 'Tasks'),
+        title: t('auto.components.right.sidebar.index.quickTasks', 'Tasks'),
         shortcut: ''
       },
       {
