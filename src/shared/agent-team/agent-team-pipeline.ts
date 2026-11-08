@@ -3,12 +3,31 @@ import type {
   AgentTeamAssignment,
   AgentTeamIssue,
   AgentTeamRole,
+  AgentTeamState,
   AgentTeamStepResult,
   AgentTeamWorkflow
 } from './agent-team-types'
 
 export function openAssignment(issue: AgentTeamIssue): AgentTeamAssignment | undefined {
   return issue.assignments.find((assignment) => assignment.endedAt === undefined)
+}
+
+/** The issue whose running assignment matches, if that assignment is still open. */
+export function findOpenAssignment(
+  issues: readonly AgentTeamIssue[],
+  matches: (assignment: AgentTeamAssignment) => boolean
+): { issue: AgentTeamIssue; assignment: AgentTeamAssignment } | null {
+  for (const issue of issues) {
+    const assignment = openAssignment(issue)
+    if (assignment && matches(assignment)) {
+      return { issue, assignment }
+    }
+  }
+  return null
+}
+
+export function replaceAgentTeamIssue(state: AgentTeamState, next: AgentTeamIssue): AgentTeamState {
+  return { ...state, issues: state.issues.map((issue) => (issue.id === next.id ? next : issue)) }
 }
 
 export function stepRole(
@@ -96,7 +115,8 @@ export function applyAgentTeamStepResult(args: {
         needsYou: {
           reason: 'blocked',
           detail: `${result.summary}${formatQuestions(result.questions)}`,
-          at: now
+          at: now,
+          ...(result.options && result.options.length > 0 ? { options: result.options } : {})
         },
         updatedAt: now
       }

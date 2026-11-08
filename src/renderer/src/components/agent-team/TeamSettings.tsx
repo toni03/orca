@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
+import { TeamAgentPauseSettings } from './TeamAgentPauseSettings'
 import { TeamSettingsProjects } from './TeamSettingsProjects'
 import { TeamSettingsRoles } from './TeamSettingsRoles'
 import { TeamSettingsTeams } from './TeamSettingsTeams'
@@ -103,6 +104,7 @@ function WorkflowSettings({ state }: { state: AgentTeamState }): React.JSX.Eleme
           onCheckedChange={(paused) => void run({ kind: 'workflow.update', patch: { paused } })}
         />
       </label>
+      <TeamAgentPauseSettings state={state} />
       <label className="flex max-w-md items-center justify-between gap-3 text-sm">
         <span>
           {translate(

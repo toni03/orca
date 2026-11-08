@@ -19201,7 +19201,16 @@
           "waitNoSeat": "Waiting · this step has no seats",
           "waitTeam": "Waiting · its team or step was removed",
           "minutes": "{{count}}m",
-          "hours": "{{hours}}h {{minutes}}m"
+          "hours": "{{hours}}h {{minutes}}m",
+          "waitSeatsPaused": "Waiting · every seat of this step is paused",
+          "statusRegistered": "Not approved yet",
+          "statusQueued": "In the priority queue",
+          "statusWorking": "Working · {{step}} · round {{round}}/{{rounds}}",
+          "statusEscalated": "Needs you · escalated after {{round}}/{{rounds}} rounds",
+          "statusNeedsYou": "Needs you · {{reason}}",
+          "statusDone": "Done",
+          "statusDiscarded": "Discarded",
+          "waitPlanLimit": "Waiting · the seats of this step are out of plan until it resets"
         },
         "TeamActivity": {
           "done": "Done",
@@ -19213,7 +19222,6 @@
           "running": "Running",
           "tokensDetail": "Input {{input}} · output {{output}} · cache read {{cache}}",
           "empty": "No sessions yet. Approved issues start when a seat is free.",
-          "weekWithTokens": "Active time and tokens, last 7 days",
           "tokens": "{{value}} tokens",
           "sessions": "Sessions",
           "colIssue": "Issue",
@@ -19222,7 +19230,22 @@
           "colRound": "Round",
           "colResult": "Result",
           "colTime": "Active time",
-          "colTokens": "Tokens"
+          "colTokens": "Tokens",
+          "today": "Today",
+          "last7": "Last 7 days",
+          "last30": "Last 30 days",
+          "range": "Range",
+          "planUsage": "Plan usage",
+          "doneEscalated": "{{done}} issues done · {{escalated}} escalated",
+          "byProject": "By project",
+          "byIssue": "By issue · top {{count}}",
+          "daily": "Daily history",
+          "colDay": "Day",
+          "colDone": "Issues done",
+          "colEscalated": "Escalated",
+          "colProjects": "Projects",
+          "limitPause": "{{agent}} seats paused at the plan limit {{from}} → {{to}}",
+          "byAgent": "By agent"
         },
         "TeamBoard": {
           "notApproved": "Not approved",
@@ -19233,7 +19256,26 @@
           "openSettings": "Open team settings",
           "teamFilter": "Team",
           "allTeams": "All teams",
-          "newIssue": "New issue"
+          "newIssue": "New issue",
+          "emptyStep": "Nothing in {{step}}",
+          "emptyBuild": "Nothing in development",
+          "emptyCheck": "Nothing to review",
+          "emptyQueue": "Nothing queued",
+          "emptyNeedsYou": "Nothing waits for you",
+          "done": "Done",
+          "doneCount": "Done · {{count}}",
+          "queueHint": "Set by the Manager · drag to reorder",
+          "group": "Group",
+          "groupNone": "None",
+          "groupProject": "By project",
+          "hiddenByFilter": "{{project}} · {{count}} issues hidden by the project filter",
+          "show": "Show",
+          "noIssues": "No issues in the queue",
+          "noIssuesBody": "Tell the Manager what you need, or link a project and its tracker in Team › Settings.",
+          "messageManager": "Message the Manager",
+          "connectProject": "Connect a project",
+          "collapseLane": "Collapse {{project}}",
+          "laneSummary": "{{open}} open · {{time}} active · {{tokens}} tokens today"
         },
         "TeamDecisionDialog": {
           "note": "Changes to request",
@@ -19248,18 +19290,22 @@
         "TeamIssueCard": {
           "openTracker": "Open {{key}} in the tracker",
           "exclusive": "Locks project",
-          "round": "Round {{round}}/{{max}}",
           "review": "Review",
           "approve": "Approve",
           "moveUp": "Move up in the queue",
           "moveDown": "Move down in the queue",
           "openMergeRequest": "Open the merge request",
-          "history": "Show the work history"
+          "escalated": "Escalated · {{round}}/{{rounds}}",
+          "readyToMerge": "Ready to merge"
         },
         "TeamManagerPanel": {
           "title": "Manager",
           "openTerminal": "Open the Manager terminal",
-          "close": "Hide Manager"
+          "close": "Hide Manager",
+          "scope": "All projects · {{agent}}",
+          "noSession": "All projects · not started",
+          "limitUntil": "Plan limit reached · the Manager replies after {{at}}",
+          "limit": "Plan limit reached · the Manager replies when the plan window resets"
         },
         "TeamManagerStartForm": {
           "description": "The Manager drafts issues, registers them in each project tracker following its spec and adds them to the queue. It shows you a draft before creating anything. It runs in its own Agent Team Manager project (~/.orca/agent-team/manager).",
@@ -19295,17 +19341,24 @@
         },
         "TeamPage": {
           "title": "Team",
-          "working": "{{count}} working",
           "manager": "Manager",
           "close": "Close Team",
           "loadError": "Agent teams are not available in this window: {{message}}",
           "tabBoard": "Board",
           "tabActivity": "Activity",
-          "tabSettings": "Settings"
+          "tabSettings": "Settings",
+          "tabNeedsYou": "Needs you",
+          "summary": "{{seats}} seats · {{working}} working · {{projects}} projects",
+          "needYou": "· {{count}} need you",
+          "resumeTeam": "Resume team",
+          "pauseTeam": "Pause team",
+          "today": "Today: {{time}} active · {{tokens}} tokens",
+          "loading": "Loading the team…"
         },
         "TeamPausedNotice": {
           "all": "All teams are paused: running steps finish, nothing new starts. Resume in Settings › Workflow.",
-          "teams": "Paused: {{teams}}. Running steps finish, nothing new starts. Resume in Settings › Teams."
+          "teams": "Paused: {{teams}}. Running steps finish, nothing new starts. Resume in Settings › Teams.",
+          "seats": "Paused seats: {{seats}}. Their queued work goes to the other seats. Resume in Settings › Teams or Workflow."
         },
         "TeamSettingsProjects": {
           "spec": "Project spec",
@@ -19404,16 +19457,129 @@
           "pause": "Paused",
           "deleteTeam": "Delete team",
           "help": "A team is a pipeline of steps. Each step has a role (what to do) and seats (who does it). Orca only looks at the step type: Build gets its own worktree and changes code; Check reviews that worktree and passes the issue on or sends it back to the Build step for a new round.",
-          "noTeams": "No teams yet. Start from a template with New team."
+          "noTeams": "No teams yet. Start from a template with New team.",
+          "resumeSeat": "Resume seat",
+          "pauseSeat": "Pause seat"
         },
         "TeamSidebarButton": {
           "label": "Team",
           "working": "{{count}} working"
         },
         "TeamIssueHistoryDialog": {
-          "round": "Round {{round}}",
           "openWorktree": "Open the worktree",
           "empty": "No session has worked on this issue yet."
+        },
+        "TeamAgentPauseSettings": {
+          "title": "Pause by agent",
+          "hint": "Pauses every seat that runs this agent, for example when its plan is out of credits. Running steps finish; queued work goes to the other seats. Pause one seat in Settings › Teams.",
+          "count": "{{paused}}/{{total}} seats paused"
+        },
+        "TeamDecisionForm": {
+          "answerPlaceholder": "Answer the seat…",
+          "changesPlaceholder": "Changes to request for a new round…",
+          "openMergeRequest": "Open merge request",
+          "shortcut": "{{keys}} sends",
+          "merge": "Merge in Orca",
+          "quickAnswers": "Quick answers"
+        },
+        "TeamInbox": {
+          "all": "All",
+          "questions": "Questions",
+          "decisions": "Decisions",
+          "escalated": "Escalated",
+          "ready": "Ready",
+          "from": "{{count}} from {{projects}} projects",
+          "project": "Project",
+          "allProjects": "All projects",
+          "empty": "Nothing waits for you here.",
+          "reply": "Reply",
+          "keysMove": "move",
+          "keysOpen": "open issue",
+          "keysReply": "reply",
+          "keyEnter": "Enter"
+        },
+        "TeamIssueSheet": {
+          "active": "{{time}} active",
+          "decide": "Decide what happens to {{target}}",
+          "blocker": "Blocker",
+          "major": "Major",
+          "minor": "Minor",
+          "info": "Info",
+          "sessions": "Sessions by round",
+          "sessionCount": "{{sessions}} sessions · {{seats}} seats",
+          "colRound": "Step · round",
+          "total": "Total",
+          "goToSession": "Go to session",
+          "description": "Description",
+          "criteria": "Acceptance criteria",
+          "checkedIn": "Checked in round {{round}}",
+          "dependencies": "Dependencies",
+          "dependsOn": "Depends on",
+          "blocks": "Blocks",
+          "reportTitle": "{{step}} report · round {{round}}",
+          "reports": "Reports",
+          "earlierRounds": "Rounds 1–{{last}} reports",
+          "files": "{{count}} files",
+          "overview": "Overview",
+          "changes": "Changes"
+        },
+        "TeamPlanUsage": {
+          "fiveHour": "5 h",
+          "week": "Week",
+          "nearLimit": "Near limit",
+          "resets": "resets {{at}}",
+          "percentNear": "{{percent}}% · near limit",
+          "resetsAt": "Resets {{at}}",
+          "unavailable": "Plan usage appears here once Orca can read the limits of the agents your seats use.",
+          "fiveHourWindow": "5-hour window",
+          "weekly": "Weekly"
+        },
+        "TeamSeatStrip": {
+          "working": "Working",
+          "blocked": "Needs you",
+          "idle": "Idle",
+          "last": "Last: {{key}} · {{result}}",
+          "noTask": "No task",
+          "todayTime": "{{time}} today",
+          "history": "History",
+          "label": "Seats",
+          "limit": "Plan limit"
+        },
+        "TeamIssueChanges": {
+          "noWorktree": "This issue has no worktree open, so there is nothing to compare.",
+          "noBase": "Set the base branch in Team › Settings › Projects to compare this branch.",
+          "loading": "Comparing the branch…",
+          "summary": "{{files}} files against {{base}}",
+          "viewAll": "Open the full diff",
+          "none": "No changes yet."
+        },
+        "TeamLaunchFailures": {
+          "title": "{{seat}} couldn't start {{key}}",
+          "hint": "Install or sign in to that agent CLI, or move the seat to another agent. The rest of the team keeps working.",
+          "retry": "Retry",
+          "editSeat": "Edit seat",
+          "copy": "Copy error"
+        },
+        "TeamManagerMentions": {
+          "label": "Mention an issue or project",
+          "search": "Search issues and projects…",
+          "empty": "Nothing matches.",
+          "issues": "Issues",
+          "projects": "Projects"
+        },
+        "TeamTrackerSyncStatus": {
+          "off": "sync off",
+          "pending": "{{count}} updates wait for the Manager",
+          "synced": "synced {{ago}} ago",
+          "upToDate": "up to date"
+        },
+        "useNeedsYouToasts": {
+          "one": "{{project}} {{key}} · {{reason}}",
+          "many": "{{count}} items need you",
+          "open": "Open"
+        },
+        "TeamActivityBreakdowns": {
+          "manager": "Manager"
         }
       }
     },
@@ -23790,6 +23956,15 @@
       "cancel": "Cancel",
       "message": "{{plugin}} wants to open {{host}}",
       "alwaysAllow": "Always allow {{host}} for this plugin"
+    }
+  },
+  "agentTeam": {
+    "mobileAlert": {
+      "ready": "Ready to merge",
+      "escalated": "Escalated",
+      "blocked": "A seat is blocked",
+      "question": "A question for you",
+      "failed": "A session stopped"
     }
   }
 }

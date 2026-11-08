@@ -140,6 +140,25 @@ describe('agent team pipeline', () => {
     expect(next.body).toContain('Rename the flag')
   })
 
+  it('keeps the quick answers a blocked seat offers', () => {
+    const next = applyAgentTeamStepResult({
+      issue: started('i1', 'd1'),
+      team,
+      roles,
+      workflow,
+      assignmentId: 'i1-a1',
+      result: {
+        kind: 'blocked',
+        summary: 'New dependency',
+        questions: ['Allow pretty-ms?'],
+        options: ['Allow', 'Deny']
+      },
+      now: 5
+    })
+    expect(next.status).toBe('needs-you')
+    expect(next.needsYou).toMatchObject({ reason: 'blocked', options: ['Allow', 'Deny'] })
+  })
+
   it('runs a blocked step again in the same round with the user answer', () => {
     const blocked = started('i1', 'd1', { status: 'needs-you' })
     const next = applyAgentTeamUserDecision({
@@ -171,6 +190,25 @@ describe('agent team scheduler', () => {
       ['mid', 'd2']
     ])
     expect(plan.waiting.low).toEqual({ kind: 'no-free-seat', stepId: 'build' })
+  })
+
+  it('skips paused seats and waits when every seat of the step is paused', () => {
+    const pausedOne = state([issue('a'), issue('b', { priority: 2 })])
+    const onlyD2 = planAgentTeamAssignments({
+      ...pausedOne,
+      seats: pausedOne.seats.map((s) => (s.id === 'd1' ? { ...s, paused: true } : s))
+    })
+    expect(onlyD2.assignments.map((a) => [a.issueId, a.seatId])).toEqual([['a', 'd2']])
+    const allPaused = planAgentTeamAssignments({
+      ...pausedOne,
+      seats: pausedOne.seats.map((s) => ({ ...s, paused: true }))
+    })
+    expect(allPaused.waiting.a).toEqual({ kind: 'seats-paused', stepId: 'build' })
+    const atLimit = planAgentTeamAssignments({
+      ...pausedOne,
+      limitPauses: [{ agent: 'claude', startedAt: 0 }]
+    })
+    expect(atLimit.waiting.a).toEqual({ kind: 'plan-limit', stepId: 'build' })
   })
 
   it('keeps an exclusive issue out of a project another issue is working in', () => {

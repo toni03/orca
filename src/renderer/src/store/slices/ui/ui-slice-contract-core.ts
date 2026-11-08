@@ -15,6 +15,7 @@ import type { TaskSourceContext } from '../../../../../shared/task-source-contex
 import type { ExecutionHostId } from '../../../../../shared/execution-host'
 import type { TaskResumeState, TopLevelView } from '../../../../../shared/ui-chrome-types'
 
+export type TeamPageTab = 'board' | 'activity' | 'needs-you' | 'settings'
 export type PendingSidebarWorktreeReveal = {
   rowKey?: string
   worktreeId: string
@@ -164,6 +165,8 @@ export type UISliceCore = {
   previousViewBeforeSkills: Exclude<UiViewHistory, 'skills'>
   previousViewBeforeMobile: Exclude<UiViewHistory, 'mobile'>
   previousViewBeforeTeam: Exclude<UiViewHistory, 'team'>
+  /** Tab the Team page shows; the Needs you sidebar entry opens its inbox. */
+  teamPageTab: TeamPageTab
   previousViewBeforeArtifacts: Exclude<UiViewHistory, 'artifacts'>
   setActiveView: (view: UISliceCore['activeView']) => void
   taskPageData: TaskPageData
@@ -208,7 +211,8 @@ export type UISliceCore = {
   closeArtifactsPage: () => void
   openMobilePage: () => void
   closeMobilePage: () => void
-  openTeamPage: () => void
+  openTeamPage: (tab?: TeamPageTab) => void
+  setTeamPageTab: (tab: TeamPageTab) => void
   closeTeamPage: () => void
   setNewWorkspaceDraft: (draft: NonNullable<UISliceCore['newWorkspaceDraft']>) => void
   clearNewWorkspaceDraft: () => void

@@ -46,6 +46,8 @@ export type AgentTeamSeat = {
   agent: TuiAgent
   model?: string
   instructions: string
+  /** A paused seat takes no new steps, for example while its agent is out of credits. */
+  paused?: boolean
   createdAt: number
   retiredAt?: number
 }
@@ -92,7 +94,13 @@ export type AgentTeamFinding = {
 
 export type AgentTeamStepResult =
   | { kind: 'done'; summary: string; mergeRequestUrl?: string }
-  | { kind: 'blocked'; summary: string; questions?: string[] }
+  | {
+      kind: 'blocked'
+      summary: string
+      questions?: string[]
+      /** Short answers the user can pick with one click, e.g. Allow / Deny. */
+      options?: string[]
+    }
   | { kind: 'pass'; summary: string; findings?: AgentTeamFinding[] }
   | { kind: 'changes'; summary: string; findings: AgentTeamFinding[] }
 
@@ -141,7 +149,13 @@ export type AgentTeamIssue = {
   worktreeId?: string
   branch?: string
   assignments: AgentTeamAssignment[]
-  needsYou?: { reason: AgentTeamNeedsYouReason; detail: string; at: number }
+  needsYou?: {
+    reason: AgentTeamNeedsYouReason
+    detail: string
+    at: number
+    /** Quick answers the seat offered; picking one answers with its text. */
+    options?: string[]
+  }
   /** Merge or pull request the Build step opened for review. */
   mergeRequest?: { url: string }
   createdAt: number
@@ -168,6 +182,15 @@ export type AgentTeamTrackerEvent = {
   at: number
 }
 
+/** An agent CLI ran out of its plan window; its seats took no new steps until it reset. */
+export type AgentTeamLimitPause = {
+  agent: TuiAgent
+  startedAt: number
+  endedAt?: number
+  /** When the provider said the window resets, if it did. */
+  resetsAt?: number
+}
+
 export type AgentTeamState = {
   version: 1
   roles: AgentTeamRole[]
@@ -178,6 +201,10 @@ export type AgentTeamState = {
   workflow: AgentTeamWorkflow
   /** Optional so states saved before tracker sync still load. */
   trackerEvents?: AgentTeamTrackerEvent[]
+  /** Spans when an agent CLI hit its plan limit, so its seats waited; the latest are kept. */
+  limitPauses?: AgentTeamLimitPause[]
+  /** When the Manager last received the tracker moves, so the board can say how fresh trackers are. */
+  trackerSyncedAt?: number
   /** The Manager's own folder project, kept out of team project lists. */
   managerRepoId?: string
 }

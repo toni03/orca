@@ -72,7 +72,13 @@ function setup(endedAt: number) {
   const stop = startAgentTeamUsageCollector(
     store,
     () => false,
-    { claude: () => ({ getAutomationRunUsage }), codex: () => null },
+    {
+      claude: () => ({
+        getAutomationRunUsage,
+        getRepoActivity: async () => ({ tokens: 0, activeMs: 0 })
+      }),
+      codex: () => null
+    },
     () => NOW
   )
   return { stop, getAutomationRunUsage, usage: () => state.issues[0].assignments[0].usage }

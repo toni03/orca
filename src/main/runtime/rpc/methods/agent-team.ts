@@ -3,8 +3,10 @@ import {
   AgentTeamIssueCreateParams,
   AgentTeamContextParams,
   AgentTeamIssueAnswerParams,
+  AgentTeamIssueDecideParams,
   AgentTeamIssueListParams,
-  AgentTeamReportParams
+  AgentTeamReportParams,
+  AgentTeamSeatPauseParams
 } from '../../../../shared/rpc-contract/agent-team-params'
 import type { AgentTeamStepResult } from '../../../../shared/agent-team/agent-team-types'
 import { requireAgentTeamService } from '../../../agent-team/agent-team-service-registry'
@@ -13,6 +15,7 @@ function stepResult(params: {
   result: 'done' | 'blocked' | 'pass' | 'changes'
   summary: string
   questions?: string[]
+  options?: string[]
   mergeRequestUrl?: string
   findings?: Extract<AgentTeamStepResult, { kind: 'changes' }>['findings']
 }): AgentTeamStepResult {
@@ -24,7 +27,12 @@ function stepResult(params: {
         ...(params.mergeRequestUrl ? { mergeRequestUrl: params.mergeRequestUrl } : {})
       }
     case 'blocked':
-      return { kind: 'blocked', summary: params.summary, questions: params.questions ?? [] }
+      return {
+        kind: 'blocked',
+        summary: params.summary,
+        questions: params.questions ?? [],
+        ...(params.options && params.options.length > 0 ? { options: params.options } : {})
+      }
     case 'pass':
       return { kind: 'pass', summary: params.summary, findings: params.findings ?? [] }
     case 'changes':
@@ -67,14 +75,58 @@ export const AGENT_TEAM_METHODS = [
     }
   }),
   defineMethod({
+    name: 'team.issueDecide',
+    permission: 'workspace',
+    params: AgentTeamIssueDecideParams,
+    handler: (params) => {
+      requireAgentTeamService().execute({
+        kind: 'issue.decide',
+        issueId: params.issueId,
+        decision: params.decision
+      })
+      return { decided: true }
+    }
+  }),
+  defineMethod({
+    name: 'team.seatPause',
+    permission: 'workspace',
+    params: AgentTeamSeatPauseParams,
+    handler: (params) => {
+      const service = requireAgentTeamService()
+      const requested = new Set(params.seatIds ?? [])
+      const seats = service
+        .getState()
+        .seats.filter(
+          (seat) =>
+            seat.retiredAt === undefined &&
+            (requested.has(seat.id) || (params.agent !== undefined && seat.agent === params.agent))
+        )
+      const unknown = [...requested].filter((id) => !seats.some((seat) => seat.id === id))
+      if (unknown.length > 0) {
+        throw new Error(
+          `No active seat ${unknown.join(', ')}. Run orca team context to list seats.`
+        )
+      }
+      service.execute({
+        kind: 'seat.pause',
+        seatIds: seats.map((seat) => seat.id),
+        paused: params.paused
+      })
+      return { seats: seats.map((seat) => seat.name) }
+    }
+  }),
+  defineMethod({
     name: 'team.issues',
     permission: 'workspace',
     params: AgentTeamIssueListParams,
     handler: (params) => {
-      const state = requireAgentTeamService().getState()
+      const service = requireAgentTeamService()
+      const state = service.getState()
       return {
         issues: state.issues.filter((issue) => !params.status || issue.status === params.status),
-        teams: state.teams.map((team) => ({ id: team.id, name: team.name }))
+        teams: state.teams.map((team) => ({ id: team.id, name: team.name })),
+        seats: state.seats.map((seat) => ({ id: seat.id, name: seat.name })),
+        projects: service.projectLabels()
       }
     }
   }),

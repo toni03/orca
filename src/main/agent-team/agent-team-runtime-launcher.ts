@@ -136,6 +136,15 @@ export function createAgentTeamRuntimeLauncher(
       await new Promise((resolve) => setTimeout(resolve, CLOSE_AFTER_REPORT_MS))
       await runtime.closeTerminal(terminalHandle)
     },
+    async findMergeRequest(repoId, branch) {
+      const reply = await runtime.getHostedReviewForBranch({
+        repoSelector: `id:${repoId}`,
+        branch,
+        force: true
+      })
+      const review = reply && 'readOutcome' in reply ? reply.review : reply
+      return review ? { url: review.url, state: review.state, updatedAt: review.updatedAt } : null
+    },
     async removeWorktree(worktreeId) {
       await runtime.removeManagedWorktree(`id:${worktreeId}`)
     },

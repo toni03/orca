@@ -20,6 +20,7 @@ import { resolveCodexAutomationRunUsage } from './codex-automation-run-attributi
 import { buildRecentSessions } from './codex-usage-session-rows'
 import { buildBreakdown, buildDaily, buildSummary } from './codex-usage-rollup-projections'
 import { UsageProviderStoreLifecycle } from '../usage/usage-provider-store-lifecycle'
+import { repoActivityInRange, type UsageRepoActivity } from '../usage/usage-repo-activity'
 import { splitUsageCacheFileViaWorker } from '../usage/usage-scan-worker-spawn'
 
 const SCHEMA_VERSION = CODEX_USAGE_SCHEMA_VERSION
@@ -146,5 +147,23 @@ export class CodexUsageStore extends UsageProviderStoreLifecycle<
       refresh: (force) => this.refresh(force),
       isScanning: () => this.getScanState().isScanning
     })
+  }
+
+  /** Tokens and session time a project used in a range, e.g. the agent-team Manager folder. */
+  async getRepoActivity(repoId: string, from: number, to: number): Promise<UsageRepoActivity> {
+    await this.refresh(false)
+    return repoActivityInRange(
+      {
+        sessions: this.state.sessions,
+        days: this.state.dailyAggregates.map((row) => ({
+          day: row.day,
+          repoId: row.repoId,
+          tokens: row.totalTokens
+        }))
+      },
+      repoId,
+      from,
+      to
+    )
   }
 }

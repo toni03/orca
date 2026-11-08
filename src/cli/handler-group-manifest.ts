@@ -2,6 +2,7 @@ import type { CommandHandler } from './dispatch'
 import { BROWSER_HANDLER_GROUPS } from './browser/browser-handler-groups'
 import { JIRA_HANDLER_GROUP } from './jira-handler-group'
 import { LINEAR_HANDLER_GROUP } from './linear-handler-group'
+import { TEAM_HANDLER_GROUP } from './team-handler-group'
 import { REFERENCE_HANDLER_GROUP } from './reference-handler-group'
 import { PLUGIN_HANDLER_GROUPS } from './plugin-handler-groups'
 
@@ -296,9 +297,5 @@ export const HANDLER_GROUPS: readonly HandlerGroup[] = [
     keys: ['ports'],
     load: async () => (await import('./handlers/ports.js')).PORTS_HANDLERS
   },
-  {
-    name: 'team',
-    keys: ['team context', 'team report', 'team issues', 'team issue answer', 'team issue add'],
-    load: async () => (await import('./handlers/team.js')).TEAM_HANDLERS
-  }
+  TEAM_HANDLER_GROUP
 ]

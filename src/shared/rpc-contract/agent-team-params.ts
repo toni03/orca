@@ -13,6 +13,7 @@ export const AgentTeamReportParams = z.object({
   result: z.enum(['done', 'blocked', 'pass', 'changes']),
   summary: requiredString('Missing --summary'),
   questions: z.array(z.string()).optional(),
+  options: z.array(z.string().trim().min(1).max(80)).max(4).optional(),
   mergeRequestUrl: z.string().optional(),
   findings: z.array(Finding).optional()
 })
@@ -35,6 +36,25 @@ export const AgentTeamIssueCreateParams = z.object({
 })
 
 export const AgentTeamContextParams = z.object({})
+
+export const AgentTeamSeatPauseParams = z.object({
+  seatIds: z.array(z.string()).optional(),
+  /** Every active seat running this agent CLI, for example when its plan is out of credits. */
+  agent: z.string().optional(),
+  paused: z.boolean()
+})
+
+/** A Needs you decision from a client without the CLI, e.g. Orca Mobile. */
+export const AgentTeamIssueDecideParams = z.object({
+  issueId: requiredString('Missing issueId'),
+  decision: z.discriminatedUnion('kind', [
+    z.object({ kind: z.literal('resume') }),
+    z.object({ kind: z.literal('answer'), note: z.string().trim().min(1) }),
+    z.object({ kind: z.literal('request-changes'), note: z.string().trim().min(1) }),
+    z.object({ kind: z.literal('done') }),
+    z.object({ kind: z.literal('discard') })
+  ])
+})
 
 export const AgentTeamIssueAnswerParams = z.object({
   issueId: requiredString('Missing --issue'),

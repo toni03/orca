@@ -80,8 +80,10 @@ import {
   AgentTeamContextParams,
   AgentTeamIssueAnswerParams,
   AgentTeamIssueCreateParams,
+  AgentTeamIssueDecideParams,
   AgentTeamIssueListParams,
-  AgentTeamReportParams
+  AgentTeamReportParams,
+  AgentTeamSeatPauseParams
 } from './agent-team-params'
 import {
   AiVaultDeleteSessionParams,
@@ -1479,8 +1481,10 @@ export const RPC_PARAMS_BY_METHOD = {
   'team.context': AgentTeamContextParams,
   'team.issueAnswer': AgentTeamIssueAnswerParams,
   'team.issueCreate': AgentTeamIssueCreateParams,
+  'team.issueDecide': AgentTeamIssueDecideParams,
   'team.issues': AgentTeamIssueListParams,
   'team.report': AgentTeamReportParams,
+  'team.seatPause': AgentTeamSeatPauseParams,
   'terminal.adoptOrphans': TerminalAdoptOrphans,
   'terminal.agentStatus': TerminalHandle,
   'terminal.clearBuffer': TerminalHandle,

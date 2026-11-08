@@ -6,6 +6,7 @@ import {
   deleteTeam,
   removeTeamStep,
   renameTeam,
+  setSeatsPaused,
   setTeamPaused,
   retireSeat,
   updateSeat,
@@ -62,6 +63,7 @@ export type AgentTeamStateCommand =
       instructions?: string
     }
   | { kind: 'seat.retire'; seatId: string }
+  | { kind: 'seat.pause'; seatIds: string[]; paused: boolean }
   | { kind: 'role.create'; name: string; stepType: AgentTeamStepType; prompt: string }
   | {
       kind: 'role.update'
@@ -127,6 +129,8 @@ export function applyAgentTeamStateCommand(
       return updateSeat(state, command.seatId, command)
     case 'seat.retire':
       return retireSeat(state, command.seatId, ids.now)
+    case 'seat.pause':
+      return setSeatsPaused(state, command.seatIds, command.paused)
     case 'role.create':
       return createRole(state, command, ids)
     case 'role.update':

@@ -19,6 +19,7 @@ import {
   splitUsageCacheFileViaWorker
 } from '../usage/usage-scan-worker-spawn'
 import { UsageProviderStoreLifecycle } from '../usage/usage-provider-store-lifecycle'
+import { repoActivityInRange, type UsageRepoActivity } from '../usage/usage-repo-activity'
 import { buildBreakdown, buildDaily, buildSummary } from './claude-usage-report-aggregation'
 import { buildRecentSessions } from './claude-usage-session-rows'
 import type { AutomationUsageLookupInput } from './claude-usage-automation-attribution'
@@ -152,5 +153,23 @@ export class ClaudeUsageStore extends UsageProviderStoreLifecycle<
       refresh: (force) => this.refresh(force),
       isScanning: () => this.getScanState().isScanning
     })
+  }
+
+  /** Tokens and session time a project used in a range, e.g. the agent-team Manager folder. */
+  async getRepoActivity(repoId: string, from: number, to: number): Promise<UsageRepoActivity> {
+    await this.refresh(false)
+    return repoActivityInRange(
+      {
+        sessions: this.state.sessions,
+        days: this.state.dailyAggregates.map((row) => ({
+          day: row.day,
+          repoId: row.repoId,
+          tokens: row.inputTokens + row.outputTokens + row.cacheReadTokens + row.cacheWriteTokens
+        }))
+      },
+      repoId,
+      from,
+      to
+    )
   }
 }

@@ -1,7 +1,10 @@
 import type { AgentTeamCommand } from '../../shared/agent-team/agent-team-commands'
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
 import type { TuiAgent } from '../../shared/tui-agent'
-import type { AgentTeamManagerSession } from '../../shared/agent-team/agent-team-ipc'
+import type {
+  AgentTeamManagerActivity,
+  AgentTeamManagerSession
+} from '../../shared/agent-team/agent-team-ipc'
 
 export type AgentTeamProjectSpecRead = {
   storage: 'repository' | 'local'
@@ -17,5 +20,6 @@ export type AgentTeamApi = {
   launchManager: (args: { agent: TuiAgent; request: string }) => Promise<AgentTeamManagerSession>
   /** The live Manager session, if one is open. */
   managerSession: () => Promise<AgentTeamManagerSession | null>
+  managerActivity: (from: number, to: number) => Promise<AgentTeamManagerActivity>
   onChanged: (callback: (state: AgentTeamState) => void) => () => void
 }

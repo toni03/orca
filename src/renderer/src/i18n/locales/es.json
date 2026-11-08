@@ -18728,7 +18728,16 @@
           "waitTeam": "En espera · se eliminó su equipo o paso",
           "minutes": "{{count}} min",
           "hours": "{{hours}} h {{minutes}} min",
-          "waitPausedAll": "En espera · todos los equipos en pausa"
+          "waitPausedAll": "En espera · todos los equipos en pausa",
+          "waitSeatsPaused": "En espera · todos los sitios de este paso están en pausa",
+          "statusRegistered": "Sin aprobar",
+          "statusQueued": "En la cola de prioridad",
+          "statusWorking": "En curso · {{step}} · ronda {{round}}/{{rounds}}",
+          "statusEscalated": "Te necesita · escalada tras {{round}}/{{rounds}} rondas",
+          "statusNeedsYou": "Te necesita · {{reason}}",
+          "statusDone": "Hecha",
+          "statusDiscarded": "Descartada",
+          "waitPlanLimit": "En espera · los sitios de este paso agotaron su plan hasta que se reinicie"
         },
         "TeamActivity": {
           "done": "Hecha",
@@ -18746,10 +18755,24 @@
           "colRound": "Ronda",
           "colResult": "Resultado",
           "colTime": "Tiempo activo",
-          "weekWithTokens": "Tiempo activo y tokens, últimos 7 días",
           "tokens": "{{value}} tokens",
           "colTokens": "Tokens",
-          "tokensDetail": "Entrada {{input}} · salida {{output}} · lectura de caché {{cache}}"
+          "tokensDetail": "Entrada {{input}} · salida {{output}} · lectura de caché {{cache}}",
+          "today": "Hoy",
+          "last7": "Últimos 7 días",
+          "last30": "Últimos 30 días",
+          "range": "Periodo",
+          "planUsage": "Uso del plan",
+          "doneEscalated": "{{done}} issues hechas · {{escalated}} escaladas",
+          "byProject": "Por proyecto",
+          "byIssue": "Por issue · top {{count}}",
+          "daily": "Historial diario",
+          "colDay": "Día",
+          "colDone": "Issues hechas",
+          "colEscalated": "Escaladas",
+          "colProjects": "Proyectos",
+          "limitPause": "Sitios de {{agent}} en pausa por el límite del plan {{from}} → {{to}}",
+          "byAgent": "Por agente"
         },
         "TeamBoard": {
           "notApproved": "Sin aprobar",
@@ -18760,7 +18783,26 @@
           "openSettings": "Abrir la configuración del equipo",
           "teamFilter": "Equipo",
           "allTeams": "Todos los equipos",
-          "newIssue": "Nueva issue"
+          "newIssue": "Nueva issue",
+          "emptyStep": "Nada en {{step}}",
+          "emptyBuild": "Nada en desarrollo",
+          "emptyCheck": "Nada que revisar",
+          "emptyQueue": "Nada en cola",
+          "emptyNeedsYou": "Nada te espera",
+          "done": "Hechas",
+          "doneCount": "Hechas · {{count}}",
+          "queueHint": "La ordena el Manager · arrastra para reordenar",
+          "group": "Agrupar",
+          "groupNone": "Sin agrupar",
+          "groupProject": "Por proyecto",
+          "hiddenByFilter": "{{project}} · {{count}} issues ocultas por el filtro de proyectos",
+          "show": "Mostrar",
+          "noIssues": "No hay issues en la cola",
+          "noIssuesBody": "Dile al Manager lo que necesitas, o vincula un proyecto y su tracker en Team › Configuración.",
+          "messageManager": "Escribir al Manager",
+          "connectProject": "Conectar un proyecto",
+          "collapseLane": "Contraer {{project}}",
+          "laneSummary": "{{open}} abiertas · {{time}} activo · {{tokens}} tokens hoy"
         },
         "TeamDecisionDialog": {
           "note": "Cambios que pides",
@@ -18775,13 +18817,13 @@
         "TeamIssueCard": {
           "openTracker": "Abrir {{key}} en el gestor de tareas",
           "exclusive": "Bloquea el proyecto",
-          "round": "Ronda {{round}}/{{max}}",
           "review": "Revisar",
           "approve": "Aprobar",
           "moveUp": "Subir en la cola",
           "moveDown": "Bajar en la cola",
           "openMergeRequest": "Abrir la merge request",
-          "history": "Ver el historial de trabajo"
+          "escalated": "Escalada · {{round}}/{{rounds}}",
+          "readyToMerge": "Lista para fusionar"
         },
         "TeamNewIssueDialog": {
           "title": "Nueva issue",
@@ -18811,13 +18853,19 @@
         },
         "TeamPage": {
           "title": "Team",
-          "working": "{{count}} trabajando",
           "close": "Cerrar Team",
           "loadError": "Los equipos de agentes no están disponibles en esta ventana: {{message}}",
           "tabBoard": "Tablero",
           "tabActivity": "Actividad",
           "tabSettings": "Configuración",
-          "manager": "Manager"
+          "manager": "Manager",
+          "tabNeedsYou": "Te necesita",
+          "summary": "{{seats}} sitios · {{working}} trabajando · {{projects}} proyectos",
+          "needYou": "· {{count}} te necesitan",
+          "resumeTeam": "Reanudar equipo",
+          "pauseTeam": "Pausar equipo",
+          "today": "Hoy: {{time}} activo · {{tokens}} tokens",
+          "loading": "Cargando el equipo…"
         },
         "TeamSeatDialog": {
           "addTitle": "Añadir puesto",
@@ -18916,7 +18964,9 @@
           "help": "Un equipo es una cadena de pasos. Cada paso tiene un rol (qué hacer) y puestos (quién lo hace). Orca solo mira el tipo de paso: Build tiene su propio worktree y cambia código; Check revisa ese worktree y pasa la issue adelante o la devuelve al Build para una ronda nueva.",
           "noTeams": "Aún no hay equipos. Parte de una plantilla con Nuevo equipo.",
           "pausedBadge": "En pausa",
-          "pause": "En pausa"
+          "pause": "En pausa",
+          "resumeSeat": "Reanudar sitio",
+          "pauseSeat": "Pausar sitio"
         },
         "TeamSidebarButton": {
           "label": "Team",
@@ -18924,12 +18974,17 @@
         },
         "TeamPausedNotice": {
           "all": "Todos los equipos están en pausa: los pasos en curso terminan y no empieza nada nuevo. Reanúdalos en Configuración › Flujo.",
-          "teams": "En pausa: {{teams}}. Los pasos en curso terminan y no empieza nada nuevo. Reanúdalos en Configuración › Equipos."
+          "teams": "En pausa: {{teams}}. Los pasos en curso terminan y no empieza nada nuevo. Reanúdalos en Configuración › Equipos.",
+          "seats": "Sitios en pausa: {{seats}}. Su trabajo en cola pasa a los demás sitios. Reanúdalos en Configuración › Equipos o Flujo."
         },
         "TeamManagerPanel": {
           "title": "Manager",
           "openTerminal": "Abrir la terminal del Manager",
-          "close": "Ocultar el Manager"
+          "close": "Ocultar el Manager",
+          "scope": "Todos los proyectos · {{agent}}",
+          "noSession": "Todos los proyectos · sin iniciar",
+          "limitUntil": "Límite del plan alcanzado · el Manager responde a partir de las {{at}}",
+          "limit": "Límite del plan alcanzado · el Manager responde cuando se reinicie la ventana del plan"
         },
         "TeamManagerStartForm": {
           "description": "El Manager redacta issues, las registra en el gestor de tareas de cada proyecto según su prompt y las añade a la cola. Te enseña un borrador antes de crear nada. Funciona en su propio proyecto Agent Team Manager (~/.orca/agent-team/manager).",
@@ -18938,9 +18993,120 @@
           "start": "Iniciar el Manager"
         },
         "TeamIssueHistoryDialog": {
-          "round": "Ronda {{round}}",
           "openWorktree": "Abrir el worktree",
           "empty": "Ninguna sesión ha trabajado todavía en esta issue."
+        },
+        "TeamAgentPauseSettings": {
+          "title": "Pausar por agente",
+          "hint": "Pausa todos los sitios que usan este agente, por ejemplo cuando su plan se queda sin créditos. Los pasos en curso terminan; el trabajo en cola pasa a los demás sitios. Para pausar un solo sitio, usa Configuración › Equipos.",
+          "count": "{{paused}}/{{total}} sitios en pausa"
+        },
+        "TeamDecisionForm": {
+          "answerPlaceholder": "Responde al sitio…",
+          "changesPlaceholder": "Cambios que pedir en una nueva ronda…",
+          "openMergeRequest": "Abrir merge request",
+          "shortcut": "{{keys}} envía",
+          "merge": "Fusionar en Orca",
+          "quickAnswers": "Respuestas rápidas"
+        },
+        "TeamInbox": {
+          "all": "Todo",
+          "questions": "Preguntas",
+          "decisions": "Decisiones",
+          "escalated": "Escaladas",
+          "ready": "Listas",
+          "from": "{{count}} de {{projects}} proyectos",
+          "project": "Proyecto",
+          "allProjects": "Todos los proyectos",
+          "empty": "Aquí no te espera nada.",
+          "reply": "Responder",
+          "keysMove": "moverse",
+          "keysOpen": "abrir issue",
+          "keysReply": "responder",
+          "keyEnter": "Intro"
+        },
+        "TeamIssueSheet": {
+          "active": "{{time}} activo",
+          "decide": "Decide qué pasa con {{target}}",
+          "blocker": "Bloqueante",
+          "major": "Grave",
+          "minor": "Menor",
+          "info": "Info",
+          "sessions": "Sesiones por ronda",
+          "sessionCount": "{{sessions}} sesiones · {{seats}} sitios",
+          "colRound": "Paso · ronda",
+          "total": "Total",
+          "goToSession": "Ir a la sesión",
+          "description": "Descripción",
+          "criteria": "Criterios de aceptación",
+          "checkedIn": "Comprobado en la ronda {{round}}",
+          "dependencies": "Dependencias",
+          "dependsOn": "Depende de",
+          "blocks": "Bloquea",
+          "reportTitle": "Informe de {{step}} · ronda {{round}}",
+          "reports": "Informes",
+          "earlierRounds": "Informes de las rondas 1–{{last}}",
+          "files": "{{count}} ficheros",
+          "overview": "Resumen",
+          "changes": "Cambios"
+        },
+        "TeamPlanUsage": {
+          "fiveHour": "5 h",
+          "week": "Semana",
+          "nearLimit": "Cerca del límite",
+          "resets": "se reinicia {{at}}",
+          "percentNear": "{{percent}}% · cerca del límite",
+          "resetsAt": "Se reinicia {{at}}",
+          "unavailable": "El uso del plan aparece aquí cuando Orca puede leer los límites de los agentes que usan tus sitios.",
+          "fiveHourWindow": "Ventana de 5 horas",
+          "weekly": "Semanal"
+        },
+        "TeamSeatStrip": {
+          "working": "Trabajando",
+          "blocked": "Te necesita",
+          "idle": "Libre",
+          "last": "Última: {{key}} · {{result}}",
+          "noTask": "Sin tarea",
+          "todayTime": "{{time}} hoy",
+          "history": "Historial",
+          "label": "Sitios",
+          "limit": "Límite del plan"
+        },
+        "TeamIssueChanges": {
+          "noWorktree": "Esta issue no tiene un worktree abierto, así que no hay nada que comparar.",
+          "noBase": "Configura la rama base en Team › Configuración › Proyectos para comparar esta rama.",
+          "loading": "Comparando la rama…",
+          "summary": "{{files}} ficheros frente a {{base}}",
+          "viewAll": "Abrir el diff completo",
+          "none": "Aún no hay cambios."
+        },
+        "TeamLaunchFailures": {
+          "title": "{{seat}} no pudo arrancar {{key}}",
+          "hint": "Instala o inicia sesión en la CLI de ese agente, o pasa el sitio a otro agente. El resto del equipo sigue trabajando.",
+          "retry": "Reintentar",
+          "editSeat": "Editar sitio",
+          "copy": "Copiar error"
+        },
+        "TeamManagerMentions": {
+          "label": "Mencionar una issue o un proyecto",
+          "search": "Buscar issues y proyectos…",
+          "empty": "No hay coincidencias.",
+          "issues": "Issues",
+          "projects": "Proyectos"
+        },
+        "TeamTrackerSyncStatus": {
+          "off": "sincronización desactivada",
+          "pending": "{{count}} cambios esperan al Manager",
+          "synced": "sincronizado hace {{ago}}",
+          "upToDate": "al día"
+        },
+        "useNeedsYouToasts": {
+          "one": "{{project}} {{key}} · {{reason}}",
+          "many": "{{count}} elementos te necesitan",
+          "open": "Abrir"
+        },
+        "TeamActivityBreakdowns": {
+          "manager": "Manager"
         }
       }
     },
@@ -23750,5 +23916,14 @@
   "wslDistroHold": {
     "terminalStopped": "La distribución WSL {{distro}} está detenida, así que Orca no inició esta terminal. Inicia la distribución y vuelve a intentarlo.",
     "terminalUnverifiable": "Orca no pudo comprobar si la distribución WSL {{distro}} está en ejecución, así que no inició esta terminal. Inicia la distribución y vuelve a intentarlo."
+  },
+  "agentTeam": {
+    "mobileAlert": {
+      "ready": "Lista para fusionar",
+      "escalated": "Escalada",
+      "blocked": "Un sitio está bloqueado",
+      "question": "Una pregunta para ti",
+      "failed": "Una sesión se detuvo"
+    }
   }
 }

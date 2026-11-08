@@ -77,13 +77,14 @@ export const MOBILE_WEB_APP_BUNDLE_SCRIPT_SWEEP = [
   ['./h/[hostId]/files/preview/[worktreeId].tsx', 44],
   ['./h/[hostId]/history/[worktreeId].tsx', 47],
   ['./h/[hostId]/index.tsx', 55],
-  ['./h/[hostId]/new-workspace.tsx', 66],
-  ['./h/[hostId]/pr/[worktreeId].tsx', 67],
-  ['./h/[hostId]/review/[worktreeId].tsx', 78],
-  ['./h/[hostId]/session/[worktreeId].tsx', 93],
-  ['./h/[hostId]/source-control/[worktreeId].tsx', 101],
-  ['./h/[hostId]/tasks.tsx', 115],
-  ['./h/_layout.tsx', 119]
+  ['./h/[hostId]/needs-you.tsx', 60],
+  ['./h/[hostId]/new-workspace.tsx', 70],
+  ['./h/[hostId]/pr/[worktreeId].tsx', 71],
+  ['./h/[hostId]/review/[worktreeId].tsx', 82],
+  ['./h/[hostId]/session/[worktreeId].tsx', 97],
+  ['./h/[hostId]/source-control/[worktreeId].tsx', 106],
+  ['./h/[hostId]/tasks.tsx', 120],
+  ['./h/_layout.tsx', 124]
 ]
 
 const sweptScripts = MOBILE_WEB_APP_BUNDLE_SCRIPT_SWEEP.map(([, scripts]) => scripts)

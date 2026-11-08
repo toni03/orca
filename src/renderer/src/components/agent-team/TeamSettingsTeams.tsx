@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRight, Plus, Trash2 } from 'lucide-react'
+import { ArrowRight, Pause, Play, Plus, Trash2 } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -27,26 +27,46 @@ import { useAgentTeamCommand } from './use-agent-team-state'
 
 function SeatButton({
   seat,
-  onOpen
+  onOpen,
+  onPause
 }: {
   seat: AgentTeamSeat
   onOpen: () => void
+  onPause: (paused: boolean) => void
 }): React.JSX.Element {
+  const paused = seat.paused === true
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs hover:bg-accent"
-    >
-      <AgentIcon agent={seat.agent} size={16} />
-      <span className="min-w-0">
-        <span className="block truncate font-medium">{seat.name}</span>
-        <span className="block truncate text-muted-foreground">
-          {getAgentLabel(seat.agent)}
-          {seat.model ? ` · ${seat.model}` : ''}
+    <div className="group flex items-center gap-1 rounded-md pr-1 hover:bg-accent">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left text-xs"
+      >
+        <AgentIcon agent={seat.agent} size={16} />
+        <span className={cn('min-w-0', paused && 'opacity-60')}>
+          <span className="block truncate font-medium">{seat.name}</span>
+          <span className="block truncate text-muted-foreground">
+            {getAgentLabel(seat.agent)}
+            {seat.model ? ` · ${seat.model}` : ''}
+          </span>
         </span>
-      </span>
-    </button>
+        {paused ? (
+          <Badge variant="outline" className="ml-auto shrink-0">
+            {translate('auto.components.agentTeam.TeamSettingsTeams.pausedBadge', 'Paused')}
+          </Badge>
+        ) : null}
+      </button>
+      <TeamIconButton
+        label={
+          paused
+            ? translate('auto.components.agentTeam.TeamSettingsTeams.resumeSeat', 'Resume seat')
+            : translate('auto.components.agentTeam.TeamSettingsTeams.pauseSeat', 'Pause seat')
+        }
+        onClick={() => onPause(!paused)}
+      >
+        {paused ? <Play /> : <Pause />}
+      </TeamIconButton>
+    </div>
   )
 }
 
@@ -152,6 +172,9 @@ function TeamPipeline({
                       key={seat.id}
                       seat={seat}
                       onOpen={() => onSeatDialog({ kind: 'edit', seatId: seat.id })}
+                      onPause={(paused) =>
+                        void run({ kind: 'seat.pause', seatIds: [seat.id], paused })
+                      }
                     />
                   ))}
                   <Button

@@ -1,4 +1,5 @@
 import { translate } from '@/i18n/i18n'
+import type { TaskProvider } from '../../../../shared/task-providers'
 import type { AgentTeamWaitReason } from '../../../../shared/agent-team/agent-team-scheduler'
 import type {
   AgentTeamIssue,
@@ -9,6 +10,52 @@ import type {
 
 export function issueKey(issue: AgentTeamIssue): string {
   return issue.tracker?.key ?? issue.id.slice(0, 6)
+}
+
+export function trackerLabel(provider: TaskProvider): string {
+  switch (provider) {
+    case 'github':
+      return 'GitHub'
+    case 'gitlab':
+      return 'GitLab'
+    case 'jira':
+      return 'Jira'
+    case 'linear':
+      return 'Linear'
+  }
+}
+
+/** One line that says where the issue stands, as the sheet header and inbox show it. */
+export function issueStatusLabel(issue: AgentTeamIssue, state: AgentTeamState): string {
+  const rounds = state.workflow.roundsPerIssue
+  switch (issue.status) {
+    case 'registered':
+      return translate('auto.components.agentTeam.labels.statusRegistered', 'Not approved yet')
+    case 'queued':
+      return translate('auto.components.agentTeam.labels.statusQueued', 'In the priority queue')
+    case 'working': {
+      const step = state.teams.find((team) => team.id === issue.teamId)?.steps[issue.stepIndex]
+      return translate(
+        'auto.components.agentTeam.labels.statusWorking',
+        'Working · {{step}} · round {{round}}/{{rounds}}',
+        { step: step?.name ?? '—', round: issue.round, rounds }
+      )
+    }
+    case 'needs-you':
+      return issue.needsYou?.reason === 'escalated'
+        ? translate(
+            'auto.components.agentTeam.labels.statusEscalated',
+            'Needs you · escalated after {{round}}/{{rounds}} rounds',
+            { round: issue.round, rounds }
+          )
+        : translate('auto.components.agentTeam.labels.statusNeedsYou', 'Needs you · {{reason}}', {
+            reason: issue.needsYou ? needsYouLabel(issue.needsYou.reason) : '—'
+          })
+    case 'done':
+      return translate('auto.components.agentTeam.labels.statusDone', 'Done')
+    case 'discarded':
+      return translate('auto.components.agentTeam.labels.statusDiscarded', 'Discarded')
+  }
 }
 
 export function stepTypeLabel(stepType: AgentTeamStepType): string {
@@ -61,6 +108,16 @@ export function waitReasonLabel(reason: AgentTeamWaitReason, state: AgentTeamSta
       )
     case 'no-free-seat':
       return translate('auto.components.agentTeam.labels.waitSeat', 'Waiting · no free seat')
+    case 'plan-limit':
+      return translate(
+        'auto.components.agentTeam.labels.waitPlanLimit',
+        'Waiting · the seats of this step are out of plan until it resets'
+      )
+    case 'seats-paused':
+      return translate(
+        'auto.components.agentTeam.labels.waitSeatsPaused',
+        'Waiting · every seat of this step is paused'
+      )
     case 'no-seat':
       return translate(
         'auto.components.agentTeam.labels.waitNoSeat',

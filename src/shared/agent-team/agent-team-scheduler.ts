@@ -1,4 +1,5 @@
 import { openAssignment } from './agent-team-pipeline'
+import { agentsOnLimitPause } from './agent-team-plan-limits'
 import type { AgentTeamIssue, AgentTeamSeat, AgentTeamState } from './agent-team-types'
 
 export type AgentTeamPlannedAssignment = {
@@ -13,6 +14,8 @@ export type AgentTeamWaitReason =
   | { kind: 'dependency'; issueId: string }
   | { kind: 'project-locked'; byIssueId: string }
   | { kind: 'no-free-seat'; stepId: string }
+  | { kind: 'seats-paused'; stepId: string }
+  | { kind: 'plan-limit'; stepId: string }
   | { kind: 'no-seat'; stepId: string }
   | { kind: 'missing-team' }
 
@@ -63,7 +66,11 @@ function preferredSeat(issue: AgentTeamIssue, stepId: string, free: readonly Age
 }
 
 /** Which free seat takes which issue next, plus why every other runnable issue waits. */
-export function planAgentTeamAssignments(state: AgentTeamState): AgentTeamSchedule {
+export function planAgentTeamAssignments(
+  state: AgentTeamState,
+  /** Agent CLIs out of plan: their seats take nothing new until the window resets. */
+  limitedAgents: ReadonlySet<string> = agentsOnLimitPause(state)
+): AgentTeamSchedule {
   const waiting: Record<string, AgentTeamWaitReason> = {}
   const runnable = state.issues
     .filter(
@@ -115,10 +122,20 @@ export function planAgentTeamAssignments(state: AgentTeamState): AgentTeamSchedu
       waiting[issue.id] = { kind: 'no-seat', stepId: step.id }
       continue
     }
+    const unpaused = stepSeats.filter((candidate) => candidate.paused !== true)
+    if (unpaused.length === 0) {
+      waiting[issue.id] = { kind: 'seats-paused', stepId: step.id }
+      continue
+    }
+    const activeSeats = unpaused.filter((candidate) => !limitedAgents.has(candidate.agent))
+    if (activeSeats.length === 0) {
+      waiting[issue.id] = { kind: 'plan-limit', stepId: step.id }
+      continue
+    }
     const seat = preferredSeat(
       issue,
       step.id,
-      stepSeats.filter((candidate) => !busySeatIds.has(candidate.id))
+      activeSeats.filter((candidate) => !busySeatIds.has(candidate.id))
     )
     if (!seat) {
       waiting[issue.id] = { kind: 'no-free-seat', stepId: step.id }

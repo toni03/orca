@@ -12,19 +12,21 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
     path: ['team', 'report'],
     summary: 'Report the result of an agent team step you were assigned',
     usage:
-      'orca team report --assignment <id> --result <done|blocked|pass|changes> --summary <text> [--question <text>]... [--merge-request <url>] [--findings <file.json>] [--json]',
+      'orca team report --assignment <id> --result <done|blocked|pass|changes> --summary <text> [--question <text>]... [--option <answer>]... [--merge-request <url>] [--findings <file.json>] [--json]',
     allowedFlags: [
       ...GLOBAL_FLAGS,
       'assignment',
       'result',
       'summary',
       'question',
+      'option',
       'merge-request',
       'findings'
     ],
-    repeatableFlags: ['question'],
+    repeatableFlags: ['question', 'option'],
     notes: [
       'Build steps report done or blocked; Check steps report pass or changes.',
+      'A blocked report can offer up to 4 short answers with --option (e.g. --option Allow --option Deny); the user picks one with one click.',
       'A Build step that opened a merge or pull request passes its URL with --merge-request.',
       'findings.json is an array of {"severity":"blocker|major|minor|info","message":"…","file":"…","line":1}.',
       'The assignment id is in the instructions Orca gave the session.'
@@ -49,6 +51,26 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
     notes: [
       'A session still waiting gets the answer typed in; otherwise the same step starts again with it.'
     ]
+  },
+  {
+    path: ['team', 'seat', 'pause'],
+    summary: 'Pause agent team seats so they take no new steps',
+    usage: 'orca team seat pause (--seat <seatId>... | --agent <agent>) [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'seat', 'agent'],
+    repeatableFlags: ['seat'],
+    notes: [
+      '--agent pauses every active seat that runs that agent CLI, for example when its plan is out of credits. Running steps finish; queued work goes to the seats that are not paused. Seat ids are in orca team context.'
+    ],
+    examples: ['orca team seat pause --agent codex']
+  },
+  {
+    path: ['team', 'seat', 'resume'],
+    summary: 'Resume paused agent team seats',
+    usage: 'orca team seat resume (--seat <seatId>... | --agent <agent>) [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'seat', 'agent'],
+    repeatableFlags: ['seat'],
+    notes: ['--agent resumes every active seat that runs that agent CLI.'],
+    examples: ['orca team seat resume --agent codex']
   },
   {
     path: ['team', 'issue', 'add'],

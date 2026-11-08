@@ -108,6 +108,9 @@ export const PAIRED_DESKTOP_METHODS = [
   'settings.updateTerminalQuickCommands',
   'terminal.getAutoRestoreFit',
   'terminal.setAutoRestoreFit',
+  // The agent team lives in desktop main; the phone reads and answers its Needs you items.
+  'team.issueDecide',
+  'team.issues',
   // Per-section collapse, sidebar feed and icons exist only with ORCA_SIDEBAR_INPUTS=main.
   ...(ORCA_SIDEBAR_INPUTS_IS_MAIN
     ? (['ui.setCollapsed', 'sidebarInputs.read', 'sidebarInputs.repoIcons'] as const)

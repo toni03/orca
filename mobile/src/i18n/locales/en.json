@@ -581,7 +581,8 @@
       "accounts": "Accounts",
       "tasks": "Tasks",
       "moreActions": "More actions",
-      "automations": "Automations"
+      "automations": "Automations",
+      "needsYou": "Needs you"
     },
     "hostScreenOverlays": {
       "deleteWorktree": "Delete Worktree",
@@ -715,7 +716,8 @@
       "changes": "Changes",
       "pullRequest": "Pull Request",
       "workspace": "Workspace",
-      "automations": "Automations"
+      "automations": "Automations",
+      "needsYou": "Needs you"
     }
   },
   "notifications": {
@@ -4501,6 +4503,35 @@
           }
         }
       }
+    }
+  },
+  "team": {
+    "mobile": {
+      "reasonReady": "Ready",
+      "reasonEscalated": "Escalated",
+      "reasonBlocked": "Blocked",
+      "reasonQuestion": "Question",
+      "reasonFailed": "Stopped",
+      "merge": "Merge",
+      "openMergeRequest": "Open MR",
+      "markDone": "Mark done",
+      "replyPlaceholder": "Reply…",
+      "changesPlaceholder": "Changes to request…",
+      "reply": "Reply",
+      "requestChanges": "Request changes",
+      "sendAnswer": "Answer",
+      "discard": "Discard",
+      "back": "Back",
+      "needsYou": "Needs you",
+      "all": "All",
+      "questions": "Questions",
+      "ready": "Ready",
+      "escalated": "Escalated",
+      "loading": "Loading…",
+      "empty": "Nothing needs you. The team keeps working.",
+      "hostUnavailable": "The agent team is unavailable on this host. Update Orca on that host and reconnect.",
+      "hostUnreachable": "Could not reach this host. Reconnect, then refresh.",
+      "actionFailed": "Could not complete this action."
     }
   }
 }

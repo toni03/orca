@@ -54,7 +54,12 @@ export async function buildAgentTeamContext(
           stepType: role?.stepType ?? '?',
           seats: state.seats
             .filter((seat) => step.seatIds.includes(seat.id) && seat.retiredAt === undefined)
-            .map((seat) => seat.name)
+            .map((seat) => ({
+              id: seat.id,
+              name: seat.name,
+              agent: seat.agent,
+              paused: seat.paused === true
+            }))
         }
       })
     })),

@@ -7,6 +7,7 @@ export const AGENT_TEAM_CHANNELS = {
   writeProjectSpec: 'agentTeam:writeProjectSpec',
   launchManager: 'agentTeam:launchManager',
   managerSession: 'agentTeam:managerSession',
+  managerActivity: 'agentTeam:managerActivity',
   changed: 'agentTeam:changed'
 } as const
 
@@ -19,3 +20,6 @@ export type AgentTeamManagerSession = {
   ptyId: string | null
   agent: TuiAgent
 }
+
+/** Tokens and session time the Manager used in a range, read from local agent transcripts. */
+export type AgentTeamManagerActivity = { tokens: number; activeMs: number }

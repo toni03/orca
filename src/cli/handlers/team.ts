@@ -42,10 +42,15 @@ function formatContext(context: AgentTeamContext): string {
     const tracker = project.tracker?.provider ?? 'no tracker'
     return `${project.repoId}  ${project.name}  ${tracker}${project.spec ? '  spec' : ''}`
   })
-  const teams = context.teams.map(
-    (team) =>
-      `${team.id}  ${team.name}${team.paused ? ' (paused)' : ''}: ${team.steps.map((step) => step.name).join(' -> ')}`
-  )
+  const teams = context.teams.flatMap((team) => [
+    `${team.id}  ${team.name}${team.paused ? ' (paused)' : ''}: ${team.steps.map((step) => step.name).join(' -> ')}`,
+    ...team.steps.flatMap((step) =>
+      step.seats.map(
+        (seat) =>
+          `  ${step.name}: ${seat.id}  ${seat.name} (${seat.agent})${seat.paused ? ' paused' : ''}`
+      )
+    )
+  ])
   return [
     'Projects:',
     ...projects,
@@ -55,6 +60,20 @@ function formatContext(context: AgentTeamContext): string {
     '',
     `Queue: ${context.queue.length} open issues (use --json for specs and the queue)`
   ].join('\n')
+}
+
+type SeatPauseReply = { seats: string[] }
+
+function seatTarget(
+  flags: Map<string, string | boolean>,
+  paused: boolean
+): { seatIds: string[]; agent?: string; paused: boolean } {
+  const seatIds = getRepeatedStringFlag(flags, 'seat')
+  const agent = getOptionalStringFlag(flags, 'agent')
+  if (seatIds.length === 0 && !agent) {
+    throw new Error('Pass --seat <seatId> or --agent <agent>.')
+  }
+  return { seatIds, ...(agent ? { agent } : {}), paused }
 }
 
 export const TEAM_HANDLERS: Record<string, CommandHandler> = {
@@ -74,6 +93,7 @@ export const TEAM_HANDLERS: Record<string, CommandHandler> = {
       result,
       summary: getRequiredStringFlag(flags, 'summary'),
       questions: getRepeatedStringFlag(flags, 'question'),
+      options: getRepeatedStringFlag(flags, 'option'),
       ...(mergeRequestUrl ? { mergeRequestUrl } : {}),
       ...(findingsPath ? { findings: await readFindings(findingsPath, cwd) } : {})
     })
@@ -93,6 +113,14 @@ export const TEAM_HANDLERS: Record<string, CommandHandler> = {
       text: getRequiredStringFlag(flags, 'text')
     })
     printResult(response, json, () => 'Answered. The step continues with your answer.')
+  },
+  'team seat pause': async ({ flags, client, json }) => {
+    const response = await client.call<SeatPauseReply>('team.seatPause', seatTarget(flags, true))
+    printResult(response, json, (result) => `Paused: ${result.seats.join(', ') || 'no seats'}.`)
+  },
+  'team seat resume': async ({ flags, client, json }) => {
+    const response = await client.call<SeatPauseReply>('team.seatPause', seatTarget(flags, false))
+    printResult(response, json, (result) => `Resumed: ${result.seats.join(', ') || 'no seats'}.`)
   },
   'team issue add': async ({ flags, client, json }) => {
     const body = getOptionalStringFlag(flags, 'body')

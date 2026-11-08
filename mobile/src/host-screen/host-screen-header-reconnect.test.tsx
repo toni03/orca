@@ -14,6 +14,7 @@ vi.mock('react-native', () => ({
 vi.mock('lucide-react-native', () => ({
   CalendarClock: 'Icon',
   ChevronLeft: 'Icon',
+  Inbox: 'Icon',
   List: 'Icon',
   MoreHorizontal: 'Icon',
   PanelLeftClose: 'Icon',
@@ -67,6 +68,7 @@ function controllerWith(forceReconnectHost: ForceReconnect) {
     connState: 'reconnecting',
     embedded: false,
     floatingWorkspaceEnabled: false,
+    hostCapabilities: [],
     forceReconnectHost,
     hostId: 'host-a',
     hostDisplay: resolveHostDisplay({ name: 'Desk' }),
@@ -163,4 +165,34 @@ describe('host Automations entry', () => {
       expect(entries()[0]?.props.disabled).toBe(true)
     }
   )
+})
+
+describe('host Needs you entry', () => {
+  let tree: ReactTestRenderer | null = null
+  afterEach(() => {
+    act(() => tree?.unmount())
+    tree = null
+  })
+
+  it('shows only on hosts that serve the agent team to phones', () => {
+    const navigate = vi.fn()
+    const screen = (hostCapabilities: string[]) => (
+      <HostScreenHeader
+        controller={{
+          ...controllerWith(null),
+          connState: 'connected',
+          hostCapabilities,
+          actions: { ...controllerWith(null).actions, navigateFromHostList: navigate }
+        }}
+      />
+    )
+    act(() => {
+      tree = create(screen([]))
+    })
+    act(() => controls(tree!, 'More actions')[0]?.props.onPress())
+    expect(controls(tree!, 'Needs you')).toHaveLength(0)
+    act(() => tree?.update(screen(['mobile.team-needs-you.v1'])))
+    act(() => controls(tree!, 'Needs you')[0]?.props.onPress())
+    expect(navigate).toHaveBeenCalledExactlyOnceWith('/h/host-a/needs-you')
+  })
 })

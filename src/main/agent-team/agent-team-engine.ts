@@ -3,25 +3,26 @@ import {
   applyAgentTeamSessionStop,
   applyAgentTeamStepResult,
   applyAgentTeamUserDecision,
+  findOpenAssignment,
   openAssignment,
-  previousRoundFindings,
+  replaceAgentTeamIssue,
   stepRole,
   type AgentTeamUserDecision
 } from '../../shared/agent-team/agent-team-pipeline'
 import { planAgentTeamAssignments } from '../../shared/agent-team/agent-team-scheduler'
-import { composeAgentTeamSessionPrompt } from '../../shared/agent-team/agent-team-session-prompt'
 import type {
   AgentTeamAssignment,
   AgentTeamIssue,
-  AgentTeamState,
   AgentTeamStepResult
 } from '../../shared/agent-team/agent-team-types'
 import {
+  agentTeamStepPrompt,
   agentTeamWorktreeName,
   closeAgentTeamSession,
   removeFinishedAgentTeamWorktree,
   type AgentTeamLauncher
 } from './agent-team-launcher'
+import { recoverUnreportedBuild } from './agent-team-unreported-recovery'
 import type { AgentTeamStore } from './agent-team-store'
 
 export class AgentTeamError extends Error {
@@ -31,10 +32,6 @@ export class AgentTeamError extends Error {
   ) {
     super(message)
   }
-}
-
-function replaceIssue(state: AgentTeamState, next: AgentTeamIssue): AgentTeamState {
-  return { ...state, issues: state.issues.map((issue) => (issue.id === next.id ? next : issue)) }
 }
 
 export class AgentTeamEngine {
@@ -88,7 +85,7 @@ export class AgentTeamEngine {
     }
     // Record the assignment before launching so the next tick cannot double-book the seat.
     this.store.update((current) =>
-      replaceIssue(current, {
+      replaceAgentTeamIssue(current, {
         ...issue,
         status: 'working',
         assignments: [...issue.assignments, assignment],
@@ -100,19 +97,12 @@ export class AgentTeamEngine {
     const title = `${seat.name} · ${issue.tracker?.key ?? issue.title}`
     const baseBranch = project?.baseBranch?.trim() || undefined
     try {
-      const prompt = composeAgentTeamSessionPrompt({
+      const prompt = await agentTeamStepPrompt(this.launcher, {
         role,
         seat,
         issue,
         assignment,
-        projectSpec: await this.launcher.readProjectSpec(project, issue.repoId),
-        previousFindings: role.stepType === 'build' ? previousRoundFindings(issue) : null,
-        cliCommand: this.launcher.cliCommand(),
-        delivery: {
-          folder: this.launcher.isFolderProject(issue.repoId),
-          baseBranch: baseBranch ?? null,
-          ...(issue.mergeRequest ? { mergeRequestUrl: issue.mergeRequest.url } : {})
-        }
+        project
       })
       if (issue.worktreeId) {
         const launched = await this.launcher.launchInWorktree({
@@ -161,7 +151,7 @@ export class AgentTeamEngine {
       if (!issue) {
         return current
       }
-      return replaceIssue(current, {
+      return replaceAgentTeamIssue(current, {
         ...issue,
         ...issuePatch,
         assignments: issue.assignments.map((assignment) =>
@@ -169,21 +159,36 @@ export class AgentTeamEngine {
         )
       })
     })
-    this.launcher.watchExit(terminalHandle, () => {
-      this.stopAssignment(assignmentId, 'exited', 'The session ended without reporting a result.')
-    })
+    this.launcher.watchExit(
+      terminalHandle,
+      () =>
+        void this.stopUnreported(
+          assignmentId,
+          'exited',
+          'The session ended without reporting a result.'
+        )
+    )
   }
 
-  private findOpen(
-    assignmentId: string
-  ): { issue: AgentTeamIssue; assignment: AgentTeamAssignment } | null {
-    for (const issue of this.store.get().issues) {
-      const assignment = openAssignment(issue)
-      if (assignment?.id === assignmentId) {
-        return { issue, assignment }
-      }
+  /** Stopped without `orca team report`: keep a delivered merge request, otherwise ask the user. */
+  async stopUnreported(
+    assignmentId: string,
+    reason: NonNullable<AgentTeamAssignment['stopReason']>,
+    detail: string
+  ): Promise<void> {
+    const recovered = await recoverUnreportedBuild(this.launcher, this.store.get(), assignmentId)
+    if (recovered && this.findOpen(assignmentId)) {
+      this.report(assignmentId, recovered)
+      return
     }
-    return null
+    this.stopAssignment(assignmentId, reason, detail)
+  }
+
+  private findOpen(assignmentId: string) {
+    return findOpenAssignment(
+      this.store.get().issues,
+      (assignment) => assignment.id === assignmentId
+    )
   }
 
   /** A seat's `orca team report`. */
@@ -214,7 +219,7 @@ export class AgentTeamEngine {
       result,
       now: this.now()
     })
-    this.store.update((current) => replaceIssue(current, next))
+    this.store.update((current) => replaceAgentTeamIssue(current, next))
     // The step is over: its record lives in the issue history and the tracker, not an open tab.
     closeAgentTeamSession(this.launcher, found.assignment)
     void this.tick()
@@ -238,7 +243,7 @@ export class AgentTeamEngine {
       detail,
       now: this.now()
     })
-    this.store.update((current) => replaceIssue(current, next))
+    this.store.update((current) => replaceAgentTeamIssue(current, next))
     if (reason !== 'needs-input') {
       void this.tick()
     }
@@ -260,17 +265,16 @@ export class AgentTeamEngine {
       needsYou: undefined,
       updatedAt: this.now()
     }
-    this.store.update((current) => replaceIssue(current, resumed))
+    this.store.update((current) => replaceAgentTeamIssue(current, resumed))
   }
 
   assignmentForTerminal(terminalHandle: string): AgentTeamAssignment | null {
-    for (const issue of this.store.get().issues) {
-      const assignment = openAssignment(issue)
-      if (assignment?.terminalHandle === terminalHandle) {
-        return assignment
-      }
-    }
-    return null
+    return (
+      findOpenAssignment(
+        this.store.get().issues,
+        (assignment) => assignment.terminalHandle === terminalHandle
+      )?.assignment ?? null
+    )
   }
 
   decide(issueId: string, decision: AgentTeamUserDecision): AgentTeamIssue {
@@ -296,7 +300,7 @@ export class AgentTeamEngine {
         needsYou: undefined,
         updatedAt: this.now()
       }
-      this.store.update((current) => replaceIssue(current, resumed))
+      this.store.update((current) => replaceAgentTeamIssue(current, resumed))
       return resumed
     }
     const next = applyAgentTeamUserDecision({
@@ -306,7 +310,7 @@ export class AgentTeamEngine {
       decision,
       now: this.now()
     })
-    this.store.update((current) => replaceIssue(current, next))
+    this.store.update((current) => replaceAgentTeamIssue(current, next))
     if (decision.kind !== 'resume' && waiting) {
       closeAgentTeamSession(this.launcher, waiting)
     }

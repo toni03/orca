@@ -195,6 +195,18 @@ export function updateSeat(
   }
 }
 
+export function setSeatsPaused(
+  state: AgentTeamState,
+  seatIds: readonly string[],
+  paused: boolean
+): AgentTeamState {
+  const ids = new Set(seatIds)
+  return {
+    ...state,
+    seats: state.seats.map((seat) => (ids.has(seat.id) ? { ...seat, paused } : seat))
+  }
+}
+
 export function retireSeat(state: AgentTeamState, seatId: string, now: number): AgentTeamState {
   return {
     ...state,

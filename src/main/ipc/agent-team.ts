@@ -34,6 +34,9 @@ export function registerAgentTeamHandlers(service: AgentTeamService): () => void
     (_event, args: { agent: TuiAgent; request: string }) => service.launchManager(args)
   )
   ipcMain.handle(AGENT_TEAM_CHANNELS.managerSession, () => service.managerSession())
+  ipcMain.handle(AGENT_TEAM_CHANNELS.managerActivity, (_event, from: number, to: number) =>
+    service.managerActivity(from, to)
+  )
   const unsubscribe = service.subscribe(broadcastAgentTeamState)
   return () => {
     unsubscribe()
@@ -43,7 +46,8 @@ export function registerAgentTeamHandlers(service: AgentTeamService): () => void
       AGENT_TEAM_CHANNELS.readProjectSpec,
       AGENT_TEAM_CHANNELS.writeProjectSpec,
       AGENT_TEAM_CHANNELS.launchManager,
-      AGENT_TEAM_CHANNELS.managerSession
+      AGENT_TEAM_CHANNELS.managerSession,
+      AGENT_TEAM_CHANNELS.managerActivity
     ]) {
       ipcMain.removeHandler(channel)
     }

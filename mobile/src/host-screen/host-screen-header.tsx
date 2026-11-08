@@ -3,6 +3,7 @@ import { Pressable, Text, View } from 'react-native'
 import {
   CalendarClock,
   ChevronLeft,
+  Inbox,
   List,
   MoreHorizontal,
   PanelLeftClose,
@@ -26,6 +27,7 @@ import {
   type ConnectionVerdict
 } from '../transport/connection-health'
 import type { HostScreenController } from './use-host-screen-controller'
+import { MOBILE_TEAM_NEEDS_YOU_CAPABILITY } from '../team/team-needs-you-capability'
 
 function isErrorVerdict(v: ConnectionVerdict): boolean {
   return isConnectionOutage(v) || v.kind === 'auth-failed'
@@ -86,6 +88,7 @@ export function HostScreenHeader({
     connState,
     embedded,
     floatingWorkspaceEnabled,
+    hostCapabilities,
     hostId,
     hostDisplay,
     onHideSidebar
@@ -112,6 +115,18 @@ export function HostScreenHeader({
       closeBeforePress: true,
       onPress: () => actions.navigateFromHostList(`${hostPath}/automations`)
     },
+    ...(hostCapabilities.includes(MOBILE_TEAM_NEEDS_YOU_CAPABILITY)
+      ? [
+          {
+            id: 'needs-you',
+            label: t('hostScreen.hostScreenHeader.needsYou', 'Needs you'),
+            icon: Inbox,
+            disabled: disconnected,
+            closeBeforePress: true,
+            onPress: () => actions.navigateFromHostList(`${hostPath}/needs-you`)
+          }
+        ]
+      : []),
     {
       id: 'accounts',
       label: t('hostScreen.hostScreenHeader.accounts', 'Accounts'),

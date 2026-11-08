@@ -8,8 +8,12 @@ import type { AutomationRunUsage } from '../../shared/automations-types'
 import type { ClaudeUsageStore } from '../claude-usage/store'
 import type { CodexUsageStore } from '../codex-usage/store'
 import type { AgentTeamStore } from './agent-team-store'
+import type { AgentTeamManagerActivity } from '../../shared/agent-team/agent-team-ipc'
 
-type UsageLookup = Pick<ClaudeUsageStore | CodexUsageStore, 'getAutomationRunUsage'>
+type UsageLookup = Pick<
+  ClaudeUsageStore | CodexUsageStore,
+  'getAutomationRunUsage' | 'getRepoActivity'
+>
 
 export type AgentTeamUsageSources = {
   claude: () => UsageLookup | null
@@ -122,4 +126,29 @@ export function startAgentTeamUsageCollector(
   timer.unref?.()
   sweep()
   return () => clearInterval(timer)
+}
+
+/** The Manager runs in its own folder project, so its tokens are that project's usage. */
+export async function readManagerActivity(
+  sources: AgentTeamUsageSources,
+  managerRepoId: string | undefined,
+  from: number,
+  to: number
+): Promise<AgentTeamManagerActivity> {
+  if (!managerRepoId) {
+    return { tokens: 0, activeMs: 0 }
+  }
+  const reads = [sources.claude(), sources.codex()].map((store) =>
+    store
+      ? store.getRepoActivity(managerRepoId, from, to).catch(() => ({ tokens: 0, activeMs: 0 }))
+      : Promise.resolve({ tokens: 0, activeMs: 0 })
+  )
+  const totals = await Promise.all(reads)
+  return totals.reduce(
+    (sum, entry) => ({
+      tokens: sum.tokens + entry.tokens,
+      activeMs: sum.activeMs + entry.activeMs
+    }),
+    { tokens: 0, activeMs: 0 }
+  )
 }

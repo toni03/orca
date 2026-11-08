@@ -13,27 +13,15 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
-import { TASK_PROVIDERS, type TaskProvider } from '../../../../shared/task-providers'
+import { TASK_PROVIDERS } from '../../../../shared/task-providers'
 import { getRepoRoutingConnectionId } from '../../../../shared/execution-host'
 import { effectiveProjectSpecStorage } from '../../../../shared/agent-team/agent-team-spec-storage'
 import { TeamProjectSpecEditor } from './TeamProjectSpecEditor'
 import { TeamPromptPreview } from './TeamPromptPreview'
+import { trackerLabel } from './team-labels'
 import { useAgentTeamCommand } from './use-agent-team-state'
 
 const NO_TRACKER = 'none'
-
-function providerLabel(provider: TaskProvider): string {
-  switch (provider) {
-    case 'github':
-      return 'GitHub'
-    case 'gitlab':
-      return 'GitLab'
-    case 'jira':
-      return 'Jira'
-    case 'linear':
-      return 'Linear'
-  }
-}
 
 export function TeamSettingsProjects({ state }: { state: AgentTeamState }): React.JSX.Element {
   const repos = useAppStore((s) => s.repos)
@@ -83,7 +71,7 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
               <span className="block truncate font-medium">{candidate.displayName}</span>
               <span className="block text-2xs text-muted-foreground">
                 {tracker
-                  ? providerLabel(tracker.provider)
+                  ? trackerLabel(tracker.provider)
                   : translate(
                       'auto.components.agentTeam.TeamSettingsProjects.noTracker',
                       'No tracker linked'
@@ -131,7 +119,7 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
                   </SelectItem>
                   {TASK_PROVIDERS.map((provider) => (
                     <SelectItem key={provider} value={provider}>
-                      {providerLabel(provider)}
+                      {trackerLabel(provider)}
                     </SelectItem>
                   ))}
                 </SelectContent>

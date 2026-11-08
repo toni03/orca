@@ -1,7 +1,10 @@
+import { previousRoundFindings } from '../../shared/agent-team/agent-team-pipeline'
+import { composeAgentTeamSessionPrompt } from '../../shared/agent-team/agent-team-session-prompt'
 import type {
   AgentTeamAssignment,
   AgentTeamIssue,
   AgentTeamProject,
+  AgentTeamRole,
   AgentTeamSeat
 } from '../../shared/agent-team/agent-team-types'
 
@@ -36,8 +39,38 @@ export type AgentTeamLauncher = {
   sendToSession(terminalHandle: string, text: string): Promise<void>
   /** Closes a session whose step is over; its transcript stays with the agent CLI. */
   closeSession(terminalHandle: string): Promise<void>
+  /** The open or latest merge or pull request of a branch, from the project host. */
+  findMergeRequest(
+    repoId: string,
+    branch: string
+  ): Promise<{ url: string; state: string; updatedAt: string } | null>
   /** Removes the worktree of an issue that is done or discarded. */
   removeWorktree(worktreeId: string): Promise<void>
+}
+
+/** The whole prompt of one step: Orca contract, delivery rules for this project, role, spec, seat, issue. */
+export async function agentTeamStepPrompt(
+  launcher: AgentTeamLauncher,
+  args: {
+    role: AgentTeamRole
+    seat: AgentTeamSeat
+    issue: AgentTeamIssue
+    assignment: AgentTeamAssignment
+    project: AgentTeamProject | undefined
+  }
+): Promise<string> {
+  const { role, issue, project } = args
+  return composeAgentTeamSessionPrompt({
+    ...args,
+    projectSpec: await launcher.readProjectSpec(project, issue.repoId),
+    previousFindings: role.stepType === 'build' ? previousRoundFindings(issue) : null,
+    cliCommand: launcher.cliCommand(),
+    delivery: {
+      folder: launcher.isFolderProject(issue.repoId),
+      baseBranch: project?.baseBranch?.trim() || null,
+      ...(issue.mergeRequest ? { mergeRequestUrl: issue.mergeRequest.url } : {})
+    }
+  })
 }
 
 export function agentTeamWorktreeName(issue: AgentTeamIssue): string {

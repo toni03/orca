@@ -1,5 +1,8 @@
 import type { AgentTeamState } from './agent-team-types'
 
+/** A paused seat takes no new steps until it is resumed. */
+export type AgentTeamContextSeat = { id: string; name: string; agent: string; paused: boolean }
+
 /** What `orca team context` returns: everything the Manager needs in one read. */
 export type AgentTeamContext = {
   projects: {
@@ -17,7 +20,7 @@ export type AgentTeamContext = {
     id: string
     name: string
     paused: boolean
-    steps: { name: string; role: string; stepType: string; seats: string[] }[]
+    steps: { name: string; role: string; stepType: string; seats: AgentTeamContextSeat[] }[]
   }[]
   workflow: AgentTeamState['workflow']
   queue: { id: string; repoId: string; title: string; status: string; key: string | null }[]

@@ -5,6 +5,7 @@ export const PAGE_ROUTE_MODULES = new Map([
   ['/h/[hostId]/agent-history/[worktreeId]', 'app/h/[hostId]/agent-history/[worktreeId].tsx'],
   ['/h/[hostId]/tasks', 'app/h/[hostId]/tasks.tsx'],
   ['/h/[hostId]/automations', 'app/h/[hostId]/automations.tsx'],
+  ['/h/[hostId]/needs-you', 'app/h/[hostId]/needs-you.tsx'],
   ['/h/[hostId]/accounts', 'app/h/[hostId]/accounts.tsx'],
   ['/h/[hostId]/new-workspace', 'app/h/[hostId]/new-workspace.tsx'],
   ['/h/[hostId]/files/[worktreeId]', 'app/h/[hostId]/files/[worktreeId].tsx'],

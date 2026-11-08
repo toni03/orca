@@ -25,10 +25,15 @@ import {
   launchAgentTeamManager
 } from './agent-team-manager'
 import { agentTeamManagerFolder } from './agent-team-manager-workspace'
-import type { AgentTeamManagerSession } from '../../shared/agent-team/agent-team-ipc'
+import type {
+  AgentTeamManagerActivity,
+  AgentTeamManagerSession
+} from '../../shared/agent-team/agent-team-ipc'
 import { reconcileAgentTeamSessionsAfterRestart } from './agent-team-restart-reconcile'
 import { AgentTeamTrackerSync } from './agent-team-tracker-sync'
+import { startAgentTeamMobileAlerts } from './agent-team-mobile-alerts'
 import {
+  readManagerActivity,
   startAgentTeamUsageCollector,
   type AgentTeamUsageSources
 } from './agent-team-usage-collector'
@@ -36,6 +41,8 @@ import { effectiveProjectSpecStorage } from '../../shared/agent-team/agent-team-
 import type { AgentTeamContext } from '../../shared/agent-team/agent-team-context'
 import type { TuiAgent } from '../../shared/tui-agent'
 import { getRepoRoutingConnectionId } from '../../shared/execution-host'
+import { watchAgentTeamPlanLimits } from './agent-team-plan-limit-watch'
+import type { RateLimitService } from '../rate-limits/service'
 
 const TICK_INTERVAL_MS = 30_000
 const RECONCILE_DELAY_MS = 15_000
@@ -59,7 +66,8 @@ export class AgentTeamService {
     private readonly store: AgentTeamStore,
     private readonly runtime: OrcaRuntimeService,
     private readonly repos: Store,
-    private readonly usage: AgentTeamUsageSources
+    private readonly usage: AgentTeamUsageSources,
+    private readonly planLimits: () => RateLimitService | null = () => null
   ) {
     this.launcher = createAgentTeamRuntimeLauncher(runtime, repos)
     this.trackerSync = new AgentTeamTrackerSync(store, runtime, repos)
@@ -79,6 +87,17 @@ export class AgentTeamService {
       )
     )
     this.disposers.push(this.trackerSync.start())
+    this.disposers.push(
+      watchAgentTeamPlanLimits(this.planLimits(), this.store, () => void this.engine.tick())
+    )
+    this.disposers.push(
+      startAgentTeamMobileAlerts({
+        getState: () => this.store.get(),
+        subscribe: (listener) => this.store.subscribe(listener),
+        projectName: (repoId) => this.repos.getRepo(repoId)?.displayName ?? repoId,
+        dispatch: (event) => this.runtime.dispatchMobileNotification(event)
+      })
+    )
     const timer = setInterval(() => void this.engine.tick(), TICK_INTERVAL_MS)
     timer.unref?.()
     this.disposers.push(() => clearInterval(timer))
@@ -89,7 +108,8 @@ export class AgentTeamService {
         void reconcileAgentTeamSessionsAfterRestart({
           state: () => this.store.get(),
           launcher: this.launcher,
-          stopAssignment: (id, reason, detail) => this.engine.stopAssignment(id, reason, detail)
+          stopAssignment: (id, reason, detail) =>
+            void this.engine.stopUnreported(id, reason, detail)
         }).then(() => this.engine.tick()),
       RECONCILE_DELAY_MS
     )
@@ -164,6 +184,22 @@ export class AgentTeamService {
   /** The live Manager session, so the Team page can show it without starting one. */
   managerSession(): Promise<AgentTeamManagerSession | null> {
     return findLiveManagerSession(this.runtime, agentTeamManagerFolder())
+  }
+
+  /** Display names for clients without the repo list, e.g. Orca Mobile. */
+  projectLabels(): { repoId: string; name: string; color: string | null }[] {
+    return this.store.get().projects.map((project) => {
+      const repo = this.repos.getRepo(project.repoId)
+      return {
+        repoId: project.repoId,
+        name: repo?.displayName ?? project.repoId,
+        color: repo?.badgeColor ?? null
+      }
+    })
+  }
+
+  managerActivity(from: number, to: number): Promise<AgentTeamManagerActivity> {
+    return readManagerActivity(this.usage, this.store.get().managerRepoId, from, to)
   }
 
   /** Folder projects share one directory, so their issues always lock the project. */
@@ -243,7 +279,7 @@ export class AgentTeamService {
         const timer = setTimeout(() => {
           pendingChecks.delete(assignment.id)
           if (handle && this.engine.assignmentForTerminal(handle)?.id === assignment.id) {
-            this.engine.stopAssignment(
+            void this.engine.stopUnreported(
               assignment.id,
               'needs-input',
               change.transition === 'errored'
@@ -268,7 +304,8 @@ export class AgentTeamService {
 export function createAgentTeamService(
   runtime: OrcaRuntimeService,
   repos: Store,
-  usage: AgentTeamUsageSources
+  usage: AgentTeamUsageSources,
+  planLimits?: () => RateLimitService | null
 ): AgentTeamService {
-  return new AgentTeamService(new AgentTeamStore(), runtime, repos, usage)
+  return new AgentTeamService(new AgentTeamStore(), runtime, repos, usage, planLimits)
 }

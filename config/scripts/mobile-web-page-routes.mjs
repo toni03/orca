@@ -23,6 +23,11 @@ export const MOBILE_WEB_PAGE_ROUTES = [
     pathname: '/h/[hostId]/automations',
     grants: ['navigate', 'storage', 'externalLink', 'haptics']
   },
+  // The agent team inbox opens merge requests and Source Control, and its segments reach haptics.
+  {
+    pathname: '/h/[hostId]/needs-you',
+    grants: ['navigate', 'storage', 'externalLink', 'haptics']
+  },
   // Accounts needs navigate/storage/externalLink for Back/shared layout wall; haptics census requires seam grant.
   {
     pathname: '/h/[hostId]/accounts',

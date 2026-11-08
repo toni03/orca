@@ -104,7 +104,8 @@ export class AgentTeamTrackerSync {
     const sentIds = new Set(sent.map((event) => event.id))
     this.store.update((current) => ({
       ...current,
-      trackerEvents: (current.trackerEvents ?? []).filter((event) => !sentIds.has(event.id))
+      trackerEvents: (current.trackerEvents ?? []).filter((event) => !sentIds.has(event.id)),
+      trackerSyncedAt: Date.now()
     }))
   }
 

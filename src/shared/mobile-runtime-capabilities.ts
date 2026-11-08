@@ -4,8 +4,12 @@ import { MOBILE_RELAY_RUNTIME_CAPABILITIES } from './mobile-desktop-relay-contra
 // Hosts without this capability have no notifications.registerPush RPC.
 export const NOTIFICATIONS_REMOTE_PUSH_RUNTIME_CAPABILITY = 'notifications.remote-push.v1' as const
 
+// Hosts without this capability have no team.issues / team.issueDecide for phones.
+export const MOBILE_TEAM_NEEDS_YOU_RUNTIME_CAPABILITY = 'mobile.team-needs-you.v1' as const
+
 export const MOBILE_RUNTIME_CAPABILITIES = [
   'mobile.tasks.v1',
+  MOBILE_TEAM_NEEDS_YOU_RUNTIME_CAPABILITY,
   NOTIFICATIONS_REMOTE_PUSH_RUNTIME_CAPABILITY,
   NOTIFICATIONS_DESKTOP_PRESENCE_RUNTIME_CAPABILITY,
   ...MOBILE_RELAY_RUNTIME_CAPABILITIES

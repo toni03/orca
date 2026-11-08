@@ -1370,7 +1370,8 @@
       "hideSidebar": "Ocultar barra lateral",
       "reconnect": "Reconectar",
       "tasks": "Tareas",
-      "automations": "Automatizaciones"
+      "automations": "Automatizaciones",
+      "needsYou": "Te necesita"
     },
     "hostScreenOverlays": {
       "deleteConfirmMessage": "¿Eliminar \"{{name}}\" ({{branch}})?",
@@ -1476,7 +1477,8 @@
       "tasks": "Tareas",
       "terminal": "Terminal",
       "workspace": "Espacio de trabajo",
-      "automations": "Automatizaciones"
+      "automations": "Automatizaciones",
+      "needsYou": "Te necesita"
     }
   },
   "newWorkspace": {
@@ -4034,6 +4036,35 @@
           }
         }
       }
+    }
+  },
+  "team": {
+    "mobile": {
+      "reasonReady": "Lista",
+      "reasonEscalated": "Escalada",
+      "reasonBlocked": "Bloqueada",
+      "reasonQuestion": "Pregunta",
+      "reasonFailed": "Detenida",
+      "merge": "Fusionar",
+      "openMergeRequest": "Abrir MR",
+      "markDone": "Marcar como hecha",
+      "replyPlaceholder": "Responder…",
+      "changesPlaceholder": "Cambios que pedir…",
+      "reply": "Responder",
+      "requestChanges": "Pedir cambios",
+      "sendAnswer": "Responder",
+      "discard": "Descartar",
+      "back": "Atrás",
+      "needsYou": "Te necesita",
+      "all": "Todo",
+      "questions": "Preguntas",
+      "ready": "Listas",
+      "escalated": "Escaladas",
+      "loading": "Cargando…",
+      "empty": "Nada te necesita. El equipo sigue trabajando.",
+      "hostUnavailable": "El equipo de agentes no está disponible en este host. Actualiza Orca en ese host y vuelve a conectar.",
+      "hostUnreachable": "No se pudo conectar con este host. Reconecta y actualiza.",
+      "actionFailed": "No se pudo completar esta acción."
     }
   }
 }
