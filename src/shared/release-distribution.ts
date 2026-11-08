@@ -32,3 +32,15 @@ export function isForkReleaseVersion(
   const match = /^v?\d+\.\d+\.\d+-([a-z0-9]+)\.\d+$/i.exec(version.trim())
   return match !== null && match[1].toLowerCase() === versionTag
 }
+
+/** True for `<x.y.z>-<versionTag>.<n>.beta.<k>`: a fork beta, published as a prerelease of the fork's own repo. */
+export function isForkBetaVersion(
+  version: string,
+  versionTag: string | null = FORK_VERSION_TAG
+): boolean {
+  if (versionTag === null) {
+    return false
+  }
+  const match = /^v?\d+\.\d+\.\d+-([a-z0-9]+)\.\d+\.beta\.\d+$/i.exec(version.trim())
+  return match !== null && match[1].toLowerCase() === versionTag
+}

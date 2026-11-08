@@ -3,6 +3,7 @@ name: ITG Windows Release
 # Fork-only: builds the unsigned "Orca ITG" Windows installer and publishes it as a GitHub Release of this repository.
 # Version: <upstream stable>-itg.<n>, e.g. v1.4.242-itg.0 is the first ITG build over upstream 1.4.242.
 # The updater parses tags as semver, so a fourth numeric component (v1.4.242.0) would be ignored.
+# beta: true publishes v<base>-itg.<n>.beta.<k> as a prerelease over the fork's latest ITG release, for testing a branch.
 
 on:
   workflow_dispatch:
@@ -22,6 +23,11 @@ on:
         required: false
         type: string
         default: ''
+      beta:
+        description: Publish a prerelease beta (<base>-itg.<n>.beta.<k>) that only manual installs or pinned updates receive
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -61,9 +67,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           BASE_INPUT: ${{ inputs.base_version }}
           INDEX_INPUT: ${{ inputs.itg_index }}
+          BETA: ${{ inputs.beta }}
         run: |
           set -euo pipefail
           base="${BASE_INPUT#v}"
+          if [[ -z "$base" && "$BETA" == "true" ]]; then
+            # A beta sits on top of the ITG release users already run, so it starts from the fork's latest one.
+            latest="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+            base="$(sed -n "s/^v\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)-.*/\1/p" <<<"$latest")"
+          fi
           if [[ -z "$base" ]]; then
             base="$(gh release view --repo stablyai/orca --json tagName --jq .tagName)"
             base="${base#v}"
@@ -72,17 +84,30 @@ jobs:
             echo "::error::base_version must be X.Y.Z, got '$base'."
             exit 1
           fi
+          tags="$(gh release list --repo "$GITHUB_REPOSITORY" --limit 200 --json tagName --jq '.[].tagName')"
           index="$INDEX_INPUT"
           if [[ -z "$index" ]]; then
-            last="$(gh release list --repo "$GITHUB_REPOSITORY" --limit 200 --json tagName --jq '.[].tagName' \
-              | sed -n "s/^v${base//./\\.}-${ORCA_RELEASE_VERSION_TAG}\.\([0-9][0-9]*\)$/\1/p" | sort -n | tail -1)"
-            index=$(( ${last:--1} + 1 ))
+            last="$(sed -n "s/^v${base//./\\.}-${ORCA_RELEASE_VERSION_TAG}\.\([0-9][0-9]*\)$/\1/p" <<<"$tags" | sort -n | tail -1)"
+            if [[ "$BETA" == "true" ]]; then
+              # Semver orders <base>-itg.<n> < <base>-itg.<n>.beta.<k> < <base>-itg.<n+1>: the next ITG release replaces the beta.
+              if [[ -z "$last" ]]; then
+                echo "::error::No ITG release over $base yet; publish v$base-$ORCA_RELEASE_VERSION_TAG.0 before a beta on it."
+                exit 1
+              fi
+              index="$last"
+            else
+              index=$(( ${last:--1} + 1 ))
+            fi
           fi
           if [[ ! "$index" =~ ^[0-9]+$ ]]; then
             echo "::error::itg_index must be a non-negative integer, got '$index'."
             exit 1
           fi
           version="${base}-${ORCA_RELEASE_VERSION_TAG}.${index}"
+          if [[ "$BETA" == "true" ]]; then
+            beta_last="$(sed -n "s/^v${version//./\\.}\.beta\.\([0-9][0-9]*\)$/\1/p" <<<"$tags" | sort -n | tail -1)"
+            version="${version}.beta.$(( ${beta_last:-0} + 1 ))"
+          fi
           tag="v${version}"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "::error::Release $tag already exists in $GITHUB_REPOSITORY."
@@ -152,15 +177,25 @@ jobs:
           TAG: ${{ steps.version.outputs.tag }}
           SHA: ${{ steps.version.outputs.sha }}
           BASE: ${{ steps.version.outputs.base }}
+          BETA: ${{ inputs.beta }}
+          REF: ${{ inputs.ref }}
         run: |
           set -euo pipefail
           git fetch --no-tags https://github.com/stablyai/orca.git main
           notes="$RUNNER_TEMP/itg-release-notes.md"
           bash config/scripts/itg-release-notes.sh "$BASE" "$(git rev-parse FETCH_HEAD)" "$GITHUB_REPOSITORY_OWNER" >"$notes"
           printf '\nBuilt from %s. Unsigned installer: Windows SmartScreen may warn on first install (More info → Run anyway). Installed builds update themselves from this repository.\n' "$SHA" >>"$notes"
+          title="Orca ITG ${TAG#v}"
+          prerelease=()
+          if [[ "$BETA" == "true" ]]; then
+            # Routine update checks skip prereleases, so the team stays on the stable ITG build.
+            printf '\nBeta from `%s`, not offered as an automatic update: install it with the setup file below. The next ITG release replaces it.\n' "$REF" >>"$notes"
+            title="$title (beta)"
+            prerelease=(--prerelease)
+          fi
           cat "$notes"
-          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft --target "$SHA" \
-            --title "Orca ITG ${TAG#v}" --notes-file "$notes"
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft "${prerelease[@]}" --target "$SHA" \
+            --title "$title" --notes-file "$notes"
 
       - name: Package and upload Windows artifacts
         uses: nick-fields/retry@v4
@@ -182,6 +217,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
           VERSION: ${{ steps.version.outputs.version }}
+          BETA: ${{ inputs.beta }}
         run: |
           set -euo pipefail
           assets="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
@@ -200,5 +236,9 @@ jobs:
             echo "::error::latest.yml on $TAG is not version $VERSION."
             exit 1
           fi
-          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          if [[ "$BETA" == "true" ]]; then
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease --latest=false
+          else
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          fi
           echo "Published https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG"

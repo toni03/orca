@@ -1,6 +1,7 @@
 import { compareAppVersions, isValidAppVersion } from './app-version'
 import {
   IS_FORK_DISTRIBUTION,
+  isForkBetaVersion,
   isForkReleaseVersion,
   RELEASE_REPOSITORY
 } from './release-distribution'
@@ -171,7 +172,8 @@ export function getVersionChannel(version: string): ReleaseChannel | null {
   if (isAdhocVersion(normalized)) {
     return 'adhoc'
   }
-  if (isForkReleaseVersion(normalized)) {
+  // Fork betas live in the fork's own repo; filing them under Stable lets the build picker pin them.
+  if (isForkReleaseVersion(normalized) || isForkBetaVersion(normalized)) {
     return 'stable'
   }
   // Why the dev channels are tested first: they are prereleases too, so this
