@@ -3,7 +3,8 @@ import { join } from 'node:path'
 import { getAppEnvironment } from '../../../shared/app-environment'
 import { readFetchResponseTextWithinLimit } from '../../../shared/fetch-response-body'
 import type { GlobalSettings } from '../../../shared/global-settings-types'
-import { getVersionChannel, MAIN_RELEASE_REPO } from '../../../shared/release-channel'
+import { getVersionChannel } from '../../../shared/release-channel'
+import { UPSTREAM_RELEASE_REPOSITORY } from '../../../shared/release-distribution'
 import { getMainHttpClient } from '../../network/http-client'
 import { writePluginFileAtomically } from '../../plugins/installation/plugin-atomic-file-write'
 import {
@@ -37,10 +38,10 @@ export function agentStateRulesChannelForAppVersion(
   return channel === 'stable' ? 'stable' : 'next'
 }
 
-// Fixed download URLs avoid API rate limits and latest-release redirects.
+// Fixed download URLs avoid API rate limits and latest-release redirects; forks reuse upstream's rules.
 export function agentStateRulesDownloadUrl(channel: AgentStateRulesChannel): string {
   const tag = `agent-state-rules-engine-${AGENT_STATE_RULES_ENGINE_VERSION}-${channel}`
-  return `https://github.com/${MAIN_RELEASE_REPO}/releases/download/${tag}/agent-state-rules.json`
+  return `https://github.com/${UPSTREAM_RELEASE_REPOSITORY}/releases/download/${tag}/agent-state-rules.json`
 }
 
 // Shared userData must not expose next-only rules to stable builds.
@@ -184,8 +185,10 @@ export class AgentStateRulesLiveUpdater {
       })
       if (!response.ok) {
         await response.body?.cancel().catch(() => undefined)
-        // Re-uploads can briefly return 404; retain the last good rules.
-        warn(`download failed: HTTP ${response.status}`)
+        // 404 is the normal state until rules are published (or mid re-upload); keep the last good rules.
+        if (response.status !== 404) {
+          warn(`download failed: HTTP ${response.status}`)
+        }
         return null
       }
       return await readFetchResponseTextWithinLimit(response, AGENT_STATE_RULES_BUNDLE_MAX_BYTES)

@@ -14,6 +14,7 @@ import {
   resolveVisibleTaskProvider,
   type TaskProvider
 } from '../../../../shared/task-providers'
+import { useTaskProviderConnections } from '@/components/feature-wall/use-integration-connection-status'
 import {
   getSourceOptions,
   getGitHubModeButtons,
@@ -127,19 +128,22 @@ export function useTaskPageRepoSelection(model: TaskPageStoreBindingsModel) {
     [settings?.visibleTaskProviders]
   )
   const defaultTaskSource = settings?.defaultTaskSource ?? 'github'
+  const taskProviderConnections = useTaskProviderConnections(selectedRepos)
   const visibleTaskProviders = useMemo(
     () =>
       restoreAvailableDefaultTaskProvider(
         preferredVisibleTaskProviders,
         {
           gitlabInstalled: preflightStatusCurrent && preflightStatus?.glab?.installed === true,
-          linearConnected: linearConnected === true
+          linearConnected: linearConnected === true,
+          connected: taskProviderConnections
         },
         defaultTaskSource
       ),
     [
       defaultTaskSource,
       linearConnected,
+      taskProviderConnections,
       preferredVisibleTaskProviders,
       preflightStatusCurrent,
       preflightStatus?.glab?.installed

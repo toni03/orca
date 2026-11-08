@@ -4,7 +4,7 @@ import type {
   AgentTeamState
 } from '../../shared/agent-team/agent-team-types'
 import { translateMain } from '../i18n/main-i18n'
-import type { MobileNotificationDispatchEvent } from '../runtime/runtime-mobile-notification-controller'
+import type { MobileNotificationDispatchEvent } from '../runtime/push/notifications/runtime-mobile-notification-controller'
 
 function reasonText(reason: AgentTeamNeedsYouReason): string {
   switch (reason) {

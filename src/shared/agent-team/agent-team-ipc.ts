@@ -1,4 +1,4 @@
-import type { TuiAgent } from '../tui-agent'
+import type { TuiAgent } from '../agent-launch/catalog/tui-agent'
 
 export const AGENT_TEAM_CHANNELS = {
   getState: 'agentTeam:getState',

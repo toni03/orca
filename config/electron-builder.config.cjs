@@ -4,18 +4,18 @@ const { join, resolve } = require('node:path')
 const {
   MACOS_FOLDER_USAGE_DESCRIPTIONS,
   applyMacHelperFolderUsageDescriptions
-} = require('./scripts/macos-folder-usage-descriptions.cjs')
-const electronBuilderNativeRebuild = require('./scripts/electron-builder-native-rebuild.cjs')
+} = require('./scripts/desktop-distribution/macos/macos-folder-usage-descriptions.cjs')
+const electronBuilderNativeRebuild = require('./scripts/desktop-distribution/runtime-verification/electron-builder-native-rebuild.cjs')
 const {
   assertPackagedDaemonEntryExists,
   verifyPackagedDaemonEntryBoots,
   verifyPackagedMacTerminalHostBoots
-} = require('./scripts/verify-packaged-daemon-entry.cjs')
+} = require('./scripts/desktop-distribution/runtime-verification/verify-packaged-daemon-entry.cjs')
 const {
   buildMacTerminalHost,
   macTerminalHostSignIgnore,
   verifyMacTerminalHost
-} = require('./scripts/macos-terminal-host-bundle.cjs')
+} = require('./scripts/macos/terminal-host-bundle/macos-terminal-host-bundle.cjs')
 const {
   assertPackagedNativeVariantsInstalled,
   assertProcessHostOutputBuilt,
@@ -26,24 +26,31 @@ const {
 const {
   assertNoWindowsExecutablesInRuntimeNodeModules
 } = require('./packaged-windows-only-runtime-files.cjs')
-const { verifyLinuxGlibcFloor } = require('./scripts/verify-linux-glibc-floor.cjs')
+const {
+  verifyLinuxGlibcFloor
+} = require('./scripts/native-build/linux/verify-linux-glibc-floor.cjs')
 const {
   verifyPackagedWindowsAgentHook
-} = require('./scripts/verify-packaged-windows-agent-hook.cjs')
+} = require('./scripts/desktop-distribution/runtime-verification/verify-packaged-windows-agent-hook.cjs')
 const {
   ensureBundledWaylandClipboard,
   finalizePackagedWaylandClipboard
 } = require('./wayland-clipboard-resources.cjs')
-const { writeMacBuildCompatibility } = require('./scripts/mac-build-compatibility.cjs')
+const {
+  writeMacBuildCompatibility
+} = require('./scripts/desktop-distribution/macos/mac-build-compatibility.cjs')
 const {
   MOBILE_WEB_BUNDLE_DIR,
   assertMobileWebBundleBuilt
-} = require('./scripts/verify-packaged-mobile-web-bundle.cjs')
-const { verifyPackagedPluginResources } = require('./scripts/verify-packaged-plugin-resources.cjs')
+} = require('./scripts/desktop-distribution/runtime-verification/verify-packaged-mobile-web-bundle.cjs')
+const {
+  verifyPackagedPluginResources,
+  verifyPackagedPluginTypings
+} = require('./scripts/desktop-distribution/runtime-verification/verify-packaged-plugin-resources.cjs')
 const {
   assertPackagedServeSelectionEntry,
   assertPackagedWebClient
-} = require('./scripts/verify-packaged-serve-payload.cjs')
+} = require('./scripts/desktop-distribution/runtime-verification/verify-packaged-serve-payload.cjs')
 const {
   assertBundledRipgrepInstalled,
   bundledRipgrepExtraResources,
@@ -52,24 +59,33 @@ const {
 } = require('./bundled-ripgrep-resources.cjs')
 const {
   verifyPackagedWindowsNodePty
-} = require('./scripts/verify-packaged-node-pty-job-ownership.cjs')
+} = require('./scripts/desktop-distribution/runtime-verification/verify-packaged-node-pty-job-ownership.cjs')
 const {
   assertOrcadTemplateBuilt,
   finalizePackagedOrcadTemplate,
   orcadTemplateExtraResource,
   orcadTemplateNodeModulesExtraResource,
   orcadTemplateMacSignIgnore
-} = require('./scripts/packaged-orcad-template.cjs')
-const { verifySkillsCliRuntime } = require('./scripts/verify-skills-cli-runtime.cjs')
+} = require('./scripts/orcad-distribution/template/packaged-orcad-template.cjs')
+const {
+  verifySkillsCliRuntime
+} = require('./scripts/runtime-verification/skills-cli/verify-skills-cli-runtime.cjs')
 const { assertNotDarkBuild } = require('./dark-build-switches.cjs')
-const { verifyStaticAppImagePackage } = require('./scripts/static-appimage-package-contract.cjs')
+const {
+  verifyStaticAppImagePackage
+} = require('./scripts/desktop-distribution/appimage/static-appimage-package-contract.cjs')
 const {
   appImageNodeRuntimeFpmArgs,
   placeAppImageNodeRuntime,
   verifyAppImageNodeRuntimeServesPty
-} = require('./scripts/appimage-node-runtime.cjs')
-const { signWindowsUninstallerViaSignPath } = require('./scripts/windows-uninstaller-signing.cjs')
-const { buildMacShipItScheduling } = require('./scripts/macos-shipit-scheduling.cjs')
+} = require('./scripts/desktop-distribution/linux/appimage-node-runtime.cjs')
+const {
+  signWindowsUninstallerViaSignPath
+} = require('./scripts/desktop-distribution/windows/windows-uninstaller-signing.cjs')
+const {
+  buildMacShipItScheduling
+} = require('./scripts/desktop-distribution/macos/macos-shipit-scheduling.cjs')
+const { resolveReleaseDistribution } = require('./release-distribution.cjs')
 
 // Dev channels need release bundle ID/signature/notarization so Squirrel.Mac accepts updates and macOS retains app identity.
 const isMacHourly = process.env.ORCA_MAC_HOURLY === '1'
@@ -102,6 +118,9 @@ const devChannelRepo = isHourlyChannel
     : isAdhocChannel
       ? 'orca-adhoc'
       : null
+const releaseDistribution = resolveReleaseDistribution()
+// Only upstream releases go through SignPath; fork distributions publish unsigned installers.
+const isWinUnsigned = isWinDevChannel || !releaseDistribution.isUpstream
 const appId = 'com.stablyai.orca'
 const featureWallResources = {
   from: 'resources/onboarding/feature-wall',
@@ -132,6 +151,12 @@ const bundledPluginResources = {
   from: 'resources/plugins/launch',
   to: 'plugins/launch'
 }
+// electron-builder always drops `*.d.ts` from app files, so `orca plugin types` reads these copies.
+const pluginAuthorTypingsResources = {
+  from: 'resources/plugins',
+  to: 'plugins',
+  filter: ['declarative/*.d.ts', 'types/*.d.ts']
+}
 // Packaged main/CLI/SSH/speech paths lack pnpm links; copy runtime closure so bare requires cannot fall through to checkout dependencies.
 // Ship only the 166KB emoji dataset used by worktree naming, not all 49MB of emojibase-data.
 const emojiShortcodeDatasetResource = {
@@ -144,6 +169,7 @@ const commonExtraResources = [
   orcadTemplateNodeModulesExtraResource,
   ...bundledRipgrepExtraResources,
   bundledPluginResources,
+  pluginAuthorTypingsResources,
   skillFreshnessResources,
   ...agentBrowserSkillResources,
   nativeChatVisualsResource,
@@ -330,16 +356,13 @@ module.exports = {
     'out/main/gitlab/project-ref-parser.js',
     'out/main/grok/**',
     'out/main/hermes/**',
-    'out/main/asar-transparent-fs.js',
-    'out/main/macos-tree-clone.js',
+    'out/main/filesystem/asar-transparent-fs.js',
+    'out/main/filesystem/macos-tree-clone.js',
     'out/main/orca-profiles/profile-index-store.js',
     'out/main/persistence/profile-state/**',
     'out/main/plugins/plugin-authoring-checks.js',
-    // `orca plugin types` copies the author typings from here in Node mode.
-    'resources/plugins/declarative/orca*.d.ts',
     // `orca plugin test` and `orca plugin check` load the runtime, kit and hooks in Node.
     'resources/plugins/declarative/*.mjs',
-    'resources/plugins/types/*.d.ts',
     'out/main/skills/bundled-skill-install/cli-entry.js',
     'out/main/startup/http1-compatibility-marker.js',
     'out/main/daemon-entry.js',
@@ -468,6 +491,7 @@ module.exports = {
     }
     // Validate real electron-builder output so broken extraResources mappings fail before shipping.
     verifyPackagedPluginResources(resourcesDir)
+    verifyPackagedPluginTypings(resourcesDir)
     assertPackagedWebClient(resourcesDir)
     assertPackagedServeSelectionEntry(resourcesDir)
     finalizePackagedRipgrep(resourcesDir)
@@ -520,9 +544,9 @@ module.exports = {
     // Sign hook signs nothing: it relays transient NSIS uninstaller files to CI SignPath; unset relay env leaves local/dev builds inert.
     signtoolOptions: {
       sign: signWindowsUninstallerViaSignPath,
-      ...(isWinDevChannel ? {} : { publisherName: 'SignPath Foundation' })
+      ...(isWinUnsigned ? {} : { publisherName: 'SignPath Foundation' })
     },
-    ...(isWinDevChannel ? { verifyUpdateCodeSignature: false } : {}),
+    ...(isWinUnsigned ? { verifyUpdateCodeSignature: false } : {}),
     extraResources: [
       ...commonExtraResources,
       ...windowsRuntimeResources,
@@ -557,9 +581,9 @@ module.exports = {
     ]
   },
   nsis: {
-    artifactName: 'orca-windows-setup.${ext}',
-    shortcutName: '${productName}',
-    uninstallDisplayName: '${productName}',
+    artifactName: `${releaseDistribution.artifactPrefix}-windows-setup.\${ext}`,
+    shortcutName: releaseDistribution.displayName ?? '${productName}',
+    uninstallDisplayName: releaseDistribution.displayName ?? '${productName}',
     createDesktopShortcut: 'always',
     // One NSIS include hosts update-guarded daemon cleanup and additive markdown Open With registration.
     // Avoid fileAssociations: it would steal default .md ownership; see the include’s header.
@@ -583,10 +607,14 @@ module.exports = {
         rank: 'Alternate'
       }))
     ],
+    // Bundled ONNX Runtime (speech) needs macOS 13.4 (#22690); the update-manifest gate reads this from Info.plist.
+    minimumSystemVersion: '13.4',
     icon: 'resources/build/icon.icns',
     entitlements: 'resources/build/entitlements.mac.plist',
     entitlementsInherit: 'resources/build/entitlements.mac.plist',
-    ...(isMacRelease ? { sign: resolve(__dirname, 'scripts/sign-mac-app.mjs') } : {}),
+    ...(isMacRelease
+      ? { sign: resolve(__dirname, './scripts/desktop-distribution/macos/sign-mac-app.mjs') }
+      : {}),
     signIgnore: [
       ...bundledRipgrepMacSignIgnore,
       ...orcadTemplateMacSignIgnore,
@@ -737,10 +765,12 @@ module.exports = {
   // Dual-arch builds need target node-pty rebuilds or Intel Macs get arm64 binaries and posix_spawnp failure.
   // beforeBuild performs targeted rebuild then returns false to skip optional cpu-features.
   npmRebuild: true,
+  // Fork versions such as 1.4.242-itg.0 must still write latest.yml, which the updater probes.
+  ...(releaseDistribution.isUpstream ? {} : { detectUpdateChannel: false }),
   publish: {
     provider: 'github',
-    owner: 'stablyai',
-    repo: devChannelRepo ?? 'orca',
+    owner: releaseDistribution.owner,
+    repo: devChannelRepo ?? releaseDistribution.repo,
     // Keep main-repo releases draft until release-cut verifies all assets; early --publish always would expose missing Windows installers.
     releaseType: devChannelRepo ? 'prerelease' : 'draft'
   }

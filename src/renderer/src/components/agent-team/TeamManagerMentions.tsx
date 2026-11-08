@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { nativeChatComposerDestination } from '../native-chat/native-chat-composer-destination'
+import { nativeChatComposerDestination } from '../native-chat/composer/focus/native-chat-composer-destination'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import { issueKey } from './team-labels'
 import { TeamProjectAvatar } from './TeamProjectAvatar'

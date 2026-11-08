@@ -70,6 +70,7 @@ export type StatusBarItem =
   | 'grok'
   | 'cursor'
   | 'zcode'
+  | 'muse'
   | 'ssh'
   | 'resource-usage'
   | 'ports'
@@ -102,6 +103,7 @@ export type RightSidebarTab =
   | 'source-control'
   | 'checks'
   | 'ports'
+  | 'tasks'
   // Plugin IDs encode their dynamic panel namespace without opening the static tab union.
   | `plugin:${string}`
 export type ActiveRightSidebarTab = Exclude<RightSidebarTab, 'search'>

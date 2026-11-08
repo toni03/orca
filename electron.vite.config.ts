@@ -6,7 +6,7 @@ import type { Plugin, Rollup } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { createBootstrapFatalExitBanner } from './config/build-plugins/bootstrap-fatal-exit-banner'
-import { createBrowserExtensionWorkerShimPlugin } from './config/build-plugins/browser-extension-worker-shim'
+import { createSandboxedScriptBundlesPlugin } from './config/build-plugins/sandboxed-script-bundles'
 import { createMainLocaleSubsetPlugin } from './config/build-plugins/main-locale-subset'
 import { createSucraseUnusedTransformersPlugin } from './config/build-plugins/sucrase-unused-transformers'
 import { createPdfjsViewerAssetsPlugin } from './config/build-plugins/pdfjs-viewer-assets'
@@ -15,7 +15,7 @@ import { createViteCacheRetentionPlugin } from './config/build-plugins/vite-cach
 import { MAIN_BUILD_ENTRY_POINTS } from './config/build-plugins/main-build-entry-points'
 import { createPlainNodeEntryGuardPlugin } from './config/build-plugins/plain-node-entry-guard'
 import { createDevServeConfig } from './config/build-plugins/dev-serve-config'
-import { resolveBuildSourceCommit } from './config/scripts/build-source-commit.mjs'
+import { resolveBuildSourceCommit } from './config/scripts/build-identity/build-source-commit.mjs'
 
 const BUNDLED_MAIN_DEPENDENCIES = new Set([
   'stream-json',
@@ -26,6 +26,8 @@ const BUNDLED_MAIN_DEPENDENCIES = new Set([
   'smol-toml',
   'yaml',
   'fflate',
+  'mime-types',
+  'mime-db',
   // Linear save confirmation; bundled like orcad so packaging needs no extra node_modules.
   'unified',
   'remark-parse',
@@ -71,6 +73,14 @@ function createDarkBuildMarkerPlugin(): Plugin {
 
 // Pin official skill installs to the bundled commit on every channel; main installs, renderer prints the command.
 const ORCA_BUILD_COMMIT_LITERAL = JSON.stringify(resolveBuildSourceCommit())
+// The updater reads releases from the repository the build was published to (forks set it).
+const RELEASE_DISTRIBUTION = createRequire(import.meta.url)(
+  './config/release-distribution.cjs'
+).resolveReleaseDistribution()
+const RELEASE_DISTRIBUTION_DEFINES = {
+  ORCA_RELEASE_REPOSITORY: JSON.stringify(RELEASE_DISTRIBUTION.repository),
+  ORCA_RELEASE_VERSION_TAG: JSON.stringify(RELEASE_DISTRIBUTION.versionTag)
+}
 
 function createStartupDiagnosticsBanner(chunkName: string): string {
   return `
@@ -235,7 +245,7 @@ export const electronViteConfig: UserConfig = {
           createPlainNodeEntryGuardPlugin(),
           createProcessHostDevRebuildPlugin(),
           createDarkBuildMarkerPlugin(),
-          createBrowserExtensionWorkerShimPlugin(),
+          createSandboxedScriptBundlesPlugin(),
           createMainLocaleSubsetPlugin()
         ]
       }
@@ -245,6 +255,7 @@ export const electronViteConfig: UserConfig = {
       ORCA_POSTHOG_WRITE_KEY: ORCA_POSTHOG_WRITE_KEY_LITERAL,
       ORCA_DIAGNOSTICS_TOKEN_URL: ORCA_DIAGNOSTICS_TOKEN_URL_LITERAL,
       ORCA_BUILD_COMMIT: ORCA_BUILD_COMMIT_LITERAL,
+      ...RELEASE_DISTRIBUTION_DEFINES,
       ...DARK_BUILD_DEFINES
     },
     // @xterm/headless declares exports:null; point Vite directly at its published CJS main to permit inlining.
@@ -259,9 +270,7 @@ export const electronViteConfig: UserConfig = {
   },
   preload: {
     build: {
-      externalizeDeps: {
-        exclude: ['zod']
-      },
+      externalizeDeps: false,
       rollupOptions: {
         // Unminified preload keeps dependency JSDoc whose em dashes would force two-byte storage in every renderer.
         output: { charset: 'ascii', comments: { legal: true, annotation: true, jsdoc: false } }
@@ -273,6 +282,7 @@ export const electronViteConfig: UserConfig = {
     cacheDir: resolve('.cache/vite/renderer'),
     define: {
       ORCA_BUILD_COMMIT: ORCA_BUILD_COMMIT_LITERAL,
+      ...RELEASE_DISTRIBUTION_DEFINES,
       ...DARK_BUILD_DEFINES
     },
     resolve: {

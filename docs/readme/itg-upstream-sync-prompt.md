@@ -1,0 +1,28 @@
+Sincroniza Orca ITG (fork `toni03/orca`) con la última versión estable de `stablyai/orca` y publica una release ITG nueva. Trabaja sin pedir confirmación, pero detente sin publicar nada si algún paso no es seguro.
+
+Remotos: `origin` = `stablyai/orca` (solo lectura, nunca hagas push ahí), `fork` = `toni03/orca`. Lee antes `docs/readme/itg-windows-release.md`.
+
+1. Ejecuta `node config/scripts/itg-upstream-release-pending.mjs toni03/orca`. Si no termina con código 0, no hay versión nueva: termina informando de su salida.
+2. `git fetch origin main --tags` y `git fetch fork main`. Trabaja en la rama `auto/itg-upstream-sync` de este worktree y arranca siempre de un estado limpio en `fork/main`; lo que haya de una ejecución anterior sin publicar se descarta, porque puede estar incompleto o corrupto:
+   - Antes de limpiar, anota para el informe `git status --short` y `git log --oneline fork/main..HEAD` (lo que se va a descartar).
+   - Si hay un merge, rebase o cherry-pick a medias, abórtalo (`git merge --abort`, `git rebase --abort`, `git cherry-pick --abort`, según el caso).
+   - `git reset --hard`, `git clean -fd` (no borra `node_modules` ni otros ficheros ignorados) y `git switch -C auto/itg-upstream-sync fork/main`.
+   - `git worktree prune` y borra con `git worktree remove --force` los worktrees temporales de comparación que hayan quedado de ejecuciones anteriores (nunca el checkout principal ni otros worktrees de Orca).
+   - Comprueba que `git status --short` sale vacío y que `HEAD` es `fork/main`; si no, detente y explícalo.
+     No crees otras ramas ni toques el checkout principal del repositorio.
+3. Haz merge de `origin/main` (no del tag de release) con `git merge --no-ff origin/main -m "Merge upstream main for v<versión>"`.
+4. Si hay conflictos, resuélvelos conservando el comportamiento de las dos partes:
+   - Los cambios exclusivos del ITG (distribución del fork, updater, `config/release-distribution.cjs`, `config/electron-builder.config.cjs`, `src/shared/release-distribution.ts`, `.github/workflows/itg-release-windows.yml`, `config/scripts/itg-*`, `docs/readme/itg-*`) deben seguir funcionando.
+   - Si una funcionalidad del ITG ya llegó upstream (su PR aparece como merged en `stablyai/orca`), quédate con la versión de upstream.
+   - Si un conflicto no se puede resolver con seguridad, ejecuta `git merge --abort`, no hagas push y termina explicando qué ficheros y por qué.
+5. Ejecuta `pnpm install`. Antes del check, para los checks huérfanos de ejecuciones anteriores con `node config/scripts/itg-stale-check-processes.mjs --kill` (solo para árboles `bun`/`tsgolint`/`tsc` cuyo shell lanzador ya no existe; anota en el informe lo que pare). Después mira la memoria libre y los procesos grandes (`tasklist //FO CSV //NH`); no cierres ninguno más (un `tsc.exe` con padre vivo es el servidor TypeScript de una sesión de agente activa) y, si el check muere por memoria, dilo en el informe con lo que viste. Después ejecuta en segundo plano `pnpm check:changed --maxWorkers=1` (tarda unos 20 minutos; con más workers la máquina se queda sin memoria). Al terminar el check (o si se interrumpe), repite `node config/scripts/itg-stale-check-processes.mjs --kill`, comprueba con `tasklist` que no queda ningún `bun`, `tsgolint` o `tsc` huérfano y anota lo que pares. Si algo falla, comprueba si el mismo fallo ocurre en `origin/main` sin el merge (un worktree temporal en el commit de upstream fusionado con `pnpm install --offline --frozen-lockfile --ignore-scripts`, que borras al terminar); solo bloquean los fallos que provoca el merge. Corrígelos con commits pequeños en la rama; si no puedes, no publiques y termina explicándolo.
+6. Publica `main` solo con fast-forward: `git push fork HEAD:main`. Nunca uses `--force` ni reescribas historia de `main`.
+7. Desactiva en `toni03/orca` los workflows de upstream que el merge haya traído o reactivado: todo lo activo salvo `.github/workflows/itg-*` (`gh api repos/toni03/orca/actions/workflows --paginate --jq '.workflows[] | select(.state == "active" and (.path | test("/itg-") | not)) | .id'` y `gh workflow disable <id> --repo toni03/orca` para cada uno). En el fork fallan (secretos y runners de upstream) y consumen minutos.
+8. Lanza la release: `gh workflow run itg-release-windows.yml --repo toni03/orca --ref main`. Busca el run con `gh run list --repo toni03/orca --workflow itg-release-windows.yml --limit 1` y síguelo con `gh run watch <id> --repo toni03/orca --exit-status`.
+9. Verifica con `gh release view --repo toni03/orca` que la nueva `v<versión>-itg.0` es Latest, que tiene `latest.yml`, `orca-itg-windows-setup.exe` y su `.blockmap`, y que `latest.yml` declara esa versión. Si el workflow falla, revisa el log del job fallido; reintenta una vez con `gh run rerun <id> --failed --repo toni03/orca` solo si el fallo es transitorio (red, runner).
+10. Actualiza la rama `main` local con `git fetch fork main:main` si no está en uso en ningún worktree; si lo está, déjala y dilo en el informe.
+11. Termina con un informe breve: versión upstream, número de commits traídos, conflictos y cómo se resolvieron, resultado de las comprobaciones, enlace a la release o motivo por el que no se publicó.
+
+Al terminar, publiques o no, deja todo parado: justo antes del informe, como último comando, ejecuta `node config/scripts/itg-stale-check-processes.mjs --session --kill` (para el servidor TypeScript de esta sesión y cualquier check que siga en marcha) y anota en el informe lo que pare.
+
+Reglas: no añadas trailers `Co-Authored-By` de Claude a los commits, no abras PRs ni comentes en `stablyai/orca`, y no incluyas nombres de clientes ni datos personales en commits o informes.

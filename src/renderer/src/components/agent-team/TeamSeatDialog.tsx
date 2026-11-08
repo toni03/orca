@@ -22,7 +22,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { AgentIcon, getAgentLabel } from '@/lib/agent-catalog'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
-import type { TuiAgent } from '../../../../shared/tui-agent'
+import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 import { useAgentTeamCommand } from './use-agent-team-state'
 import { useEnabledAgents } from './use-enabled-agents'
 

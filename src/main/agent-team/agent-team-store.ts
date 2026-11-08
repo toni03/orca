@@ -7,7 +7,11 @@ import {
   createInitialAgentTeamState
 } from '../../shared/agent-team/agent-team-builtin-templates'
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
-import { durableWriteTempPath, writeFileDurable, writeFileDurableSync } from '../durable-file-write'
+import {
+  durableWriteTempPath,
+  writeFileDurable,
+  writeFileDurableSync
+} from '../filesystem/durable-file-write'
 
 const SAVE_DEBOUNCE_MS = 300
 

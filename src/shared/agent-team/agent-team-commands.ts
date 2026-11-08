@@ -36,7 +36,7 @@ import type {
   AgentTeamTrackerRef,
   AgentTeamWorkflow
 } from './agent-team-types'
-import type { TuiAgent } from '../tui-agent'
+import type { TuiAgent } from '../agent-launch/catalog/tui-agent'
 
 /** Changes that only touch the saved state. */
 export type AgentTeamStateCommand =

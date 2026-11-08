@@ -52,6 +52,7 @@ export type RepositoryApi = {
         | 'repoIcon'
         | 'upstream'
         | 'hookSettings'
+        | 'editorFormatter'
         | 'worktreeBaseRef'
         | 'worktreeBasePath'
         | 'kind'
@@ -65,6 +66,7 @@ export type RepositoryApi = {
         | 'projectGroupId'
         | 'projectGroupOrder'
         | 'forkSyncMode'
+        | 'agentWorkspaceTrust'
       >
     > & {
       externalWorktreeVisibility?: Repo['externalWorktreeVisibility'] | null

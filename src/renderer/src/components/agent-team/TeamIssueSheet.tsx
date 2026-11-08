@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatTokens } from '@/components/stats/usage-formatters'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
+import { activateAndRevealWorktree } from '@/lib/workspace/activation/worktree-activation'
 import type { AgentTeamIssue, AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import { formatDuration, issueKey, issueStatusLabel, trackerLabel } from './team-labels'
 import { TeamDecisionForm } from './TeamDecisionForm'

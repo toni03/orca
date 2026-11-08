@@ -1,5 +1,5 @@
 import type { UISlice, UISliceGet, UISliceSet } from './ui-slice-contract'
-import { findPrevLiveNonTaskStackHistoryIndex } from '../worktree-nav-history'
+import { findPrevLiveNonTaskStackHistoryIndex } from './workspace-navigation-history'
 import { hasFeatureInteraction } from '../../../../../shared/feature-interactions'
 import {
   normalizeVisibleTaskProviders,
@@ -9,6 +9,7 @@ import {
 import { PER_REPO_FETCH_LIMIT } from '../../../../../shared/work-items'
 import { isGitRepoKind } from '../../../../../shared/repo-kind'
 import { presetToQuery } from './ui-slice-hydration-sanitizers'
+import { selectTaskProviderAvailability } from '../../task-provider-connections'
 
 const LINEAR_TASK_PREFETCH_LIMIT = 36
 
@@ -113,10 +114,7 @@ export function createUiTaskActions(set: UISliceSet, get: UISliceGet): Partial<U
       )
       const visibleTaskProviders = restoreAvailableDefaultTaskProvider(
         preferredVisibleTaskProviders,
-        {
-          gitlabInstalled: state.preflightStatus?.glab?.installed === true,
-          linearConnected: state.linearStatus?.connected === true
-        },
+        selectTaskProviderAvailability(state),
         state.settings?.defaultTaskSource
       )
       const resolvedSource = resolveVisibleTaskProvider(

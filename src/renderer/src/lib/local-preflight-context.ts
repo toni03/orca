@@ -10,15 +10,15 @@ import {
 import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '../../../shared/execution-host'
 import type { Repo } from '../../../shared/repo-types'
 import type { Worktree } from '../../../shared/worktree/types'
-import type { ResolvedAgentBackgroundTarget } from './agent-background-session-contract'
 import { parseWorkspaceKey } from '../../../shared/workspace-scope'
 import { projectMatchesRepo } from '../../../shared/project-repo-match'
-import { getIndexedRepoMap, getIndexedReposById } from '@/store/worktree-repo-index'
+import { getIndexedRepoMap, getIndexedReposById } from '@/store/repos/repository-catalog-index'
 import { defaultScopeHost } from './default-creation-host'
 import { getLocalProjectRuntimeWorkspace } from './local-project-runtime-workspace'
 import { getActiveWorkspaceOwnerTarget } from './resolved-worktree-execution-host'
 import { getEnvironmentRuntimeContextKey } from './provider-runtime-context'
 import { getRendererAppPlatform } from './renderer-app-platform'
+import type { RuntimeClientTarget } from '../../../shared/runtime-client-target'
 import {
   getProjectRuntimePreflightContext,
   getCachedLocalProjectRuntimeWslContext,
@@ -56,7 +56,10 @@ export function getLocalProjectExecutionRuntimeContext(
   worktreeId?: string | null,
   appPlatform: NodeJS.Platform = getRendererAppPlatform(),
   wslContext: LocalProjectRuntimeWslContext = {},
-  resolvedTarget?: ResolvedAgentBackgroundTarget
+  resolvedTarget?: {
+    worktree: Pick<Worktree, 'repoId' | 'projectId' | 'path' | 'hostId'>
+    repo: Pick<Repo, 'id' | 'path' | 'connectionId' | 'executionHostId'>
+  }
 ): ProjectExecutionRuntimeResolution | undefined {
   if (appPlatform !== 'win32' || worktreeId === FLOATING_TERMINAL_WORKTREE_ID) {
     return undefined
@@ -148,6 +151,11 @@ export function getLocalRepoProjectExecutionRuntimeContext(
     wslAvailable: wslContext.wslAvailable,
     availableWslDistros: wslContext.availableWslDistros
   })
+}
+
+/** Runtime whose forge CLIs preflight checks; keep in step with the preflight context's host. */
+export function getLocalPreflightTarget(state: AppState): RuntimeClientTarget {
+  return getActiveWorkspaceOwnerTarget(state) ?? defaultScopeHost(state.settings)
 }
 
 export function getLocalPreflightContext(

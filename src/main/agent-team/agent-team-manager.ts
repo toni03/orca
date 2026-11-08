@@ -1,15 +1,15 @@
 import type { AgentTeamManagerSession } from '../../shared/agent-team/agent-team-ipc'
-import { makePaneKey } from '../../shared/stable-pane-id'
-import { isTuiAgent } from '../../shared/tui-agent-config'
+import { makePaneKey } from '../../shared/workspace-layout/stable-pane-id'
+import { isTuiAgent } from '../../shared/agent-launch/catalog/tui-agent-config'
 import { composeAgentTeamManagerKickoff } from '../../shared/agent-team/agent-team-manager-prompt'
 import { stepRole } from '../../shared/agent-team/agent-team-pipeline'
 import type { AgentTeamContext } from '../../shared/agent-team/agent-team-context'
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
-import type { TuiAgent } from '../../shared/tui-agent'
+import type { TuiAgent } from '../../shared/agent-launch/catalog/tui-agent'
 import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import type { AgentTeamProjectSpecRead } from './agent-team-service'
-import { runtimePathsEqual } from '../runtime/runtime-worktree-path-identity'
+import { runtimePathsEqual } from '../runtime/workspaces/catalog/runtime-worktree-path-identity'
 import {
   agentTeamManagerFolder,
   ensureAgentTeamManagerWorkspace

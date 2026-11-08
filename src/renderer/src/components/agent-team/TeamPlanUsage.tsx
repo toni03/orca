@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import type { AgentTeamSeat } from '../../../../shared/agent-team/agent-team-types'
 import type { RateLimitWindow } from '../../../../shared/rate-limit-types'
 import { agentPlanWindows } from '../../../../shared/agent-team/agent-team-plan-limits'
-import type { TuiAgent } from '../../../../shared/tui-agent'
+import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 
 const NEAR_LIMIT_PERCENT = 80
 
