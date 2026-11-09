@@ -30,4 +30,17 @@ function resolveReleaseDistribution(env = process.env) {
   }
 }
 
-module.exports = { UPSTREAM_RELEASE_REPOSITORY, resolveReleaseDistribution }
+/** Build-time constants the app reads to pick its update feed. */
+function resolveReleaseDistributionDefines(env = process.env) {
+  const { repository, versionTag } = resolveReleaseDistribution(env)
+  return {
+    ORCA_RELEASE_REPOSITORY: JSON.stringify(repository),
+    ORCA_RELEASE_VERSION_TAG: JSON.stringify(versionTag)
+  }
+}
+
+module.exports = {
+  UPSTREAM_RELEASE_REPOSITORY,
+  resolveReleaseDistribution,
+  resolveReleaseDistributionDefines
+}

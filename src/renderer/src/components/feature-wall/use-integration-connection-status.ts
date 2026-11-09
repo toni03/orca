@@ -1,10 +1,10 @@
 import { useShallow } from 'zustand/react/shallow'
 import { selectTaskProviderConnections } from '@/store/task-provider-connections'
-import type { TaskProviderConnections } from '../../../../shared/task-providers'
+import type { TaskProviderConnections } from '../../../../shared/work-items/task-providers'
 import type { Repo } from '../../../../shared/repo-types'
 import { useAppStore } from '@/store'
 import { getLocalPreflightContext, localPreflightContextKey } from '@/lib/local-preflight-context'
-import { getProviderRuntimeContextKey } from '@/lib/provider-runtime-context'
+import { getProviderRuntimeContextKey } from '@/runtime/hosts/observations/provider-runtime-context'
 
 export type IntegrationStepState = 'active' | 'done' | 'upcoming'
 

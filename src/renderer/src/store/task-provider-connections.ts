@@ -13,7 +13,7 @@ import type { RuntimeClientTarget } from '../../../shared/runtime-client-target'
 import type {
   TaskProviderAvailability,
   TaskProviderConnections
-} from '../../../shared/task-providers'
+} from '../../../shared/work-items/task-providers'
 
 function isSameRuntimeTarget(left: RuntimeClientTarget, right: RuntimeClientTarget): boolean {
   return left.kind === 'environment'
