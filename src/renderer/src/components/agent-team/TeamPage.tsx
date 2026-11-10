@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { MessagesSquare, Pause, Play, X } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
@@ -18,7 +17,7 @@ import { TeamActivity } from './TeamActivity'
 import { TeamInbox } from './TeamInbox'
 import { TeamSettings } from './TeamSettings'
 import { TeamManagerPanel } from './TeamManagerPanel'
-import { TeamPlanUsageChip, useTeamPlanUsage } from './TeamPlanUsage'
+import { useTeamManagerView } from './team-manager-view'
 import { formatDuration } from './team-labels'
 import { useAgentTeamCommand, useAgentTeamState } from './use-agent-team-state'
 import { useNow } from './use-now'
@@ -61,9 +60,9 @@ export default function TeamPage(): React.JSX.Element {
   const closeTeamPage = useAppStore((s) => s.closeTeamPage)
   const tab = useAppStore((s) => s.teamPageTab)
   const setTab = useAppStore((s) => s.setTeamPageTab)
-  const [managerOpen, setManagerOpen] = useState(false)
+  const [managerView, setManagerView] = useTeamManagerView()
+  const managerOpen = managerView !== 'closed'
   const now = useNow(60_000)
-  const plan = useTeamPlanUsage(state?.seats ?? [])
   const today = state ? activityTotals(state, lastDaysRange(1, now), now) : null
   const needsYou = state?.issues.filter((issue) => issue.status === 'needs-you').length ?? 0
 
@@ -75,7 +74,6 @@ export default function TeamPage(): React.JSX.Element {
         </h1>
         {state ? <TeamSummary state={state} /> : null}
         <span className="ml-auto flex items-center gap-2">
-          <TeamPlanUsageChip rows={plan} />
           {state ? (
             <Button
               size="sm"
@@ -95,7 +93,7 @@ export default function TeamPage(): React.JSX.Element {
             size="sm"
             variant={managerOpen ? 'secondary' : 'default'}
             aria-pressed={managerOpen}
-            onClick={() => setManagerOpen((open) => !open)}
+            onClick={() => setManagerView(managerOpen ? 'closed' : 'docked')}
           >
             <MessagesSquare />
             {translate('auto.components.agentTeam.TeamPage.manager', 'Manager')}
@@ -131,7 +129,9 @@ export default function TeamPage(): React.JSX.Element {
                 setTab(value)
               }
             }}
-            className="flex min-h-0 min-w-0 flex-1 flex-col"
+            className={
+              managerView === 'expanded' ? 'hidden' : 'flex min-h-0 min-w-0 flex-1 flex-col'
+            }
           >
             <div className="mx-5 mt-3 flex items-center gap-3">
               <TabsList>
@@ -168,7 +168,7 @@ export default function TeamPage(): React.JSX.Element {
                 <TeamBoard
                   state={state}
                   onOpenSettings={() => setTab('settings')}
-                  onOpenManager={() => setManagerOpen(true)}
+                  onOpenManager={() => setManagerView('docked')}
                 />
               </div>
             </TabsContent>
@@ -188,7 +188,13 @@ export default function TeamPage(): React.JSX.Element {
               </div>
             </TabsContent>
           </Tabs>
-          {managerOpen ? <TeamManagerPanel onClose={() => setManagerOpen(false)} /> : null}
+          {managerOpen ? (
+            <TeamManagerPanel
+              expanded={managerView === 'expanded'}
+              onExpandedChange={(expanded) => setManagerView(expanded ? 'expanded' : 'docked')}
+              onClose={() => setManagerView('closed')}
+            />
+          ) : null}
         </div>
       )}
     </div>

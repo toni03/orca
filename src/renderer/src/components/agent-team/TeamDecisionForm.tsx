@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { openAssignment } from '../../../../shared/agent-team/agent-team-pipeline'
 import type { AgentTeamUserDecision } from '../../../../shared/agent-team/agent-team-pipeline'
 import type { AgentTeamIssue } from '../../../../shared/agent-team/agent-team-types'
+import { openReviewLabel } from './team-labels'
 
 type Props = {
   issue: AgentTeamIssue
@@ -145,10 +146,7 @@ export function TeamDecisionForm({
               <Button size="sm" variant="outline" asChild>
                 <a href={issue.mergeRequest.url} target="_blank" rel="noreferrer">
                   <GitPullRequest />
-                  {translate(
-                    'auto.components.agentTeam.TeamDecisionForm.openMergeRequest',
-                    'Open merge request'
-                  )}
+                  {openReviewLabel(issue.mergeRequest.url)}
                 </a>
               </Button>
             ) : null}

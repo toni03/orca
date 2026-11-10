@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { formatTokens } from '@/components/stats/usage-formatters'
+import { TeamIssueDescription } from './TeamIssueDescription'
 import { cn } from '@/lib/utils'
 import type {
   AgentTeamAssignment,
@@ -209,7 +210,7 @@ export function IssueDetails({
           <SectionTitle>
             {translate('auto.components.agentTeam.TeamIssueSheet.description', 'Description')}
           </SectionTitle>
-          <p className="whitespace-pre-wrap text-sm">{issue.body.trim()}</p>
+          <TeamIssueDescription issue={issue} />
         </section>
       ) : null}
       {issue.criteria.length > 0 ? (

@@ -2,6 +2,7 @@ import type { AgentTeamCommand } from '../../shared/agent-team/agent-team-comman
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
 import type { TuiAgent } from '../../shared/tui-agent'
 import type {
+  AgentTeamIssueLiveStatus,
   AgentTeamManagerActivity,
   AgentTeamManagerSession
 } from '../../shared/agent-team/agent-team-ipc'
@@ -21,5 +22,7 @@ export type AgentTeamApi = {
   /** The live Manager session, if one is open. */
   managerSession: () => Promise<AgentTeamManagerSession | null>
   managerActivity: (from: number, to: number) => Promise<AgentTeamManagerActivity>
+  /** Labels and state from the tracker, and the branch's pull request, read on demand. */
+  issueLiveStatus: (issueId: string) => Promise<AgentTeamIssueLiveStatus>
   onChanged: (callback: (state: AgentTeamState) => void) => () => void
 }

@@ -1,4 +1,6 @@
 import type { TuiAgent } from '../tui-agent'
+import type { CheckStatus, PRReviewDecision } from '../github/pull-request-types'
+import type { HostedReviewProvider, HostedReviewState } from '../hosted-review'
 
 export const AGENT_TEAM_CHANNELS = {
   getState: 'agentTeam:getState',
@@ -8,6 +10,7 @@ export const AGENT_TEAM_CHANNELS = {
   launchManager: 'agentTeam:launchManager',
   managerSession: 'agentTeam:managerSession',
   managerActivity: 'agentTeam:managerActivity',
+  issueLiveStatus: 'agentTeam:issueLiveStatus',
   changed: 'agentTeam:changed'
 } as const
 
@@ -23,3 +26,16 @@ export type AgentTeamManagerSession = {
 
 /** Tokens and session time the Manager used in a range, read from local agent transcripts. */
 export type AgentTeamManagerActivity = { tokens: number; activeMs: number }
+
+/** The tracker issue and the branch's pull request as their services report them now. */
+export type AgentTeamIssueLiveStatus = {
+  tracker: { state: string; open: boolean; labels: string[] } | null
+  review: {
+    provider: HostedReviewProvider
+    number: number
+    url: string
+    state: HostedReviewState
+    checks: CheckStatus
+    reviewDecision?: PRReviewDecision
+  } | null
+}

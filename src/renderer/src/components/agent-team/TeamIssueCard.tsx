@@ -19,6 +19,7 @@ import {
   formatDuration,
   issueKey,
   needsYouLabel,
+  openReviewLabel,
   trackerLabel,
   waitReasonLabel
 } from './team-labels'
@@ -146,10 +147,7 @@ export function TeamIssueCard({
             <TeamIconLink
               href={issue.mergeRequest.url}
               className="inline-flex size-5 items-center justify-center rounded hover:bg-accent hover:text-foreground"
-              label={translate(
-                'auto.components.agentTeam.TeamIssueCard.openMergeRequest',
-                'Open the merge request'
-              )}
+              label={openReviewLabel(issue.mergeRequest.url)}
             >
               <GitPullRequest className="size-3" />
             </TeamIconLink>

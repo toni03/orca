@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ExternalLink, FolderGit2, GitPullRequest } from 'lucide-react'
+import { ExternalLink, FolderGit2, GitPullRequest, X } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import { Badge } from '@/components/ui/badge'
@@ -14,12 +14,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatTokens } from '@/components/stats/usage-formatters'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import type { AgentTeamIssue, AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
-import { formatDuration, issueKey, issueStatusLabel, trackerLabel } from './team-labels'
+import {
+  formatDuration,
+  issueKey,
+  issueStatusLabel,
+  openReviewLabel,
+  trackerLabel
+} from './team-labels'
 import { TeamDecisionForm } from './TeamDecisionForm'
 import { TeamIconButton, TeamIconLink } from './TeamIconButton'
 import { changeTotals, TeamIssueChanges, useIssueBranchChanges } from './TeamIssueChanges'
 import { TeamProjectAvatar } from './TeamProjectAvatar'
 import { IssueDetails, RoundReports, SessionsByRound } from './TeamIssueSheetSections'
+import { TeamIssueActions, TeamIssueLiveStatus } from './TeamIssueSheetActions'
 import { useAgentTeamCommand } from './use-agent-team-state'
 import { useNow } from './use-now'
 
@@ -77,7 +84,7 @@ function SheetBody({
 
   return (
     <>
-      <div className="border-b border-border pr-8">
+      <div className="border-b border-border">
         <SheetHeader>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <TeamProjectAvatar repo={repo} name={projectName} />
@@ -104,10 +111,7 @@ function SheetBody({
                 <TeamIconLink
                   href={issue.mergeRequest.url}
                   className={linkClass}
-                  label={translate(
-                    'auto.components.agentTeam.TeamIssueCard.openMergeRequest',
-                    'Open the merge request'
-                  )}
+                  label={openReviewLabel(issue.mergeRequest.url)}
                 >
                   <GitPullRequest className="size-3.5" />
                 </TeamIconLink>
@@ -127,6 +131,13 @@ function SheetBody({
                   <FolderGit2 />
                 </TeamIconButton>
               ) : null}
+              <TeamIconButton
+                size="icon-sm"
+                label={translate('auto.components.agentTeam.TeamIssueSheet.close', 'Close')}
+                onClick={onClose}
+              >
+                <X />
+              </TeamIconButton>
             </span>
           </div>
           <SheetTitle>{issue.title}</SheetTitle>
@@ -159,6 +170,8 @@ function SheetBody({
               ) : null}
             </span>
           </SheetDescription>
+          <TeamIssueLiveStatus issue={issue} />
+          <TeamIssueActions issue={issue} state={state} onDiscarded={onClose} />
         </SheetHeader>
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-4 scrollbar-sleek">
@@ -231,7 +244,8 @@ export function TeamIssueSheet({ issueId, state, onClose }: Props): React.JSX.El
   const issue = issueId ? state.issues.find((candidate) => candidate.id === issueId) : undefined
   return (
     <Sheet open={issue !== undefined} onOpenChange={(open) => (open ? undefined : onClose())}>
-      <SheetContent className="w-full sm:max-w-[720px]">
+      {/* Start below the window controls so this sheet's close button is never mistaken for Orca's. */}
+      <SheetContent showCloseButton={false} className="top-9 h-auto w-full sm:max-w-[720px]">
         {issue ? <SheetBody key={issue.id} issue={issue} state={state} onClose={onClose} /> : null}
       </SheetContent>
     </Sheet>

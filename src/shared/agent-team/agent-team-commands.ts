@@ -15,6 +15,7 @@ import {
 import {
   approveIssues,
   createIssue,
+  holdIssues,
   reorderQueue,
   updateIssueDetails,
   updateWorkflow,
@@ -85,8 +86,10 @@ export type AgentTeamStateCommand =
       criteria?: string[]
       scope?: AgentTeamIssueScope
       tracker?: AgentTeamTrackerRef
+      dependsOn?: string[]
     }
   | { kind: 'issue.approve'; issueIds: string[] }
+  | { kind: 'issue.hold'; issueIds: string[] }
   | { kind: 'queue.reorder'; issueIds: string[] }
   | { kind: 'workflow.update'; patch: Partial<AgentTeamWorkflow> }
 
@@ -147,6 +150,8 @@ export function applyAgentTeamStateCommand(
       return updateIssueDetails(state, command.issueId, command, ids.now)
     case 'issue.approve':
       return approveIssues(state, command.issueIds, ids.now)
+    case 'issue.hold':
+      return holdIssues(state, command.issueIds, ids.now)
     case 'queue.reorder':
       return reorderQueue(state, command.issueIds)
     case 'workflow.update':

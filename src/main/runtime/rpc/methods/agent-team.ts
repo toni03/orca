@@ -4,12 +4,38 @@ import {
   AgentTeamContextParams,
   AgentTeamIssueAnswerParams,
   AgentTeamIssueDecideParams,
+  AgentTeamIssueIdsParams,
   AgentTeamIssueListParams,
+  AgentTeamIssueUpdateParams,
   AgentTeamReportParams,
   AgentTeamSeatPauseParams
 } from '../../../../shared/rpc-contract/agent-team-params'
-import type { AgentTeamStepResult } from '../../../../shared/agent-team/agent-team-types'
+import type {
+  AgentTeamState,
+  AgentTeamStepResult
+} from '../../../../shared/agent-team/agent-team-types'
 import { requireAgentTeamService } from '../../../agent-team/agent-team-service-registry'
+
+/** An issue by its Orca id or, when unambiguous, its tracker key (`#48`, `API-128`). */
+function resolveIssueId(state: AgentTeamState, ref: string): string {
+  const wanted = ref.trim()
+  if (state.issues.some((issue) => issue.id === wanted)) {
+    return wanted
+  }
+  const key = wanted.replace(/^#/, '').toLowerCase()
+  const matches = state.issues.filter(
+    (issue) =>
+      issue.status !== 'discarded' && issue.tracker?.key.replace(/^#/, '').toLowerCase() === key
+  )
+  if (matches.length === 1) {
+    return matches[0].id
+  }
+  throw new Error(
+    matches.length > 1
+      ? `${ref} matches several issues; pass the issue id from orca team issues.`
+      : `No issue ${ref}. Run orca team issues to list them.`
+  )
+}
 
 function stepResult(params: {
   result: 'done' | 'blocked' | 'pass' | 'changes'
@@ -68,7 +94,7 @@ export const AGENT_TEAM_METHODS = [
     handler: (params) => {
       requireAgentTeamService().execute({
         kind: 'issue.decide',
-        issueId: params.issueId,
+        issueId: resolveIssueId(requireAgentTeamService().getState(), params.issueId),
         decision: { kind: 'answer', note: params.text }
       })
       return { answered: true }
@@ -81,7 +107,7 @@ export const AGENT_TEAM_METHODS = [
     handler: (params) => {
       requireAgentTeamService().execute({
         kind: 'issue.decide',
-        issueId: params.issueId,
+        issueId: resolveIssueId(requireAgentTeamService().getState(), params.issueId),
         decision: params.decision
       })
       return { decided: true }
@@ -128,6 +154,62 @@ export const AGENT_TEAM_METHODS = [
         seats: state.seats.map((seat) => ({ id: seat.id, name: seat.name })),
         projects: service.projectLabels()
       }
+    }
+  }),
+  defineMethod({
+    name: 'team.issueApprove',
+    permission: 'workspace',
+    params: AgentTeamIssueIdsParams,
+    handler: (params) => {
+      const service = requireAgentTeamService()
+      const issueIds = params.issueIds.map((ref) => resolveIssueId(service.getState(), ref))
+      const state = service.execute({ kind: 'issue.approve', issueIds })
+      return { issues: state.issues.filter((issue) => issueIds.includes(issue.id)) }
+    }
+  }),
+  defineMethod({
+    name: 'team.issueHold',
+    permission: 'workspace',
+    params: AgentTeamIssueIdsParams,
+    handler: (params) => {
+      const service = requireAgentTeamService()
+      const issueIds = params.issueIds.map((ref) => resolveIssueId(service.getState(), ref))
+      const state = service.execute({ kind: 'issue.hold', issueIds })
+      return { issues: state.issues.filter((issue) => issueIds.includes(issue.id)) }
+    }
+  }),
+  defineMethod({
+    name: 'team.issueUpdate',
+    permission: 'workspace',
+    params: AgentTeamIssueUpdateParams,
+    handler: (params) => {
+      const service = requireAgentTeamService()
+      const current = service.getState()
+      const issueId = resolveIssueId(current, params.issueId)
+      const state = service.execute({
+        kind: 'issue.update',
+        issueId,
+        ...(params.title !== undefined ? { title: params.title } : {}),
+        ...(params.body !== undefined ? { body: params.body } : {}),
+        ...(params.criteria ? { criteria: params.criteria } : {}),
+        ...(params.dependsOn
+          ? { dependsOn: params.dependsOn.map((ref) => resolveIssueId(current, ref)) }
+          : {})
+      })
+      return { issue: state.issues.find((issue) => issue.id === issueId) ?? null }
+    }
+  }),
+  defineMethod({
+    name: 'team.issueDiscard',
+    permission: 'workspace',
+    params: AgentTeamIssueIdsParams,
+    handler: (params) => {
+      const service = requireAgentTeamService()
+      const issueIds = params.issueIds.map((ref) => resolveIssueId(service.getState(), ref))
+      for (const issueId of issueIds) {
+        service.execute({ kind: 'issue.decide', issueId, decision: { kind: 'discard' } })
+      }
+      return { discarded: issueIds }
     }
   }),
   defineMethod({

@@ -141,3 +141,17 @@ export function formatDuration(ms: number): string {
     minutes: minutes % 60
   })
 }
+
+/** GitLab calls a review a merge request; GitHub and the other hosts call it a pull request. */
+export function isMergeRequestUrl(url: string): boolean {
+  return /\/merge_requests\/\d+/.test(url)
+}
+
+export function openReviewLabel(url: string): string {
+  return isMergeRequestUrl(url)
+    ? translate(
+        'auto.components.agentTeam.TeamIssueCard.openMergeRequest',
+        'Open the merge request'
+      )
+    : translate('auto.components.agentTeam.TeamIssueCard.openPullRequest', 'Open the pull request')
+}

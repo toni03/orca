@@ -60,3 +60,17 @@ export const AgentTeamIssueAnswerParams = z.object({
   issueId: requiredString('Missing --issue'),
   text: requiredString('Missing --text')
 })
+
+/** Issues that move between Not approved and the queue together. */
+export const AgentTeamIssueIdsParams = z.object({
+  issueIds: z.array(z.string().trim().min(1)).min(1, 'Pass --issue <issueId>')
+})
+
+export const AgentTeamIssueUpdateParams = z.object({
+  issueId: requiredString('Missing --issue'),
+  title: z.string().optional(),
+  body: z.string().optional(),
+  criteria: z.array(z.string()).optional(),
+  /** Replaces the dependencies; an empty list clears them. */
+  dependsOn: z.array(z.string()).optional()
+})

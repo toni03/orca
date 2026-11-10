@@ -53,6 +53,55 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
     ]
   },
   {
+    path: ['team', 'issue', 'approve'],
+    summary: 'Approve issues so they join the priority queue',
+    usage: 'orca team issue approve --issue <issueId>... [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'issue'],
+    repeatableFlags: ['issue'],
+    notes: [
+      'An issue is its Orca id or its tracker key (#48, API-128) when only one issue has it.'
+    ],
+    examples: ['orca team issue approve --issue #48 --issue #49']
+  },
+  {
+    path: ['team', 'issue', 'hold'],
+    summary: 'Move queued issues that have not started back to Not approved',
+    usage: 'orca team issue hold --issue <issueId>... [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'issue'],
+    repeatableFlags: ['issue'],
+    notes: ['Issues a seat already works on cannot be held; discard them or wait.']
+  },
+  {
+    path: ['team', 'issue', 'update'],
+    summary: 'Change the title, description, criteria or dependencies of an issue',
+    usage:
+      'orca team issue update --issue <issueId> [--title <text>] [--body <text>] [--criterion <text>]... [--depends-on <issueId>]... [--no-dependencies] [--json]',
+    allowedFlags: [
+      ...GLOBAL_FLAGS,
+      'issue',
+      'title',
+      'body',
+      'criterion',
+      'depends-on',
+      'no-dependencies'
+    ],
+    repeatableFlags: ['criterion', 'depends-on'],
+    notes: [
+      '--criterion and --depends-on replace the whole list; --no-dependencies clears the dependencies.'
+    ],
+    examples: ['orca team issue update --issue #48 --no-dependencies']
+  },
+  {
+    path: ['team', 'issue', 'discard'],
+    summary: 'Discard issues: they leave the board and any running session stops',
+    usage: 'orca team issue discard --issue <issueId>... [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'issue'],
+    repeatableFlags: ['issue'],
+    notes: [
+      'The tracker issue stays as it is; close it there if needed. Orca removes the issue worktree.'
+    ]
+  },
+  {
     path: ['team', 'seat', 'pause'],
     summary: 'Pause agent team seats so they take no new steps',
     usage: 'orca team seat pause (--seat <seatId>... | --agent <agent>) [--json]',

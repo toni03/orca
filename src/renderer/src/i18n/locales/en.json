@@ -19296,7 +19296,8 @@
           "moveDown": "Move down in the queue",
           "openMergeRequest": "Open the merge request",
           "escalated": "Escalated · {{round}}/{{rounds}}",
-          "readyToMerge": "Ready to merge"
+          "readyToMerge": "Ready to merge",
+          "openPullRequest": "Open the pull request"
         },
         "TeamManagerPanel": {
           "title": "Manager",
@@ -19305,7 +19306,9 @@
           "scope": "All projects · {{agent}}",
           "noSession": "All projects · not started",
           "limitUntil": "Plan limit reached · the Manager replies after {{at}}",
-          "limit": "Plan limit reached · the Manager replies when the plan window resets"
+          "limit": "Plan limit reached · the Manager replies when the plan window resets",
+          "collapse": "Show the board beside the Manager",
+          "expand": "Show only the Manager"
         },
         "TeamManagerStartForm": {
           "description": "The Manager drafts issues, registers them in each project tracker following its spec and adds them to the queue. It shows you a draft before creating anything. It runs in its own Agent Team Manager project (~/.orca/agent-team/manager).",
@@ -19521,7 +19524,27 @@
           "earlierRounds": "Rounds 1–{{last}} reports",
           "files": "{{count}} files",
           "overview": "Overview",
-          "changes": "Changes"
+          "changes": "Changes",
+          "close": "Close",
+          "reviewOpen": "Open",
+          "reviewDraft": "Draft",
+          "reviewMerged": "Merged",
+          "reviewClosed": "Closed",
+          "checksPassed": "checks passed",
+          "checksFailed": "checks failed",
+          "checksRunning": "checks running",
+          "trackerOpen": "Open · {{state}}",
+          "trackerClosed": "Closed · {{state}}",
+          "mergeRequestState": "MR !{{number}}",
+          "pullRequestState": "PR #{{number}}",
+          "hold": "Hold",
+          "editDependencies": "Dependencies",
+          "dependsOnPicker": "Starts after these issues are done",
+          "discard": "Discard",
+          "discardTitle": "Discard {{key}}?",
+          "discardRunning": "A seat is working on it: its session stops and the worktree is removed. The tracker issue stays as it is.",
+          "discardIdle": "It leaves the board and its worktree is removed. The tracker issue stays as it is.",
+          "cancel": "Cancel"
         },
         "TeamPlanUsage": {
           "fiveHour": "5 h",
@@ -19543,7 +19566,8 @@
           "todayTime": "{{time}} today",
           "history": "History",
           "label": "Seats",
-          "limit": "Plan limit"
+          "limit": "Plan limit",
+          "noTeam": "No team"
         },
         "TeamIssueChanges": {
           "noWorktree": "This issue has no worktree open, so there is nothing to compare.",
@@ -20211,7 +20235,45 @@
         "runBrowser_one": "Used the browser {{count}} time",
         "runPlan_one": "Updated the plan {{count}} time",
         "runLiveBrowser_one": "Using the browser {{count}} time",
-        "runLivePlan_one": "Updating the plan {{count}} time"
+        "runLivePlan_one": "Updating the plan {{count}} time",
+        "team": {
+          "context_one": "Read the team state",
+          "context_other": "Read the team state {{count}} times",
+          "contextLive": "Reading the team state",
+          "issues_one": "Listed issues",
+          "issues_other": "Listed issues {{count}} times",
+          "issuesLive": "Listing issues",
+          "issueAdd_one": "Added {{count}} issue",
+          "issueAdd_other": "Added {{count}} issues",
+          "issueAddLive": "Adding issues",
+          "issueApprove_one": "Approved issues",
+          "issueApprove_other": "Approved issues {{count}} times",
+          "issueApproveLive": "Approving issues",
+          "issueHold_one": "Held issues",
+          "issueHold_other": "Held issues {{count}} times",
+          "issueHoldLive": "Holding issues",
+          "issueUpdate_one": "Updated {{count}} issue",
+          "issueUpdate_other": "Updated {{count}} issues",
+          "issueUpdateLive": "Updating issues",
+          "issueDiscard_one": "Discarded issues",
+          "issueDiscard_other": "Discarded issues {{count}} times",
+          "issueDiscardLive": "Discarding issues",
+          "issueAnswer_one": "Answered {{count}} issue",
+          "issueAnswer_other": "Answered {{count}} issues",
+          "issueAnswerLive": "Answering issues",
+          "seatPause_one": "Paused seats",
+          "seatPause_other": "Paused seats {{count}} times",
+          "seatPauseLive": "Pausing seats",
+          "seatResume_one": "Resumed seats",
+          "seatResume_other": "Resumed seats {{count}} times",
+          "seatResumeLive": "Resuming seats",
+          "report_one": "Reported the step",
+          "report_other": "Reported {{count}} times",
+          "reportLive": "Reporting",
+          "other_one": "Ran {{count}} team command",
+          "other_other": "Ran {{count}} team commands",
+          "otherLive": "Running team commands"
+        }
       },
       "providerFrame": {
         "byteCount_one": "{{count}} byte",

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { SquareTerminal, X } from 'lucide-react'
+import { Maximize2, Minimize2, SquareTerminal, X } from 'lucide-react'
 import { getIntlLocale, translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import { agentsAtPlanLimit } from '../../../../shared/agent-team/agent-team-plan-limits'
@@ -50,7 +50,15 @@ function useManagerSession(): {
 }
 
 /** The Manager conversation docked beside the board, drawn as Orca's native chat over its terminal. */
-export function TeamManagerPanel({ onClose }: { onClose: () => void }): React.JSX.Element {
+export function TeamManagerPanel({
+  expanded,
+  onExpandedChange,
+  onClose
+}: {
+  expanded: boolean
+  onExpandedChange: (expanded: boolean) => void
+  onClose: () => void
+}): React.JSX.Element {
   const { session, loading, setSession } = useManagerSession()
   const [focused, setFocused] = useState(false)
   const chatReady = session?.tabId && session.paneKey
@@ -63,7 +71,11 @@ export function TeamManagerPanel({ onClose }: { onClose: () => void }): React.JS
 
   return (
     <aside
-      className="flex min-h-0 w-[420px] shrink-0 flex-col border-l border-border"
+      className={
+        expanded
+          ? 'flex min-h-0 min-w-0 flex-1 flex-col'
+          : 'flex min-h-0 w-[420px] shrink-0 flex-col border-l border-border'
+      }
       onFocusCapture={() => setFocused(true)}
       onBlurCapture={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -103,6 +115,25 @@ export function TeamManagerPanel({ onClose }: { onClose: () => void }): React.JS
             <SquareTerminal />
           </TeamIconButton>
         ) : null}
+        <TeamIconButton
+          variant="ghost"
+          size="icon-sm"
+          aria-pressed={expanded}
+          label={
+            expanded
+              ? translate(
+                  'auto.components.agentTeam.TeamManagerPanel.collapse',
+                  'Show the board beside the Manager'
+                )
+              : translate(
+                  'auto.components.agentTeam.TeamManagerPanel.expand',
+                  'Show only the Manager'
+                )
+          }
+          onClick={() => onExpandedChange(!expanded)}
+        >
+          {expanded ? <Minimize2 /> : <Maximize2 />}
+        </TeamIconButton>
         <TeamIconButton
           variant="ghost"
           size="icon-sm"
