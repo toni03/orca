@@ -3,7 +3,7 @@ import type { GitLabWorkItem } from '../../../../shared/gitlab-types'
 import type { JiraIssue } from '../../../../shared/jira/jira-types'
 import type { Repo } from '../../../../shared/repo-types'
 import type { LinkedWorkItemSummary } from '@/lib/new-workspace'
-import { getWorkItemRepo } from '@/lib/work-item-repo-row'
+import { getWorkItemRepo } from '@/lib/work-items/work-item-repo-row'
 import type { AppState } from '@/store/types'
 import {
   getGitHubWorkItemWorkspaceSeed,

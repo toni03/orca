@@ -9,7 +9,7 @@ import { selectFolderWorkspaces } from '@/store/workspaces/catalog/workspace-rec
 import { JiraIcon } from '@/components/icons/JiraIcon'
 import { getTaskPageRepoSourceContext } from '@/components/task-page/task-page-source-context'
 import { getJiraPresets } from '@/components/task-page/task-page-localized-options'
-import { getWorkItemRepo } from '@/lib/work-item-repo-row'
+import { getWorkItemRepo } from '@/lib/work-items/work-item-repo-row'
 import { openAppHttpLink } from '@/lib/browser/navigation/app-http-link-open'
 import {
   openComposerForGitHubWorkItem,
