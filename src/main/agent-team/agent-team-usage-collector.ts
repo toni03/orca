@@ -4,7 +4,7 @@ import type {
   AgentTeamIssue,
   AgentTeamState
 } from '../../shared/agent-team/agent-team-types'
-import type { AutomationRunUsage } from '../../shared/automations-types'
+import type { AutomationRunUsage } from '../../shared/automations/history/automation-run'
 import type { ClaudeUsageStore } from '../claude-usage/store'
 import type { CodexUsageStore } from '../codex-usage/store'
 import type { AgentTeamStore } from './agent-team-store'

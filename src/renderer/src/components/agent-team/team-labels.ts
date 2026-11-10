@@ -1,5 +1,5 @@
 import { translate } from '@/i18n/i18n'
-import type { TaskProvider } from '../../../../shared/task-providers'
+import type { TaskProvider } from '../../../../shared/work-items/task-providers'
 import type { AgentTeamWaitReason } from '../../../../shared/agent-team/agent-team-scheduler'
 import type {
   AgentTeamIssue,

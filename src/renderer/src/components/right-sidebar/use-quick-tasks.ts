@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppStore } from '@/store'
-import { PER_REPO_FETCH_LIMIT } from '@/lib/new-workspace'
+import { PER_REPO_FETCH_LIMIT } from '../../../../shared/work-items/work-item-pagination'
 import { gitLabApiFor } from '@/runtime/repository-gitlab/gitlab-owner-api'
 import { useTaskProviderConnections } from '@/components/feature-wall/use-integration-connection-status'
 import { getTaskPageRepoSourceContext } from '@/components/task-page/task-page-source-context'
@@ -8,7 +8,7 @@ import {
   GITLAB_TASK_FETCH_CONCURRENCY,
   gitLabTaskRepoSelector
 } from '@/components/task-page/gitlab/use-task-page-gitlab-loading'
-import { getTaskPresetQuery } from '../../../../shared/task-preset-query'
+import { getTaskPresetQuery } from '../../../../shared/work-items/task-preset-query'
 import { mapSettledWithConcurrency } from '../../../../shared/map-with-concurrency'
 import type { GitHubWorkItem } from '../../../../shared/github/work-item-types'
 import type { GitLabWorkItem } from '../../../../shared/gitlab-types'

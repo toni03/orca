@@ -4,7 +4,7 @@ import {
   getLocalPreflightTarget,
   localPreflightContextKey
 } from '@/lib/local-preflight-context'
-import { getProviderRuntimeContextKey } from '@/lib/provider-runtime-context'
+import { getProviderRuntimeContextKey } from '@/runtime/hosts/observations/provider-runtime-context'
 import { getTaskPageRepoSourceContext } from '@/lib/task-repo-source-context'
 import { taskSourceRuntimeTarget } from '@/lib/task-source-runtime-target'
 import { isGitRepoKind } from '../../../shared/repo-kind'
@@ -13,7 +13,7 @@ import type { RuntimeClientTarget } from '../../../shared/runtime-client-target'
 import type {
   TaskProviderAvailability,
   TaskProviderConnections
-} from '../../../shared/task-providers'
+} from '../../../shared/work-items/task-providers'
 
 function isSameRuntimeTarget(left: RuntimeClientTarget, right: RuntimeClientTarget): boolean {
   return left.kind === 'environment'

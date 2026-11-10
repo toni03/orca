@@ -15,6 +15,7 @@ import { createViteCacheRetentionPlugin } from './config/build-plugins/vite-cach
 import { MAIN_BUILD_ENTRY_POINTS } from './config/build-plugins/main-build-entry-points'
 import { createPlainNodeEntryGuardPlugin } from './config/build-plugins/plain-node-entry-guard'
 import { createDevServeConfig } from './config/build-plugins/dev-serve-config'
+import { reactPluginOptions } from './config/build-plugins/react-compiler'
 import { resolveBuildSourceCommit } from './config/scripts/build-identity/build-source-commit.mjs'
 
 const BUNDLED_MAIN_DEPENDENCIES = new Set([
@@ -32,6 +33,7 @@ const BUNDLED_MAIN_DEPENDENCIES = new Set([
   'unified',
   'remark-parse',
   'remark-gfm',
+  'hast-util-from-html-isomorphic',
   // Windows NSIS copies app.asar before external resources; bootstrap must not race resources/node_modules.
   'zod'
 ])
@@ -74,13 +76,9 @@ function createDarkBuildMarkerPlugin(): Plugin {
 // Pin official skill installs to the bundled commit on every channel; main installs, renderer prints the command.
 const ORCA_BUILD_COMMIT_LITERAL = JSON.stringify(resolveBuildSourceCommit())
 // The updater reads releases from the repository the build was published to (forks set it).
-const RELEASE_DISTRIBUTION = createRequire(import.meta.url)(
+const RELEASE_DISTRIBUTION_DEFINES = createRequire(import.meta.url)(
   './config/release-distribution.cjs'
-).resolveReleaseDistribution()
-const RELEASE_DISTRIBUTION_DEFINES = {
-  ORCA_RELEASE_REPOSITORY: JSON.stringify(RELEASE_DISTRIBUTION.repository),
-  ORCA_RELEASE_VERSION_TAG: JSON.stringify(RELEASE_DISTRIBUTION.versionTag)
-}
+).resolveReleaseDistributionDefines()
 
 function createStartupDiagnosticsBanner(chunkName: string): string {
   return `
@@ -293,7 +291,7 @@ export const electronViteConfig: UserConfig = {
       }
     },
     plugins: [
-      react(),
+      react(reactPluginOptions()),
       tailwindcss(),
       createPdfjsViewerAssetsPlugin(),
       createViteCacheRetentionPlugin()

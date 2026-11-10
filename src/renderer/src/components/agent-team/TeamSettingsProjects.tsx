@@ -13,7 +13,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
-import { TASK_PROVIDERS } from '../../../../shared/task-providers'
+import { TASK_PROVIDERS } from '../../../../shared/work-items/task-providers'
 import { getRepoRoutingConnectionId } from '../../../../shared/execution-host'
 import { effectiveProjectSpecStorage } from '../../../../shared/agent-team/agent-team-spec-storage'
 import { TeamProjectSpecEditor } from './TeamProjectSpecEditor'

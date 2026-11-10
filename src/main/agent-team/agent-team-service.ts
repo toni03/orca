@@ -44,7 +44,7 @@ import type { AgentTeamContext } from '../../shared/agent-team/agent-team-contex
 import type { TuiAgent } from '../../shared/agent-launch/catalog/tui-agent'
 import { getRepoRoutingConnectionId } from '../../shared/execution-host'
 import { watchAgentTeamPlanLimits } from './agent-team-plan-limit-watch'
-import type { RateLimitService } from '../rate-limits/service'
+import type { RateLimitService } from '../rate-limits/service/rate-limit-service'
 
 const TICK_INTERVAL_MS = 30_000
 const RECONCILE_DELAY_MS = 15_000

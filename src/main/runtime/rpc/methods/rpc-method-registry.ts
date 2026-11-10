@@ -8,6 +8,7 @@ import { AUTOMATION_METHODS } from './automations/automations'
 import { AGENT_TEAM_METHODS } from './agent-team/agent-team'
 import { REPO_METHODS } from './projects/repo'
 import { WORKTREE_METHODS } from './workspaces/worktree'
+import { AGENT_ACTIVITY_METHODS } from './workspaces/agent-activity-methods'
 import { REFERENCE_METHODS } from './reference/reference'
 import { TERMINAL_METHODS } from './terminal/terminal'
 import { TERMINAL_ORPHAN_METHODS } from './terminal/terminal-orphan'
@@ -94,6 +95,7 @@ export const ALL_RPC_METHODS = [
   ...AGENT_TEAM_METHODS,
   ...REPO_METHODS,
   ...WORKTREE_METHODS,
+  ...AGENT_ACTIVITY_METHODS,
   ...REFERENCE_METHODS,
   ...AGENT_SESSION_METHODS,
   ...STRUCTURED_AGENT_SESSION_METHODS,
