@@ -120,6 +120,70 @@ export function reorderQueue(
   }
 }
 
+/** Puts queued issues that have not started back in Not approved, so no seat takes them. */
+export function holdIssues(
+  state: AgentTeamState,
+  issueIds: readonly string[],
+  now: number
+): AgentTeamState {
+  for (const id of issueIds) {
+    const issue = requireIssue(state, id)
+    if (issue.status !== 'queued' && issue.status !== 'registered') {
+      throw new AgentTeamMutationError(
+        `Issue ${id} is ${issue.status}; only queued issues that have not started can be held.`
+      )
+    }
+  }
+  const wanted = new Set(issueIds)
+  return {
+    ...state,
+    issues: state.issues.map((issue) =>
+      wanted.has(issue.id) && issue.status === 'queued'
+        ? { ...issue, status: 'registered', updatedAt: now }
+        : issue
+    )
+  }
+}
+
+function requireIssue(state: AgentTeamState, issueId: string): AgentTeamIssue {
+  const issue = state.issues.find((candidate) => candidate.id === issueId)
+  if (!issue) {
+    throw new AgentTeamMutationError(`No issue ${issueId}.`)
+  }
+  return issue
+}
+
+/** Rejects unknown issues, the issue itself, and any dependency that already waits on it. */
+function checkDependencies(
+  state: AgentTeamState,
+  issueId: string,
+  dependsOn: readonly string[]
+): void {
+  const byId = new Map(state.issues.map((issue) => [issue.id, issue]))
+  for (const id of dependsOn) {
+    if (id === issueId) {
+      throw new AgentTeamMutationError('An issue cannot depend on itself.')
+    }
+    if (!byId.has(id)) {
+      throw new AgentTeamMutationError(`No issue ${id} to depend on.`)
+    }
+  }
+  const pending = [...dependsOn]
+  const seen = new Set<string>()
+  while (pending.length > 0) {
+    const id = pending.pop()!
+    if (id === issueId) {
+      throw new AgentTeamMutationError(
+        'These dependencies would make the issues wait on each other.'
+      )
+    }
+    if (!seen.has(id)) {
+      seen.add(id)
+      pending.push(...(byId.get(id)?.dependsOn ?? []))
+    }
+  }
+}
+
 export function updateIssueDetails(
   state: AgentTeamState,
   issueId: string,
@@ -129,9 +193,15 @@ export function updateIssueDetails(
     criteria?: string[]
     scope?: AgentTeamIssueScope
     tracker?: AgentTeamTrackerRef
+    dependsOn?: string[]
   },
   now: number
 ): AgentTeamState {
+  requireIssue(state, issueId)
+  const dependsOn = patch.dependsOn ? [...new Set(patch.dependsOn)] : undefined
+  if (dependsOn) {
+    checkDependencies(state, issueId, dependsOn)
+  }
   return {
     ...state,
     issues: state.issues.map((issue) =>
@@ -145,6 +215,7 @@ export function updateIssueDetails(
               : {}),
             ...(patch.scope ? { scope: patch.scope } : {}),
             ...(patch.tracker ? { tracker: patch.tracker } : {}),
+            ...(dependsOn ? { dependsOn } : {}),
             updatedAt: now
           }
         : issue

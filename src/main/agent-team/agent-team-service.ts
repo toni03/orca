@@ -26,9 +26,11 @@ import {
 } from './agent-team-manager'
 import { agentTeamManagerFolder } from './agent-team-manager-workspace'
 import type {
+  AgentTeamIssueLiveStatus,
   AgentTeamManagerActivity,
   AgentTeamManagerSession
 } from '../../shared/agent-team/agent-team-ipc'
+import { readAgentTeamIssueLiveStatus } from './agent-team-issue-status'
 import { reconcileAgentTeamSessionsAfterRestart } from './agent-team-restart-reconcile'
 import { AgentTeamTrackerSync } from './agent-team-tracker-sync'
 import { startAgentTeamMobileAlerts } from './agent-team-mobile-alerts'
@@ -196,6 +198,13 @@ export class AgentTeamService {
         color: repo?.badgeColor ?? null
       }
     })
+  }
+
+  issueLiveStatus(issueId: string): Promise<AgentTeamIssueLiveStatus> {
+    const issue = this.store.get().issues.find((candidate) => candidate.id === issueId)
+    return issue
+      ? readAgentTeamIssueLiveStatus(this.runtime, issue)
+      : Promise.resolve({ tracker: null, review: null })
   }
 
   managerActivity(from: number, to: number): Promise<AgentTeamManagerActivity> {

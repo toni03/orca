@@ -68,7 +68,8 @@ export async function agentTeamStepPrompt(
     delivery: {
       folder: launcher.isFolderProject(issue.repoId),
       baseBranch: project?.baseBranch?.trim() || null,
-      ...(issue.mergeRequest ? { mergeRequestUrl: issue.mergeRequest.url } : {})
+      ...(issue.mergeRequest ? { mergeRequestUrl: issue.mergeRequest.url } : {}),
+      ...(issue.tracker ? { tracker: issue.tracker } : {})
     }
   })
 }

@@ -3,8 +3,10 @@ import type {
   AgentTeamIssue,
   AgentTeamRole,
   AgentTeamSeat,
-  AgentTeamStepType
+  AgentTeamStepType,
+  AgentTeamTrackerRef
 } from './agent-team-types'
+import type { TaskProvider } from '../task-providers'
 
 const ROLE_SECTION_HEADING = /^##\s+For\s+(.+?)\s*$/i
 const ANY_H2_HEADING = /^##\s+/
@@ -34,6 +36,8 @@ export type AgentTeamDelivery = {
   /** Null means the project's default branch. */
   baseBranch: string | null
   mergeRequestUrl?: string
+  /** The tracker issue this work answers to, which may live on a different service than the code. */
+  tracker?: AgentTeamTrackerRef
 }
 
 const NO_DELIVERY: AgentTeamDelivery = { folder: true, baseBranch: null }
@@ -67,25 +71,50 @@ export function orcaCliNote(cliCommand: string | null | undefined): string | nul
 
 function deliveryRules(stepType: AgentTeamStepType, delivery: AgentTeamDelivery): string[] {
   if (delivery.folder) {
-    return ['- This project is a folder without git: never commit, push or open merge requests.']
+    return ['- This project is a folder without git: never commit, push or open pull requests.']
   }
   const base = delivery.baseBranch ? `\`${delivery.baseBranch}\`` : "the project's default branch"
+  const tracker = trackerTarget(delivery.tracker)
   if (stepType === 'build') {
     return [
       `- The base branch is ${base}. If this worktree's branch does not start from it, rebase onto it before you change anything.`,
-      `- When the work is done, commit, push this branch and open a merge request (GitLab, \`glab mr create\`) or pull request (GitHub, \`gh pr create\`) against ${base}, ready for review, not as a draft. In later rounds push to the same branch so the open one updates.`,
-      '- Comment on the tracker issue with its link and a short summary, using the CLI for that tracker (gh, glab, `orca jira`, `orca linear`).',
+      `- When the work is done, commit, push this branch and open a pull request against ${base} on the project's code host, ready for review, not as a draft. ${CODE_HOST_RULE} In later rounds push to the same branch so the open one updates.`,
+      tracker
+        ? `- Comment on ${tracker} with the pull request link and a short summary.`
+        : '- This issue has no tracker issue: put the summary in the pull request description only.',
       '- Never merge, and never change tracker labels or states: the Manager does that.'
     ]
   }
   const request = delivery.mergeRequestUrl
-    ? `the merge request ${delivery.mergeRequestUrl}`
-    : 'the merge request (GitLab) or pull request (GitHub) of this branch'
+    ? `the pull request ${delivery.mergeRequestUrl}`
+    : "this branch's pull request on the project's code host"
   return [
-    `- Review ${request} against ${base}. Add yourself as a reviewer where the host allows it.`,
-    '- Post your findings as review comments on it and a short summary on the tracker issue, using the CLI for that host or tracker.',
+    `- Review ${request} against ${base}. Add yourself as a reviewer where the host allows it. ${CODE_HOST_RULE}`,
+    tracker
+      ? `- Post your findings as review comments on it and a short summary on ${tracker}.`
+      : '- Post your findings as review comments on it.',
     '- Never merge, approve on behalf of the user, or change tracker labels or states: the Manager does that.'
   ]
+}
+
+/** The code host is not the tracker: a Jira or Linear project still keeps its code on GitHub, GitLab or another host. */
+const CODE_HOST_RULE =
+  'Find the host from `git remote get-url origin` and use its CLI: `gh pr` for GitHub, `glab mr` for GitLab (where it is called a merge request), or the CLI or API of any other host.'
+
+const TRACKERS: Record<TaskProvider, { name: string; cli: string }> = {
+  github: { name: 'GitHub', cli: '`gh issue comment`' },
+  gitlab: { name: 'GitLab', cli: '`glab issue note`' },
+  jira: { name: 'Jira', cli: '`orca jira`' },
+  linear: { name: 'Linear', cli: '`orca linear`' }
+}
+
+function trackerTarget(tracker: AgentTeamTrackerRef | undefined): string | null {
+  if (!tracker) {
+    return null
+  }
+  const { name, cli } = TRACKERS[tracker.provider]
+  const where = tracker.url ? ` ${tracker.url}` : ''
+  return `the ${name} issue ${tracker.key}${where} (with ${cli})`
 }
 
 /** Fixed first layer of every session: how to deliver, how to report and how to treat issue text. */

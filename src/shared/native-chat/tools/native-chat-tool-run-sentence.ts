@@ -6,6 +6,11 @@ import {
   type NativeChatToolCategoryCall
 } from './native-chat-tool-icon'
 import { toolInputCommand } from './native-chat-tool-summary'
+import {
+  orcaTeamClauseEnglish,
+  orcaTeamCommandKind,
+  type OrcaTeamCommandKind
+} from './native-chat-orca-team-command'
 import { isToolCallBlock, type NativeChatBlock } from '../native-chat-types'
 
 /** Shared singular/plural category copy; desktop translates and mobile formats directly. */
@@ -102,6 +107,8 @@ export type NativeChatToolRunSentenceWords = {
   clause: (category: NativeChatToolCategory, count: number, live: boolean) => string
   pair: (first: string, second: string) => string
   list: (leading: readonly string[], last: string) => string
+  /** Agent team CLI calls, named by what they did; English when absent. */
+  teamClause?: (kind: OrcaTeamCommandKind, count: number, live: boolean) => string
 }
 
 /** The one line a run reads as: past tense once settled, present while live. */
@@ -114,18 +121,30 @@ export function nativeChatToolRunSentence(
   if (calls.length === 0) {
     return null
   }
+  const teamCounts = new Map<OrcaTeamCommandKind, number>()
+  const otherCalls = calls.filter((call) => {
+    const kind = orcaTeamCommandKind(call.input)
+    if (kind) {
+      teamCounts.set(kind, (teamCounts.get(kind) ?? 0) + 1)
+    }
+    return kind === null
+  })
   // Settled lone shell calls show their command instead of Ran 1 command. While live, commands stay in the adjacent preview;
   // keep header shape stable when another call arrives.
-  if (calls.length === 1 && !live) {
+  if (calls.length === 1 && otherCalls.length === 1 && !live) {
     const command = toolInputCommand(calls[0].input)
     if (command !== null && command.length > 0) {
       return command
     }
   }
+  const teamClause = words.teamClause ?? orcaTeamClauseEnglish
   return joinNativeChatToolRunClauses(
-    nativeChatToolRunClauses(calls).map(({ category, count }) =>
-      words.clause(category, count, live)
-    ),
+    [
+      ...[...teamCounts].map(([kind, count]) => teamClause(kind, count, live)),
+      ...nativeChatToolRunClauses(otherCalls).map(({ category, count }) =>
+        words.clause(category, count, live)
+      )
+    ],
     words
   )
 }

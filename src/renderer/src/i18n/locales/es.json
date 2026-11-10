@@ -18931,7 +18931,8 @@
           "moveDown": "Bajar en la cola",
           "openMergeRequest": "Abrir la merge request",
           "escalated": "Escalada · {{round}}/{{rounds}}",
-          "readyToMerge": "Lista para fusionar"
+          "readyToMerge": "Lista para fusionar",
+          "openPullRequest": "Abrir la pull request"
         },
         "TeamNewIssueDialog": {
           "title": "Nueva issue",
@@ -19092,7 +19093,9 @@
           "scope": "Todos los proyectos · {{agent}}",
           "noSession": "Todos los proyectos · sin iniciar",
           "limitUntil": "Límite del plan alcanzado · el Manager responde a partir de las {{at}}",
-          "limit": "Límite del plan alcanzado · el Manager responde cuando se reinicie la ventana del plan"
+          "limit": "Límite del plan alcanzado · el Manager responde cuando se reinicie la ventana del plan",
+          "collapse": "Mostrar el tablero junto al Manager",
+          "expand": "Mostrar solo el Manager"
         },
         "TeamManagerStartForm": {
           "description": "El Manager redacta issues, las registra en el gestor de tareas de cada proyecto según su prompt y las añade a la cola. Te enseña un borrador antes de crear nada. Funciona en su propio proyecto Agent Team Manager (~/.orca/agent-team/manager).",
@@ -19156,7 +19159,27 @@
           "earlierRounds": "Informes de las rondas 1–{{last}}",
           "files": "{{count}} ficheros",
           "overview": "Resumen",
-          "changes": "Cambios"
+          "changes": "Cambios",
+          "close": "Cerrar",
+          "reviewOpen": "Abierta",
+          "reviewDraft": "Borrador",
+          "reviewMerged": "Fusionada",
+          "reviewClosed": "Cerrada",
+          "checksPassed": "checks correctos",
+          "checksFailed": "checks fallidos",
+          "checksRunning": "checks en curso",
+          "trackerOpen": "Abierta · {{state}}",
+          "trackerClosed": "Cerrada · {{state}}",
+          "mergeRequestState": "MR !{{number}}",
+          "pullRequestState": "PR #{{number}}",
+          "hold": "Retener",
+          "editDependencies": "Dependencias",
+          "dependsOnPicker": "Empieza cuando estas issues estén hechas",
+          "discard": "Descartar",
+          "discardTitle": "¿Descartar {{key}}?",
+          "discardRunning": "Un seat está trabajando en ella: su sesión se detiene y se elimina el worktree. La issue del tracker se queda como está.",
+          "discardIdle": "Sale del tablero y se elimina su worktree. La issue del tracker se queda como está.",
+          "cancel": "Cancelar"
         },
         "TeamPlanUsage": {
           "fiveHour": "5 h",
@@ -19178,7 +19201,8 @@
           "todayTime": "{{time}} hoy",
           "history": "Historial",
           "label": "Sitios",
-          "limit": "Límite del plan"
+          "limit": "Límite del plan",
+          "noTeam": "Sin equipo"
         },
         "TeamIssueChanges": {
           "noWorktree": "Esta issue no tiene un worktree abierto, así que no hay nada que comparar.",
@@ -19788,7 +19812,45 @@
         "runLivePlan_many": "Actualizando el plan {{count}} veces",
         "runLiveTool_one": "Usando {{count}} herramienta",
         "runLiveTool_other": "Usando {{count}} herramientas",
-        "runLiveTool_many": "Usando {{count}} herramientas"
+        "runLiveTool_many": "Usando {{count}} herramientas",
+        "team": {
+          "context_one": "Consultó el estado del equipo",
+          "context_other": "Consultó el estado del equipo {{count}} veces",
+          "contextLive": "Consultando el estado del equipo",
+          "issues_one": "Listó las issues",
+          "issues_other": "Listó las issues {{count}} veces",
+          "issuesLive": "Listando issues",
+          "issueAdd_one": "Añadió {{count}} issue",
+          "issueAdd_other": "Añadió {{count}} issues",
+          "issueAddLive": "Añadiendo issues",
+          "issueApprove_one": "Aprobó issues",
+          "issueApprove_other": "Aprobó issues {{count}} veces",
+          "issueApproveLive": "Aprobando issues",
+          "issueHold_one": "Retuvo issues",
+          "issueHold_other": "Retuvo issues {{count}} veces",
+          "issueHoldLive": "Reteniendo issues",
+          "issueUpdate_one": "Actualizó {{count}} issue",
+          "issueUpdate_other": "Actualizó {{count}} issues",
+          "issueUpdateLive": "Actualizando issues",
+          "issueDiscard_one": "Descartó issues",
+          "issueDiscard_other": "Descartó issues {{count}} veces",
+          "issueDiscardLive": "Descartando issues",
+          "issueAnswer_one": "Respondió {{count}} issue",
+          "issueAnswer_other": "Respondió {{count}} issues",
+          "issueAnswerLive": "Respondiendo issues",
+          "seatPause_one": "Pausó seats",
+          "seatPause_other": "Pausó seats {{count}} veces",
+          "seatPauseLive": "Pausando seats",
+          "seatResume_one": "Reanudó seats",
+          "seatResume_other": "Reanudó seats {{count}} veces",
+          "seatResumeLive": "Reanudando seats",
+          "report_one": "Informó del paso",
+          "report_other": "Informó {{count}} veces",
+          "reportLive": "Informando",
+          "other_one": "Ejecutó {{count}} comando del equipo",
+          "other_other": "Ejecutó {{count}} comandos del equipo",
+          "otherLive": "Ejecutando comandos del equipo"
+        }
       },
       "status": {
         "responding": "El agente está respondiendo",

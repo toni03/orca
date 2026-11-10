@@ -203,7 +203,38 @@ function SeatCard({
   )
 }
 
-/** One card per active seat: what it is doing, its time and tokens today, its last results. */
+type SeatRow = { id: string; name: string; seats: AgentTeamSeat[] }
+
+/** One row per team with the seats its steps use, in step order; seats no team uses go last. */
+function seatRowsByTeam(state: AgentTeamState): SeatRow[] {
+  const active = new Map(
+    state.seats.filter((seat) => seat.retiredAt === undefined).map((seat) => [seat.id, seat])
+  )
+  const placed = new Set<string>()
+  const rows: SeatRow[] = []
+  for (const team of state.teams) {
+    const ids = [...new Set(team.steps.flatMap((step) => step.seatIds))]
+    const seats = ids.flatMap((id) => {
+      const seat = active.get(id)
+      return seat ? [seat] : []
+    })
+    if (seats.length > 0) {
+      seats.forEach((seat) => placed.add(seat.id))
+      rows.push({ id: team.id, name: team.name, seats })
+    }
+  }
+  const unplaced = [...active.values()].filter((seat) => !placed.has(seat.id))
+  if (unplaced.length > 0) {
+    rows.push({
+      id: 'unassigned',
+      name: translate('auto.components.agentTeam.TeamSeatStrip.noTeam', 'No team'),
+      seats: unplaced
+    })
+  }
+  return rows
+}
+
+/** One card per active seat, a row per team: what it is doing, its time and tokens today, its last results. */
 export function TeamSeatStrip({
   state,
   now,
@@ -213,25 +244,32 @@ export function TeamSeatStrip({
   now: number
   onOpenIssue: (issueId: string) => void
 }): React.JSX.Element | null {
-  const seats = state.seats.filter((seat) => seat.retiredAt === undefined)
-  if (seats.length === 0) {
+  const rows = seatRowsByTeam(state)
+  if (rows.length === 0) {
     return null
   }
   const today = usageBy(state, 'seat', lastDaysRange(1, now), now)
   return (
     <section
       aria-label={translate('auto.components.agentTeam.TeamSeatStrip.label', 'Seats')}
-      className="flex gap-2 overflow-x-auto pb-1 scrollbar-sleek"
+      className="flex flex-col gap-2"
     >
-      {seats.map((seat) => (
-        <SeatCard
-          key={seat.id}
-          seat={seat}
-          state={state}
-          today={today.get(seat.id)}
-          now={now}
-          onOpenIssue={onOpenIssue}
-        />
+      {rows.map((row) => (
+        <div key={row.id} className="flex min-w-0 flex-col gap-1">
+          <h3 className="text-xs font-medium text-muted-foreground">{row.name}</h3>
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-sleek">
+            {row.seats.map((seat) => (
+              <SeatCard
+                key={seat.id}
+                seat={seat}
+                state={state}
+                today={today.get(seat.id)}
+                now={now}
+                onOpenIssue={onOpenIssue}
+              />
+            ))}
+          </div>
+        </div>
       ))}
     </section>
   )

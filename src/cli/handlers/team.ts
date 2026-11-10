@@ -37,6 +37,16 @@ function formatIssues(result: {
     .join('\n')
 }
 
+function formatIssueStates(issues: AgentTeamIssue[]): string {
+  return issues
+    .map((issue) => {
+      const key = issue.tracker?.key ? ` ${issue.tracker.key}` : ''
+      const deps = issue.dependsOn.length > 0 ? `  depends on ${issue.dependsOn.join(', ')}` : ''
+      return `${issue.id}${key}  [${issue.status}]  ${issue.title}${deps}`
+    })
+    .join('\n')
+}
+
 function formatContext(context: AgentTeamContext): string {
   const projects = context.projects.map((project) => {
     const tracker = project.tracker?.provider ?? 'no tracker'
@@ -113,6 +123,44 @@ export const TEAM_HANDLERS: Record<string, CommandHandler> = {
       text: getRequiredStringFlag(flags, 'text')
     })
     printResult(response, json, () => 'Answered. The step continues with your answer.')
+  },
+  'team issue approve': async ({ flags, client, json }) => {
+    const response = await client.call<{ issues: AgentTeamIssue[] }>('team.issueApprove', {
+      issueIds: getRepeatedStringFlag(flags, 'issue')
+    })
+    printResult(response, json, (result) => formatIssueStates(result.issues))
+  },
+  'team issue hold': async ({ flags, client, json }) => {
+    const response = await client.call<{ issues: AgentTeamIssue[] }>('team.issueHold', {
+      issueIds: getRepeatedStringFlag(flags, 'issue')
+    })
+    printResult(response, json, (result) => formatIssueStates(result.issues))
+  },
+  'team issue update': async ({ flags, client, json }) => {
+    const title = getOptionalStringFlag(flags, 'title')
+    const body = getOptionalStringFlag(flags, 'body')
+    const criteria = getRepeatedStringFlag(flags, 'criterion')
+    const dependsOn = getRepeatedStringFlag(flags, 'depends-on')
+    const clearDependencies = flags.get('no-dependencies') === true
+    if (clearDependencies && dependsOn.length > 0) {
+      throw new Error('Pass --depends-on or --no-dependencies, not both.')
+    }
+    const response = await client.call<{ issue: AgentTeamIssue | null }>('team.issueUpdate', {
+      issueId: getRequiredStringFlag(flags, 'issue'),
+      ...(title !== undefined ? { title } : {}),
+      ...(body !== undefined ? { body } : {}),
+      ...(criteria.length > 0 ? { criteria } : {}),
+      ...(dependsOn.length > 0 || clearDependencies ? { dependsOn } : {})
+    })
+    printResult(response, json, (result) =>
+      result.issue ? `Updated ${formatIssueStates([result.issue])}` : 'Updated.'
+    )
+  },
+  'team issue discard': async ({ flags, client, json }) => {
+    const response = await client.call<{ discarded: string[] }>('team.issueDiscard', {
+      issueIds: getRepeatedStringFlag(flags, 'issue')
+    })
+    printResult(response, json, (result) => `Discarded: ${result.discarded.join(', ')}.`)
   },
   'team seat pause': async ({ flags, client, json }) => {
     const response = await client.call<SeatPauseReply>('team.seatPause', seatTarget(flags, true))

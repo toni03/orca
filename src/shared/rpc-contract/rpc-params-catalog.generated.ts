@@ -85,7 +85,9 @@ import {
   AgentTeamIssueAnswerParams,
   AgentTeamIssueCreateParams,
   AgentTeamIssueDecideParams,
+  AgentTeamIssueIdsParams,
   AgentTeamIssueListParams,
+  AgentTeamIssueUpdateParams,
   AgentTeamReportParams,
   AgentTeamSeatPauseParams
 } from './agent-team-params'
@@ -1532,8 +1534,12 @@ export const RPC_PARAMS_BY_METHOD = {
   'status.get': StatusGetParams,
   'team.context': AgentTeamContextParams,
   'team.issueAnswer': AgentTeamIssueAnswerParams,
+  'team.issueApprove': AgentTeamIssueIdsParams,
   'team.issueCreate': AgentTeamIssueCreateParams,
   'team.issueDecide': AgentTeamIssueDecideParams,
+  'team.issueDiscard': AgentTeamIssueIdsParams,
+  'team.issueHold': AgentTeamIssueIdsParams,
+  'team.issueUpdate': AgentTeamIssueUpdateParams,
   'team.issues': AgentTeamIssueListParams,
   'team.report': AgentTeamReportParams,
   'team.seatPause': AgentTeamSeatPauseParams,

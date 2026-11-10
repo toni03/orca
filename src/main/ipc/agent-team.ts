@@ -37,6 +37,9 @@ export function registerAgentTeamHandlers(service: AgentTeamService): () => void
   ipcMain.handle(AGENT_TEAM_CHANNELS.managerActivity, (_event, from: number, to: number) =>
     service.managerActivity(from, to)
   )
+  ipcMain.handle(AGENT_TEAM_CHANNELS.issueLiveStatus, (_event, issueId: string) =>
+    service.issueLiveStatus(issueId)
+  )
   const unsubscribe = service.subscribe(broadcastAgentTeamState)
   return () => {
     unsubscribe()
@@ -47,7 +50,8 @@ export function registerAgentTeamHandlers(service: AgentTeamService): () => void
       AGENT_TEAM_CHANNELS.writeProjectSpec,
       AGENT_TEAM_CHANNELS.launchManager,
       AGENT_TEAM_CHANNELS.managerSession,
-      AGENT_TEAM_CHANNELS.managerActivity
+      AGENT_TEAM_CHANNELS.managerActivity,
+      AGENT_TEAM_CHANNELS.issueLiveStatus
     ]) {
       ipcMain.removeHandler(channel)
     }
