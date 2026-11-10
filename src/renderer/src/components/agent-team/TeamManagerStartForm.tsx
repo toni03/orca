@@ -11,7 +11,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { AgentIcon } from '@/lib/agent-catalog'
+import { AgentIcon } from '@/components/agent/icons/AgentIcon'
 import type { AgentTeamManagerSession } from '../../../../shared/agent-team/agent-team-ipc'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 import { useEnabledAgents } from './use-enabled-agents'

@@ -24,6 +24,7 @@ import {
 } from '../../../../shared/execution-host'
 import { resolveWorktreeLaunchHost } from '../../workspaces/catalog/worktree-launch-host-repo'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
+import type { AgentLaunchPreferences } from '../../../../shared/agent-session/agent-session-host-authority'
 import type { TerminalWorkspaceLaunchScope } from '../../orchestration/terminal-authority/structured-sessions/runtime-legacy-worker-terminal-recovery-types'
 
 export abstract class OrcaRuntimeWithTerminalCreateDeduplication extends OrcaRuntimeWithCreateAgentSession {
@@ -190,6 +191,8 @@ export abstract class OrcaRuntimeWithTerminalCreateDeduplication extends OrcaRun
       agentArgs?: string | null
       sessionOptions?: Readonly<Record<string, SessionOptionValue>>
       extraAgentArgs?: string
+      /** Model and effort for this launch; ignored when sessionOptions are given. */
+      launchPreferences?: AgentLaunchPreferences
       suppressStartupUpdatePrompt?: boolean
       /** Run now is the user's act; a scheduled run is background and a stopped WSL distro holds it. */
       wslUserAct?: true
@@ -210,12 +213,13 @@ export abstract class OrcaRuntimeWithTerminalCreateDeduplication extends OrcaRun
     }
     const prompt = opts.prompt.trim()
     const commandPrompt = agentPromptRidesLaunchCommand(opts.agent)
+    const sessionOptions = opts.sessionOptions ?? this.toAgentSessionOptions(opts.launchPreferences)
     const terminal = await this.createTerminal(
       `id:${worktree.id}`,
       {
         startupAgent: opts.agent,
         ...(opts.agentArgs !== undefined ? { agentArgs: opts.agentArgs } : {}),
-        ...(opts.sessionOptions !== undefined ? { sessionOptions: opts.sessionOptions } : {}),
+        ...(sessionOptions !== undefined ? { sessionOptions } : {}),
         ...(opts.extraAgentArgs !== undefined ? { extraAgentArgs: opts.extraAgentArgs } : {}),
         ...(prompt && commandPrompt ? { startupPrompt: prompt } : {}),
         startupPromptCarry: 'force-line',

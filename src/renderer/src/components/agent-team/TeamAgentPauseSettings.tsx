@@ -1,6 +1,7 @@
 import { translate } from '@/i18n/i18n'
 import { Switch } from '@/components/ui/switch'
-import { AgentIcon, getAgentLabel } from '@/lib/agent-catalog'
+import { AgentIcon } from '@/components/agent/icons/AgentIcon'
+import { getAgentLabel } from '@/lib/agent-catalog/agent-catalog'
 import type { AgentTeamSeat, AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import { useAgentTeamCommand } from './use-agent-team-state'
 

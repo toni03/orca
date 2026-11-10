@@ -4,7 +4,7 @@ import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
 import { formatTokens } from '@/components/stats/usage-formatters'
-import { AgentIcon } from '@/lib/agent-catalog'
+import { AgentIcon } from '@/components/agent/icons/AgentIcon'
 import { cn } from '@/lib/utils'
 import {
   lastDaysRange,

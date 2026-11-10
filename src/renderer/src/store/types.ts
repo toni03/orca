@@ -14,8 +14,8 @@ import type { JiraSlice } from './slices/jira/jira-slice-contract'
 import type { EditorSlice } from './slices/editor/types/editor-slice'
 import type { StatsSlice } from './slices/process-stats/stats'
 import type { MemorySlice } from './slices/process-stats/memory'
-import type { AgentTeamSlice } from './slices/agent-team'
 import type { WorkspaceSpaceSlice } from './slices/workspace-cleanup/workspace-space'
+import type { AgentTeamSlice } from './slices/agent-team'
 import type {
   ClaudeUsageSlice,
   CodexUsageSlice,

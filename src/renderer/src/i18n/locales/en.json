@@ -6570,6 +6570,11 @@
           "b0a7bfc34c": "Hide from sidebar",
           "88d402b71d": "Onboarding checklist"
         },
+        "SetupScriptCodeBlock": {
+          "showLess": "Show less",
+          "showMore_one": "Show {{count}} more line",
+          "showMore_other": "Show {{count}} more lines"
+        },
         "SetupScriptPromptCard": {
           "ff1e819a11": "Add a setup script",
           "70715947fb": "Setup script cannot be empty",
@@ -6589,13 +6594,13 @@
           "eefa756190": "Configure manually",
           "ca4efcbc25": "Save",
           "fdbc6cb064": "Detected setup script",
-          "7275f674cc": "Detected setup",
           "822ff300ad": "Dismiss",
           "5bfd5c8779": "Dismiss setup scripts",
-          "detectedFromSource": "Detected from <file>{{source}}</file>",
           "ignoresSharedSetup": "This repo ignores shared <yaml>orca.yaml</yaml> setup scripts. Add a local command, or change the source in Settings.",
           "reviewSetupScript": "Review setup script",
-          "foundSetupScriptIn": "Found a setup script in <file>{{source}}</file>."
+          "foundSetupScriptIn": "Found a setup script in <file>{{source}}</file>.",
+          "7275f674cc": "Detected setup",
+          "detectedFromSource": "Detected from <file>{{source}}</file>"
         },
         "SetupScriptReviewDialog": {
           "title": "Review setup script",
@@ -7730,12 +7735,7 @@
           "running": "Running",
           "idle": "Idle"
         },
-        "projectOrderSaveFailed": "Could not save the complete project order",
-        "SetupScriptCodeBlock": {
-          "showLess": "Show less",
-          "showMore_one": "Show {{count}} more line",
-          "showMore_other": "Show {{count}} more lines"
-        }
+        "projectOrderSaveFailed": "Could not save the complete project order"
       },
       "shared": {
         "useDaemonActions": {
@@ -7801,21 +7801,6 @@
         }
       },
       "settings": {
-        "keep": {
-          "local": {
-            "main": {
-              "up": {
-                "to": {
-                  "date": {
-                    "setting": {
-                      "f4c23aee76": "Keep local main up to date"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
         "AccountsPane": {
           "locationSaveFailed": "Account location could not be saved. Try again.",
           "dbb9626ed1": "Cancel",
@@ -8168,9 +8153,6 @@
           "79209b37b9": "If cookie import is not the right fit, Computer Use can control local apps and may use existing logged-in browser sessions where applicable. Install the Orca Computer Use skill; macOS also requires privacy permissions.",
           "333984cf90": "Use an existing browser session",
           "9895ed44de": "Open computer use"
-        },
-        "BrowserUseEnableSwitch": {
-          "ce4d6f80d8": "Enable agent browser use"
         },
         "BrowserUseExamples": {
           "1199258ace": "Copy",
@@ -9185,9 +9167,6 @@
           "d32b87e754": "Use review template when available",
           "981eae7e14": "Draft by default"
         },
-        "RepositorySourceControlAiSection": {
-          "112f3b934f": "Source control AI"
-        },
         "RuntimeAccessGrantList": {
           "sshAccessCaveat": "Revoking here doesn't stop someone with SSH access to this computer from pairing again. To cut them off, remove their SSH access.",
           "6f6d5188ed": "Revoke {{value0}}",
@@ -9871,8 +9850,6 @@
           "6fa734ed95": "Delete {{value0}}",
           "68de13f72c": "Failed to delete model.",
           "cfde55c7b0": "Failed to download model.",
-          "ba4a900d1d": "Dictation Mode",
-          "0121960365": "Enable Voice Dictation",
           "62d2a84d31": "Failed to clear OpenAI API key",
           "37aba8bb63": "OpenAI API key cleared",
           "8572bbb537": "Failed to save OpenAI API key",
@@ -9891,7 +9868,9 @@
           "speechGpuLabel": "Use GPU",
           "speechGpuDescription": "Recognize speech on the graphics card when it works, and on the CPU when it fails. Turn off if dictation freezes or restarts your computer.",
           "updateToFasterVersion": "Update to the faster version ({{value0}} MB)",
-          "c5ea32143e": "Speech model"
+          "c5ea32143e": "Speech model",
+          "ba4a900d1d": "Dictation Mode",
+          "0121960365": "Enable Voice Dictation"
         },
         "WorktreeSymlinksSection": {
           "1c1e35b219": "Remove {{value0}}",
@@ -13954,6 +13933,27 @@
           "noMatches": "No matches.",
           "searchHosts": "Search hosts…",
           "searchLanguages": "Search languages…"
+        },
+        "RepositorySourceControlAiSection": {
+          "112f3b934f": "Source control AI"
+        },
+        "keep": {
+          "local": {
+            "main": {
+              "up": {
+                "to": {
+                  "date": {
+                    "setting": {
+                      "f4c23aee76": "Keep local main up to date"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "BrowserUseEnableSwitch": {
+          "ce4d6f80d8": "Enable agent browser use"
         }
       },
       "right": {
@@ -17512,12 +17512,12 @@
           "noModel": "No speech model selected. Download one in Settings > Voice.",
           "disabled": "Voice dictation is disabled. Enable it in Settings > Voice.",
           "notReady": "Speech model not ready. Download it in Settings > Voice.",
+          "modelNeedsUpdate": "Your speech model needs an update to keep working. Update it to the faster version in Settings > Voice.",
           "unknownModel": "Selected model is no longer available. Please choose another in Settings > Voice.",
           "5d2c3e7ae3": "No speech detected.",
           "micFallback": "Selected microphone unavailable. Using system default.",
           "micDisconnected": "Microphone disconnected. Dictation stopped.",
           "cloudLimitReached": "Dictation stopped at the 10-minute cloud limit.",
-          "modelNeedsUpdate": "Your speech model needs an update to keep working. Update it to the faster version in Settings > Voice.",
           "retryUnmatched": "Retry couldn't tell which words were already typed, so it inserted them all."
         },
         "dictation-transcript-delivery": {
@@ -20390,6 +20390,10 @@
         "modelUnavailable": "{{agent}} couldn't use {{detail}}. Pick another model and send again.",
         "modelUnavailableUpdate": "{{agent}} couldn't use {{detail}}. Update {{agent}} to {{minimumVersion}} or later to keep it after a restart, or pick another model and send again.",
         "modelNotSelected": "{{agent}} has no model selected. Check your model selection and {{agent}} sign-in, then send again.",
+        "providerUnavailable": "{{agent}} couldn't respond because the service is busy. Pick another model, or wait a little and send again.",
+        "providerSafetyStopped": "{{agent}} stopped this response after a safety check. Review your request and send again.",
+        "providerResponseFailed": "{{agent}} couldn't finish this response. Open Details for more information.",
+        "selectedModel": "the selected model",
         "providerRejected": "{{agent}} didn't accept this message.",
         "providerRejectedQuoted": "{{agent}} didn't accept this message: {{detail}}.",
         "attachmentEmpty": "An image on this message is empty, so the message was not sent.",
@@ -20459,11 +20463,7 @@
         "agentNotSignedIn": "Sign in to {{agent}}.",
         "thenSendAgain": "Then send your message again.",
         "runCommandWhenDone": "Run /{{command}} when it's done.",
-        "commandAfterAnswer": "Answer the agent's question or approval, then run /{{command}}.",
-        "providerUnavailable": "{{agent}} couldn't respond because the service is busy. Pick another model, or wait a little and send again.",
-        "providerSafetyStopped": "{{agent}} stopped this response after a safety check. Review your request and send again.",
-        "providerResponseFailed": "{{agent}} couldn't finish this response. Open Details for more information.",
-        "selectedModel": "the selected model"
+        "commandAfterAnswer": "Answer the agent's question or approval, then run /{{command}}."
       },
       "writeNotice": {
         "notDoneReadHistory": "This chat's history couldn't be loaded.",
@@ -20599,11 +20599,11 @@
         "orcaStopCanContinue": "You can continue in this conversation.",
         "orcaStopUnnamedServer": "the remote server",
         "permissionDenied": "{{agent}} denied permission. View details.",
+        "safetyReviewApproved": "{{agent}} approved this action. View details.",
         "safetyReview": "{{agent}} reported a safety review warning. View details.",
         "truncatedResponse": "Provider response truncated (original size: {{bytes}} bytes).",
         "modelFallback": "Claude switched models: {{from}} → {{to}}.",
-        "forkedFrom": "Forked from",
-        "safetyReviewApproved": "{{agent}} approved this action. View details."
+        "forkedFrom": "Forked from"
       },
       "composer": {
         "send": "Send",
@@ -20935,6 +20935,8 @@
         "showAgent": "Show {{value0}} in the conversation"
       },
       "jumpToLatest": "Jump to latest",
+      "newRowsAnnouncement": "New messages arrived while you were away",
+      "newRowsMarker": "New",
       "find": {
         "label": "Find in chat",
         "noResults": "No results",
@@ -21395,11 +21397,11 @@
       "composerWorkspace": {
         "copyFailed": "Failed to copy",
         "copyIdentity": "Copy {{value0}}",
+        "detachedCommit": "Commit {{head}} (not a branch)",
         "folder": "Folder",
         "mainCheckout": "Main checkout",
         "turnWorking": "This chat's agent is working. Switch branches after its turn finishes.",
-        "worktree": "Worktree",
-        "detachedCommit": "Commit {{head}} (not a branch)"
+        "worktree": "Worktree"
       },
       "creationChatNotOpened": "Your worktree is ready, but the chat could not open. Retry to open it with your message.",
       "fork": {
@@ -21469,9 +21471,7 @@
         "questionNotSentDetail": "Your question is still in this chat. Send /btw again to retry.",
         "questionUnconfirmed": "{{agent}} couldn't confirm the side chat got your question",
         "questionUnconfirmedDetail": "Check the side chat before asking again. Your question is still in this chat."
-      },
-      "newRowsAnnouncement": "New messages arrived while you were away",
-      "newRowsMarker": "New"
+      }
     },
     "tab": {
       "bar": {
@@ -21888,6 +21888,9 @@
         "scrollToLatestOnSendTitle": "Scroll to latest when sending",
         "scrollToLatestOnSendCopy": "Sending while scrolled up jumps to the latest message and follows the reply. Turn off to keep your place.",
         "scrollToLatestOnSendSearchPosition": "position",
+        "markNewMessagesTitle": "Mark new messages when returning to a chat",
+        "markNewMessagesCopy": "Coming back to a chat draws a New line above what arrived while you were away, and scrolls to it if you were reading the latest.",
+        "markNewMessagesSearchUnread": "unread",
         "inlineVisualsTitle": "Inline visuals",
         "inlineVisualsCopy": "Let the agent show charts, diagrams and mockups inside its replies. Applies to newly started chats.",
         "inlineVisualsToggleLabel": "Toggle inline visuals",
@@ -21928,10 +21931,7 @@
         "turnDiffsTitle": "Turn diffs",
         "turnDiffsCopy": "Shows the files each turn changed, with line counts, below the reply.",
         "turnDiffsSearchChangedFiles": "changed files",
-        "turnDiffsSearchEdits": "edits",
-        "markNewMessagesTitle": "Mark new messages when returning to a chat",
-        "markNewMessagesCopy": "Coming back to a chat draws a New line above what arrived while you were away, and scrolls to it if you were reading the latest.",
-        "markNewMessagesSearchUnread": "unread"
+        "turnDiffsSearchEdits": "edits"
       },
       "voice": {
         "dictationLanguage": {
@@ -23379,14 +23379,14 @@
   "workspaceDeletion": {
     "preferenceSaveFailed": "Could not save deletion preference",
     "alwaysForceDelete": "Always force delete",
+    "alwaysForceDeleteDescription": "Applies to all future workspace deletions.",
     "moreActions": "More force delete options",
     "moreBranchActions": "More branch delete options",
     "alwaysForceDeleteBranches": "Always delete preserved branches",
+    "alwaysForceDeleteBranchesDescription": "Applies to branches kept after future workspace deletions.",
     "moreDeleteOptions": "More delete options",
     "alwaysDelete": "Always delete",
-    "alwaysDeleteTooltip": "Skip this confirmation for future deletions.",
-    "alwaysForceDeleteDescription": "Applies to all future workspace deletions.",
-    "alwaysForceDeleteBranchesDescription": "Applies to branches kept after future workspace deletions."
+    "alwaysDeleteTooltip": "Skip this confirmation for future deletions."
   },
   "worktree": {
     "setupTrust": {
@@ -24696,6 +24696,7 @@
     "catalogEmpty": "{{agent}} has no available models.",
     "workspaceStartupFailed": "Could not start {{agent}}. Check Arguments in this setup and try again.",
     "search": "Search, e.g. Opus 5.5…",
+    "searchAgents": "Search agents…",
     "configure": "Configure {{agent}}",
     "arguments": "Arguments",
     "argumentsHint": "Applies only to CLI launches.",
@@ -24715,8 +24716,7 @@
     "use": "Use",
     "select": "Select agent",
     "promptPlaceholder": "Add a prompt (optional): / for skills, @ for files",
-    "promptPlaceholderFilesOnly": "Add a prompt (optional): @ for files",
-    "searchAgents": "Search agents…"
+    "promptPlaceholderFilesOnly": "Add a prompt (optional): @ for files"
   },
   "automations": {
     "runFailures": {
@@ -25127,8 +25127,8 @@
     }
   },
   "checks": {
-    "rerunUnsuccessful": "Rerun unsuccessful",
-    "gitlabAllowedFailure": "Allowed to fail"
+    "gitlabAllowedFailure": "Allowed to fail",
+    "rerunUnsuccessful": "Rerun unsuccessful"
   },
   "gitGraph": {
     "copyHash": "Copy commit hash",
@@ -25221,15 +25221,6 @@
     "disallowed": "{{host}} can no longer control browser tabs. Turn it back on in Settings > SSH.",
     "failed": "Couldn’t stop {{host}}. Turn off its browser control in Settings > SSH."
   },
-  "agentTeam": {
-    "mobileAlert": {
-      "ready": "Ready to merge",
-      "escalated": "Escalated",
-      "blocked": "A seat is blocked",
-      "question": "A question for you",
-      "failed": "A session stopped"
-    }
-  },
   "speechModelUpdate": {
     "updateTitle": "Update your speech model",
     "updateDescription": "Dictation now runs on a faster engine. {{model}} needs a one-time download ({{size}} MB) before you can dictate again.",
@@ -25255,5 +25246,14 @@
     "failedAtDescription": "The download stopped at {{mb}} MB. Check your connection and try again.",
     "failedDescription": "The download stopped. Check your connection and try again.",
     "tryAgain": "Try again"
+  },
+  "agentTeam": {
+    "mobileAlert": {
+      "ready": "Ready to merge",
+      "escalated": "Escalated",
+      "blocked": "A seat is blocked",
+      "question": "A question for you",
+      "failed": "A session stopped"
+    }
   }
 }
