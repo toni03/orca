@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AppState } from 'react-native'
-import type { RpcClient } from '../transport/rpc-client'
-import { subscribeConnectionRevival } from '../transport/connection-revival-signal'
+import type { RpcClient } from '../transport/rpc/rpc-client-contract'
+import { subscribeConnectionRevival } from '../diagnostics/connection/connection-revival-signal'
 import { translate } from '../i18n/mobile-i18n'
 import {
   teamIssueDecideWrite,

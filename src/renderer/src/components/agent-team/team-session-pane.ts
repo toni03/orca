@@ -1,7 +1,7 @@
 import { useAppStore } from '@/store'
 import { revealTerminalPane } from '@/lib/reveal-terminal-pane'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
+import { activateAndRevealWorktree } from '@/lib/workspace/activation/worktree-activation'
+import type { AgentStatusEntry } from '../../../../shared/agent-status/contracts/agent-status-types'
 
 /** The live hook status of a seat session, matched by its runtime terminal handle. */
 export function useSessionStatus(terminalHandle: string | undefined): AgentStatusEntry | undefined {

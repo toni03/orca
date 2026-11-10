@@ -6,7 +6,7 @@ import type {
   AgentTeamStepType,
   AgentTeamTrackerRef
 } from './agent-team-types'
-import type { TaskProvider } from '../task-providers'
+import type { TaskProvider } from '../work-items/task-providers'
 
 const ROLE_SECTION_HEADING = /^##\s+For\s+(.+?)\s*$/i
 const ANY_H2_HEADING = /^##\s+/

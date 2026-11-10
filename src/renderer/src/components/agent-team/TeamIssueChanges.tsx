@@ -3,16 +3,16 @@ import { FileDiff } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
-import { getConnectionId } from '@/lib/connection-context'
-import { detectLanguage } from '@/lib/language-detect'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { getRuntimeGitBranchCompare } from '@/runtime/runtime-git-diff-client'
-import { findWorktreeById } from '@/store/slices/worktree-helpers'
+import { getConnectionId } from '@/lib/workspace/ownership/connection-context'
+import { detectLanguage } from '../../../../shared/editor-language/editor-language-detect'
+import { activateAndRevealWorktree } from '@/lib/workspace/activation/worktree-activation'
+import { getRuntimeGitBranchCompare } from '@/runtime/source-control/git/runtime-git-diff-client'
+import { findWorktreeById } from '@/store/github/refresh/worktree-refresh'
 import {
   getWorktreeGitOwnerTarget,
   requireGitOwnerTarget
-} from '@/components/right-sidebar/worktree-git-owner-target'
-import type { GitBranchCompareResult } from '../../../../shared/git-diff-compare-types'
+} from '@/components/right-sidebar/source-control/sync/worktree-git-owner-target'
+import type { GitBranchCompareResult } from '../../../../shared/git/diff/git-diff-compare-types'
 import type { AgentTeamIssue, AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 
 type Load =
@@ -33,12 +33,11 @@ export function changeTotals(result: GitBranchCompareResult): { added: number; r
 
 /** Compares the issue branch with its base, the same way Source Control does. */
 export function useIssueBranchChanges(issue: AgentTeamIssue, state: AgentTeamState): Load {
-  const worktreesByRepo = useAppStore((s) => s.worktreesByRepo)
+  const worktree = useAppStore((s) =>
+    issue.worktreeId ? findWorktreeById(s, issue.worktreeId) : null
+  )
   const repos = useAppStore((s) => s.repos)
   const [load, setLoad] = useState<Load>({ kind: 'loading' })
-  const worktree = issue.worktreeId
-    ? findWorktreeById(worktreesByRepo, issue.worktreeId)
-    : undefined
   const repo = repos.find((candidate) => candidate.id === issue.repoId)
   const project = state.projects.find((candidate) => candidate.repoId === issue.repoId)
   const baseRef =

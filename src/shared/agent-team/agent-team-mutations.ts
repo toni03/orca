@@ -1,7 +1,7 @@
 import { BUILTIN_TEAM_TEMPLATES } from './agent-team-builtin-templates'
 import { openAssignment } from './agent-team-pipeline'
 import type { AgentTeam, AgentTeamSeat, AgentTeamState } from './agent-team-types'
-import type { TuiAgent } from '../tui-agent'
+import type { TuiAgent } from '../agent-launch/catalog/tui-agent'
 
 export class AgentTeamMutationError extends Error {}
 

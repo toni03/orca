@@ -13,7 +13,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { AgentIcon } from '@/lib/agent-catalog'
 import type { AgentTeamManagerSession } from '../../../../shared/agent-team/agent-team-ipc'
-import type { TuiAgent } from '../../../../shared/tui-agent'
+import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 import { useEnabledAgents } from './use-enabled-agents'
 
 /** Starts the Manager, or returns to a live session with the same agent. */

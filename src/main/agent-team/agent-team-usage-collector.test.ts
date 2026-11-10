@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createInitialAgentTeamState } from '../../shared/agent-team/agent-team-builtin-templates'
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
-import type { AutomationRunUsage } from '../../shared/automations-types'
+import type { AutomationRunUsage } from '../../shared/automations/history/automation-run'
 import { startAgentTeamUsageCollector } from './agent-team-usage-collector'
 
 const NOW = 10 * 60_000

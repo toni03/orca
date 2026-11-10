@@ -1,5 +1,5 @@
-import type { TuiAgent } from '../tui-agent'
-import type { TaskProvider } from '../task-providers'
+import type { TuiAgent } from '../agent-launch/catalog/tui-agent'
+import type { TaskProvider } from '../work-items/task-providers'
 
 /** Orca routes by step type only; role names and prompts belong to the user. */
 export type AgentTeamStepType = 'build' | 'check'

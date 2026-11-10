@@ -1,6 +1,9 @@
-import type { TuiAgent } from '../tui-agent'
+import type { TuiAgent } from '../agent-launch/catalog/tui-agent'
 import type { CheckStatus, PRReviewDecision } from '../github/pull-request-types'
-import type { HostedReviewProvider, HostedReviewState } from '../hosted-review'
+import type {
+  HostedReviewProvider,
+  HostedReviewState
+} from '../source-control/hosted-review/hosted-review-contracts'
 
 export const AGENT_TEAM_CHANNELS = {
   getState: 'agentTeam:getState',

@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { useAppStore } from '@/store'
 import { getAgentCatalog } from '@/lib/agent-catalog'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
-import type { TuiAgent } from '../../../../shared/tui-agent'
+import { isTuiAgentEnabled } from '../../../../shared/agent-launch/catalog/tui-agent-selection'
+import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 
 /** Agent CLIs installed on this computer and switched on in Settings › Agents. */
 export function useEnabledAgents(): {
