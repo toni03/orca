@@ -19730,7 +19730,19 @@
           "reportLive": "Informando",
           "other_one": "Ejecutó {{count}} comando del equipo",
           "other_other": "Ejecutó {{count}} comandos del equipo",
-          "otherLive": "Ejecutando comandos del equipo"
+          "otherLive": "Ejecutando comandos del equipo",
+          "context_many": "Consultó el estado del equipo {{count}} veces",
+          "issues_many": "Listó las issues {{count}} veces",
+          "issueAdd_many": "Añadió {{count}} issues",
+          "issueApprove_many": "Aprobó issues {{count}} veces",
+          "issueHold_many": "Retuvo issues {{count}} veces",
+          "issueUpdate_many": "Actualizó {{count}} issues",
+          "issueDiscard_many": "Descartó issues {{count}} veces",
+          "issueAnswer_many": "Respondió {{count}} issues",
+          "seatPause_many": "Pausó seats {{count}} veces",
+          "seatResume_many": "Reanudó seats {{count}} veces",
+          "report_many": "Informó {{count}} veces",
+          "other_many": "Ejecutó {{count}} comandos del equipo"
         }
       },
       "status": {
