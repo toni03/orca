@@ -84,6 +84,17 @@ import { CurrentRequestsParams } from './agent-session-current-requests-params'
 import { CreateAgentSessionParams, EnsureAgentSessionParams } from './agent-session-params'
 import { ReadVisualParams } from './agent-session-visual-params'
 import {
+  AgentTeamContextParams,
+  AgentTeamIssueAnswerParams,
+  AgentTeamIssueCreateParams,
+  AgentTeamIssueDecideParams,
+  AgentTeamIssueIdsParams,
+  AgentTeamIssueListParams,
+  AgentTeamIssueUpdateParams,
+  AgentTeamReportParams,
+  AgentTeamSeatPauseParams
+} from './agent-team-params'
+import {
   AiVaultDeleteSessionParams,
   AiVaultListSessionsParams,
   AiVaultPrepareSessionResumeParams,
@@ -1555,6 +1566,17 @@ export const RPC_PARAMS_BY_METHOD = {
   'ssh.updateTarget': SshTargetUpdate,
   'stats.summary': null,
   'status.get': StatusGetParams,
+  'team.context': AgentTeamContextParams,
+  'team.issueAnswer': AgentTeamIssueAnswerParams,
+  'team.issueApprove': AgentTeamIssueIdsParams,
+  'team.issueCreate': AgentTeamIssueCreateParams,
+  'team.issueDecide': AgentTeamIssueDecideParams,
+  'team.issueDiscard': AgentTeamIssueIdsParams,
+  'team.issueHold': AgentTeamIssueIdsParams,
+  'team.issueUpdate': AgentTeamIssueUpdateParams,
+  'team.issues': AgentTeamIssueListParams,
+  'team.report': AgentTeamReportParams,
+  'team.seatPause': AgentTeamSeatPauseParams,
   'terminal.ackOutput': TerminalAckOutput,
   'terminal.adoptOrphans': TerminalAdoptOrphans,
   'terminal.agentStatus': TerminalHandle,

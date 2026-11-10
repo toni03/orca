@@ -3,7 +3,7 @@ import {
   updateLimitPauses
 } from '../../shared/agent-team/agent-team-plan-limits'
 import type { RateLimitState } from '../../shared/rate-limit-types'
-import type { RateLimitService } from '../rate-limits/service'
+import type { RateLimitService } from '../rate-limits/service/rate-limit-service'
 import type { AgentTeamStore } from './agent-team-store'
 
 /** Seats of an agent CLI that ran out of plan wait for its window instead of failing a step. */

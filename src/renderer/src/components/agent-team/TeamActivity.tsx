@@ -20,7 +20,7 @@ import type {
   AgentTeamLimitPause,
   AgentTeamState
 } from '../../../../shared/agent-team/agent-team-types'
-import { getAgentLabel } from '@/lib/agent-catalog'
+import { getAgentLabel } from '@/lib/agent-catalog/agent-catalog'
 import { formatDuration, issueKey } from './team-labels'
 import { AssignmentTokens, assignmentResultLabel } from './TeamAssignmentResult'
 import { TeamIssueSheet } from './TeamIssueSheet'
