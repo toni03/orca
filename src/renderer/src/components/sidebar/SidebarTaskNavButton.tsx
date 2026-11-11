@@ -9,9 +9,9 @@ import {
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
 import { PER_REPO_FETCH_LIMIT } from '../../../../shared/work-items/work-item-pagination'
-import { getLocalPreflightContext, localPreflightContextKey } from '@/lib/local-preflight-context'
-import { cn } from '@/lib/utils'
-import { useAppStore } from '@/store'
+import { getLocalPreflightContext } from '@/runtime/hosts/preflight/local-preflight-context'
+import { cn } from '@/lib/class-names'
+import { useAppStore } from '@/store/index'
 import { useRepoMap } from '@/store/repos/use-repository-catalog'
 import { useTaskProviderConnections } from '@/components/feature-wall/use-integration-connection-status'
 import { useTranslate } from '@/i18n/use-translate'
@@ -22,6 +22,7 @@ import {
   restoreAvailableDefaultTaskProvider,
   resolveVisibleTaskProvider
 } from '../../../../shared/work-items/task-providers'
+import { localPreflightContextKey } from '../../runtime/hosts/preflight/local-preflight-context-key'
 
 function HideTaskSidebarMenu({ onHide }: { onHide: () => void }): React.JSX.Element {
   const t = useTranslate()

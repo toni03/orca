@@ -7,9 +7,11 @@ import {
   selectTaskProviderConnections
 } from './task-provider-connections'
 
-vi.mock('@/lib/local-preflight-context', () => ({
+vi.mock('@/runtime/hosts/preflight/local-preflight-context', () => ({
   getLocalPreflightContext: () => undefined,
-  getLocalPreflightTarget: () => ({ kind: 'local' }),
+  getLocalPreflightTarget: () => ({ kind: 'local' })
+}))
+vi.mock('@/runtime/hosts/preflight/local-preflight-context-key', () => ({
   localPreflightContextKey: () => 'local'
 }))
 

@@ -1,9 +1,9 @@
 import type { AppState } from '@/store/types'
 import {
   getLocalPreflightContext,
-  getLocalPreflightTarget,
-  localPreflightContextKey
-} from '@/lib/local-preflight-context'
+  getLocalPreflightTarget
+} from '@/runtime/hosts/preflight/local-preflight-context'
+import { localPreflightContextKey } from '@/runtime/hosts/preflight/local-preflight-context-key'
 import { getProviderRuntimeContextKey } from '@/runtime/hosts/observations/provider-runtime-context'
 import { getTaskPageRepoSourceContext } from '@/lib/work-items/task-repo-source-context'
 import { taskSourceRuntimeTarget } from '@/lib/work-items/task-source-runtime-target'
