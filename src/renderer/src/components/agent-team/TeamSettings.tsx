@@ -95,7 +95,7 @@ function WorkflowSettings({ state }: { state: AgentTeamState }): React.JSX.Eleme
           <span className="block text-xs text-muted-foreground">
             {translate(
               'auto.components.agentTeam.TeamSettings.pausedAllHint',
-              'Running steps finish; no team starts anything new until you resume. To pause one team, use Settings › Teams.'
+              'Running steps finish; no team starts anything new until you resume. To pause one team, use Settings › Team › Teams.'
             )}
           </span>
         </span>

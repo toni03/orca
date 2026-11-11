@@ -43,6 +43,7 @@ function stepResult(params: {
   questions?: string[]
   options?: string[]
   mergeRequestUrl?: string
+  mergeRequestUrls?: string[]
   findings?: Extract<AgentTeamStepResult, { kind: 'changes' }>['findings']
 }): AgentTeamStepResult {
   switch (params.result) {
@@ -50,7 +51,10 @@ function stepResult(params: {
       return {
         kind: 'done',
         summary: params.summary,
-        ...(params.mergeRequestUrl ? { mergeRequestUrl: params.mergeRequestUrl } : {})
+        ...(params.mergeRequestUrl ? { mergeRequestUrl: params.mergeRequestUrl } : {}),
+        ...(params.mergeRequestUrls && params.mergeRequestUrls.length > 1
+          ? { mergeRequestUrls: params.mergeRequestUrls }
+          : {})
       }
     case 'blocked':
       return {

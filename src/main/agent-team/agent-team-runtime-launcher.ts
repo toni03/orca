@@ -5,6 +5,8 @@ import type { AgentLaunchPreferences } from '../../shared/agent-session/agent-se
 import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import { effectiveProjectSpecStorage } from '../../shared/agent-team/agent-team-spec-storage'
+import { quoteStartupArg } from '../../shared/agent-launch/startup/tui-agent-startup-shell'
+import type { TuiAgent } from '../../shared/agent-launch/catalog/tui-agent'
 import { resolveAgentTeamCliCommand } from './agent-team-cli-command'
 import type { AgentTeamLauncher } from './agent-team-launcher'
 
@@ -16,6 +18,14 @@ export const AGENT_TEAM_PROJECT_SPEC_PATH = join('.orca', 'agent-team.md')
 
 function launchPreferences(seat: AgentTeamSeat): AgentLaunchPreferences | undefined {
   return seat.model ? { model: seat.model } : undefined
+}
+
+/** Claude edits outside its cwd only for added dirs; other agents get the linked paths in the prompt. */
+function extraDirArgs(agent: TuiAgent, dirs: readonly string[] | undefined): string | undefined {
+  if (agent !== 'claude' || !dirs?.length) {
+    return undefined
+  }
+  return dirs.map((dir) => `--add-dir ${quoteStartupArg(dir, 'posix')}`).join(' ')
 }
 
 export async function readRepositoryProjectSpec(repoPath: string): Promise<string | null> {
@@ -39,8 +49,28 @@ export function createAgentTeamRuntimeLauncher(
   return {
     cliCommand: resolveAgentTeamCliCommand,
     isFolderProject: (repoId) => store.getRepo(repoId)?.kind === 'folder',
-    async launchInNewWorktree({ repoId, name, baseBranch, seat, prompt, title }) {
+    repoName: (repoId) => store.getRepo(repoId)?.displayName ?? repoId,
+    async createLinkedWorktree({ repoId, name, baseBranch, title }) {
+      const created = await runtime.createManagedWorktree({
+        repoSelector: `id:${repoId}`,
+        name,
+        ...(baseBranch ? { baseBranch } : {}),
+        displayName: title,
+        displayNameKind: 'user',
+        runHooks: false,
+        setupDecision: 'run',
+        activate: false,
+        lineage: { noParent: true }
+      })
+      return {
+        worktreeId: created.worktree.id,
+        path: created.worktree.path,
+        ...(created.worktree.branch ? { branch: created.worktree.branch } : {})
+      }
+    },
+    async launchInNewWorktree({ repoId, name, baseBranch, seat, prompt, title, extraDirs }) {
       const repo = store.getRepo(repoId)
+      const extraAgentArgs = extraDirArgs(seat.agent, extraDirs)
       if (repo?.kind === 'folder') {
         // No git to isolate a worktree: Build works in the folder, and every issue locks the project.
         const launched = await runtime.launchAgentTerminal(`path:${repo.path}`, {
@@ -69,6 +99,7 @@ export function createAgentTeamRuntimeLauncher(
         startupPrompt: prompt,
         startupLaunchSource: 'agent-team',
         startupSuppressUpdatePrompt: true,
+        ...(extraAgentArgs ? { startupExtraAgentArgs: extraAgentArgs } : {}),
         ...(launchPreferences(seat) ? { startupLaunchPreferences: launchPreferences(seat) } : {}),
         activate: false,
         lineage: { noParent: true }
@@ -89,12 +120,14 @@ export function createAgentTeamRuntimeLauncher(
       }
     },
 
-    async launchInWorktree({ worktreeId, seat, prompt, title }) {
+    async launchInWorktree({ worktreeId, seat, prompt, title, extraDirs }) {
+      const extraAgentArgs = extraDirArgs(seat.agent, extraDirs)
       const launched = await runtime.launchAgentTerminal(`id:${worktreeId}`, {
         agent: seat.agent,
         prompt,
         title,
         suppressStartupUpdatePrompt: true,
+        ...(extraAgentArgs ? { extraAgentArgs } : {}),
         ...(seat.model ? { sessionOptions: { model: seat.model } } : {})
       })
       if (launched.ptyId) {

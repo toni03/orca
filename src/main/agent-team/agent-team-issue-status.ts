@@ -63,14 +63,15 @@ async function readTrackerStatus(
 
 async function readReviewStatus(
   runtime: OrcaRuntimeService,
-  issue: AgentTeamIssue
+  repoId: string,
+  branch: string | undefined
 ): Promise<ReviewStatus | null> {
-  if (!issue.branch) {
+  if (!branch) {
     return null
   }
   const reply = await runtime.getHostedReviewForBranch({
-    repoSelector: `id:${issue.repoId}`,
-    branch: issue.branch
+    repoSelector: `id:${repoId}`,
+    branch
   })
   const review = reply && 'readOutcome' in reply ? reply.review : reply
   return review
@@ -90,9 +91,18 @@ export async function readAgentTeamIssueLiveStatus(
   runtime: OrcaRuntimeService,
   issue: AgentTeamIssue
 ): Promise<AgentTeamIssueLiveStatus> {
-  const [tracker, review] = await Promise.all([
+  const [tracker, review, linked] = await Promise.all([
     readTrackerStatus(runtime, issue).catch(() => null),
-    readReviewStatus(runtime, issue).catch(() => null)
+    readReviewStatus(runtime, issue.repoId, issue.branch).catch(() => null),
+    Promise.all(
+      (issue.linkedWorktrees ?? []).map(async (entry) => ({
+        repoId: entry.repoId,
+        review: await readReviewStatus(runtime, entry.repoId, entry.branch).catch(() => null)
+      }))
+    )
   ])
-  return { tracker, review }
+  const linkedReviews = linked.flatMap((entry) =>
+    entry.review ? [{ repoId: entry.repoId, review: entry.review }] : []
+  )
+  return { tracker, review, ...(linkedReviews.length > 0 ? { linkedReviews } : {}) }
 }

@@ -13062,6 +13062,18 @@
           "shownPluginCount_other": "{{count}} complementos coincidentes mostrados, incluido este",
           "samePublisher": "Más elementos incluidos como {{value0}}",
           "shownPluginCount_many": "{{count}} complementos coincidentes mostrados, incluido este"
+        },
+        "team": {
+          "title": "Team",
+          "description": "Equipos, roles, proyectos y flujo del equipo de agentes, y si Team aparece en la barra lateral.",
+          "showButton": "Mostrar Team en la barra lateral",
+          "showButtonDescription": "Muestra las entradas Team y Te necesita en la barra lateral.",
+          "openTeam": "Abrir Team",
+          "keywordTeam": "equipo",
+          "keywordSeats": "sitios",
+          "keywordRoles": "roles",
+          "keywordTracker": "gestor de tareas",
+          "keywordManager": "manager"
         }
       },
       "right": {
@@ -18865,7 +18877,7 @@
           "hiddenByFilter": "{{project}} · {{count}} issues ocultas por el filtro de proyectos",
           "show": "Mostrar",
           "noIssues": "No hay issues en la cola",
-          "noIssuesBody": "Dile al Manager lo que necesitas, o vincula un proyecto y su tracker en Team › Configuración.",
+          "noIssuesBody": "Dile al Manager lo que necesitas, o vincula un proyecto y su tracker en Configuración › Team.",
           "messageManager": "Escribir al Manager",
           "connectProject": "Conectar un proyecto",
           "collapseLane": "Contraer {{project}}",
@@ -18925,7 +18937,6 @@
           "loadError": "Los equipos de agentes no están disponibles en esta ventana: {{message}}",
           "tabBoard": "Tablero",
           "tabActivity": "Actividad",
-          "tabSettings": "Configuración",
           "manager": "Manager",
           "tabNeedsYou": "Te necesita",
           "summary": "{{seats}} sitios · {{working}} trabajando · {{projects}} proyectos",
@@ -18933,7 +18944,8 @@
           "resumeTeam": "Reanudar equipo",
           "pauseTeam": "Pausar equipo",
           "today": "Hoy: {{time}} activo · {{tokens}} tokens",
-          "loading": "Cargando el equipo…"
+          "loading": "Cargando el equipo…",
+          "openSettings": "Configuración de Team"
         },
         "TeamSeatDialog": {
           "addTitle": "Añadir puesto",
@@ -18964,7 +18976,7 @@
           "projects": "Proyectos",
           "workflow": "Flujo",
           "pausedAll": "Pausar todos los equipos",
-          "pausedAllHint": "Los pasos en curso terminan; ningún equipo empieza nada nuevo hasta que reanudes. Para pausar un solo equipo, usa Configuración › Equipos.",
+          "pausedAllHint": "Los pasos en curso terminan; ningún equipo empieza nada nuevo hasta que reanudes. Para pausar un solo equipo, usa Configuración › Team › Equipos.",
           "syncTracker": "Mantener los gestores de tareas al día con el tablero",
           "syncTrackerHint": "Cuando se mueve una issue con clave del gestor de tareas, Orca pide al Manager que actualice sus etiquetas o su estado según el prompt del proyecto. Los movimientos esperan hasta que haya una sesión del Manager abierta y libre."
         },
@@ -18989,7 +19001,14 @@
           "noProjects": "Añade un proyecto git a Orca para usarlo con un equipo.",
           "remoteStorageHint": "Proyecto remoto: su prompt se guarda en este ordenador, porque Orca todavía no puede leer desde aquí la copia remota.",
           "baseBranch": "Rama base",
-          "baseBranchDefault": "La del proyecto"
+          "baseBranchDefault": "La del proyecto",
+          "groups": "Grupos de proyectos",
+          "groupRepos": "{{count}} repos · proyectos separados",
+          "baseBranchDefaultNamed": "Por defecto ({{branch}})",
+          "baseBranchMissing": "No hay ninguna rama {{branch}} en este repo.",
+          "repoDefaultBranch": "Por defecto en el repo: {{branch}}",
+          "trackerFromRepo": "{{tracker}} (repo)",
+          "trackerNotConnected": "{{tracker}} no está conectado en este Orca: conéctalo en Configuración › Fuentes de tareas."
         },
         "TeamSettingsRoles": {
           "builtin": "Integrado",
@@ -19042,8 +19061,8 @@
         },
         "TeamPausedNotice": {
           "all": "Todos los equipos están en pausa: los pasos en curso terminan y no empieza nada nuevo. Reanúdalos en Configuración › Flujo.",
-          "teams": "En pausa: {{teams}}. Los pasos en curso terminan y no empieza nada nuevo. Reanúdalos en Configuración › Equipos.",
-          "seats": "Sitios en pausa: {{seats}}. Su trabajo en cola pasa a los demás sitios. Reanúdalos en Configuración › Equipos o Flujo."
+          "teams": "En pausa: {{teams}}. Los pasos en curso terminan y no empieza nada nuevo. Reanúdalos en Configuración › Team › Equipos.",
+          "seats": "Sitios en pausa: {{seats}}. Su trabajo en cola pasa a los demás sitios. Reanúdalos en Configuración › Team › Equipos o Flujo."
         },
         "TeamManagerPanel": {
           "title": "Manager",
@@ -19068,13 +19087,12 @@
         },
         "TeamAgentPauseSettings": {
           "title": "Pausar por agente",
-          "hint": "Pausa todos los sitios que usan este agente, por ejemplo cuando su plan se queda sin créditos. Los pasos en curso terminan; el trabajo en cola pasa a los demás sitios. Para pausar un solo sitio, usa Configuración › Equipos.",
+          "hint": "Pausa todos los sitios que usan este agente, por ejemplo cuando su plan se queda sin créditos. Los pasos en curso terminan; el trabajo en cola pasa a los demás sitios. Para pausar un solo sitio, usa Configuración › Team › Equipos.",
           "count": "{{paused}}/{{total}} sitios en pausa"
         },
         "TeamDecisionForm": {
           "answerPlaceholder": "Responde al sitio…",
           "changesPlaceholder": "Cambios que pedir en una nueva ronda…",
-          "openMergeRequest": "Abrir merge request",
           "shortcut": "{{keys}} envía",
           "merge": "Fusionar en Orca",
           "quickAnswers": "Respuestas rápidas"
@@ -19141,10 +19159,6 @@
           "cancel": "Cancelar"
         },
         "TeamPlanUsage": {
-          "fiveHour": "5 h",
-          "week": "Semana",
-          "nearLimit": "Cerca del límite",
-          "resets": "se reinicia {{at}}",
           "percentNear": "{{percent}}% · cerca del límite",
           "resetsAt": "Se reinicia {{at}}",
           "unavailable": "El uso del plan aparece aquí cuando Orca puede leer los límites de los agentes que usan tus sitios.",
@@ -19165,7 +19179,7 @@
         },
         "TeamIssueChanges": {
           "noWorktree": "Esta issue no tiene un worktree abierto, así que no hay nada que comparar.",
-          "noBase": "Configura la rama base en Team › Configuración › Proyectos para comparar esta rama.",
+          "noBase": "Configura la rama base en Configuración › Team › Proyectos para comparar esta rama.",
           "loading": "Comparando la rama…",
           "summary": "{{files}} ficheros frente a {{base}}",
           "viewAll": "Abrir el diff completo",
@@ -19198,6 +19212,14 @@
         },
         "TeamActivityBreakdowns": {
           "manager": "Manager"
+        },
+        "TeamGroupSettings": {
+          "asOne": "Trabajar este grupo como un solo proyecto",
+          "asOneHint": "Cada issue tiene un worktree en cada repo seleccionado, todos en la misma rama, y una merge request en cada repo que cambie. Sus issues y su gestor de tareas viven en el repo del tracker.",
+          "trackerRepo": "Repo del tracker",
+          "trackerRepoHint": "Guarda el gestor de tareas, la especificación y la rama base del grupo; el agente arranca en su worktree.",
+          "repos": "Repos",
+          "trackerTag": "tracker"
         }
       },
       "agent-workspace-trust-decision": {

@@ -173,6 +173,7 @@ export function buildDefaultSettings(args: {
     showTitlebarAppName: true,
     showTasksButton: true,
     showAutomationsButton: true,
+    showTeamButton: true,
     artifactsEnabled: true,
     artifactSharingEnabled: false,
     agentSkillSharingEnabled: false,

@@ -50,7 +50,10 @@ function formatIssueStates(issues: AgentTeamIssue[]): string {
 function formatContext(context: AgentTeamContext): string {
   const projects = context.projects.map((project) => {
     const tracker = project.tracker?.provider ?? 'no tracker'
-    return `${project.repoId}  ${project.name}  ${tracker}${project.spec ? '  spec' : ''}`
+    const group = project.groupRepos
+      ? `  group: ${project.groupRepos.map((repo) => repo.name).join(', ')}`
+      : ''
+    return `${project.repoId}  ${project.name}  ${tracker}${project.spec ? '  spec' : ''}${group}`
   })
   const teams = context.teams.flatMap((team) => [
     `${team.id}  ${team.name}${team.paused ? ' (paused)' : ''}: ${team.steps.map((step) => step.name).join(' -> ')}`,
@@ -97,14 +100,16 @@ export const TEAM_HANDLERS: Record<string, CommandHandler> = {
       throw new Error(`--result must be one of ${RESULTS.join(', ')}.`)
     }
     const findingsPath = getOptionalStringFlag(flags, 'findings')
-    const mergeRequestUrl = getOptionalStringFlag(flags, 'merge-request')
+    const mergeRequestUrls = getRepeatedStringFlag(flags, 'merge-request')
     const response = await client.call<{ reported: boolean }>('team.report', {
       assignmentId: getRequiredStringFlag(flags, 'assignment'),
       result,
       summary: getRequiredStringFlag(flags, 'summary'),
       questions: getRepeatedStringFlag(flags, 'question'),
       options: getRepeatedStringFlag(flags, 'option'),
-      ...(mergeRequestUrl ? { mergeRequestUrl } : {}),
+      ...(mergeRequestUrls.length > 0
+        ? { mergeRequestUrl: mergeRequestUrls[0], mergeRequestUrls }
+        : {}),
       ...(findingsPath ? { findings: await readFindings(findingsPath, cwd) } : {})
     })
     printResult(response, json, () => 'Reported. Orca moves the issue to its next step.')

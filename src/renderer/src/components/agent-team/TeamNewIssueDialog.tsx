@@ -23,6 +23,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import { useAgentTeamCommand } from './use-agent-team-state'
+import { projectTracker } from '../../../../shared/agent-team/agent-team-project-tracker'
 
 type Props = {
   open: boolean
@@ -56,7 +57,10 @@ function NewIssueForm({ onOpenChange, state, defaultTeamId }: Props): React.JSX.
   const isFolder = teamRepos.find((repo) => repo.id === repoId)?.kind === 'folder'
   const [approved, setApproved] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const tracker = state.projects.find((project) => project.repoId === repoId)?.tracker
+  const tracker = projectTracker(
+    state.projects.find((project) => project.repoId === repoId),
+    teamRepos.find((repo) => repo.id === repoId)
+  )
 
   const submit = async (): Promise<void> => {
     setSubmitting(true)

@@ -44,6 +44,7 @@ const SETTINGS_NAV_TARGETS = [
   'session-history',
   'share-skills',
   'automations',
+  'team',
   'orca-account',
   'linear',
   'setup-guide',

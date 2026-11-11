@@ -15,9 +15,8 @@ import type {
   AgentTeamIssue,
   AgentTeamStepResult
 } from '../../shared/agent-team/agent-team-types'
+import { launchAgentTeamStep } from './agent-team-step-launch'
 import {
-  agentTeamStepPrompt,
-  agentTeamWorktreeName,
   closeAgentTeamSession,
   removeFinishedAgentTeamWorktree,
   type AgentTeamLauncher
@@ -92,45 +91,16 @@ export class AgentTeamEngine {
         updatedAt: assignment.startedAt
       })
     )
-    const project = state.projects.find((candidate) => candidate.repoId === issue.repoId)
-    const step = team.steps[issue.stepIndex]
-    const title = `${seat.name} · ${issue.tracker?.key ?? issue.title}`
-    const baseBranch = project?.baseBranch?.trim() || undefined
     try {
-      const prompt = await agentTeamStepPrompt(this.launcher, {
-        role,
-        seat,
+      const launched = await launchAgentTeamStep(this.store, this.launcher, {
+        state,
         issue,
-        assignment,
-        project
+        team,
+        seat,
+        role,
+        assignment
       })
-      if (issue.worktreeId) {
-        const launched = await this.launcher.launchInWorktree({
-          worktreeId: issue.worktreeId,
-          seat,
-          prompt,
-          title
-        })
-        this.recordLaunch(issue.id, assignment.id, launched.terminalHandle, {})
-      } else {
-        if (role.stepType !== 'build') {
-          throw new Error(
-            `Step "${step?.name}" checks a worktree, but no Build step has created one.`
-          )
-        }
-        const launched = await this.launcher.launchInNewWorktree({
-          repoId: issue.repoId,
-          name: agentTeamWorktreeName(issue),
-          ...(baseBranch ? { baseBranch } : {}),
-          seat,
-          prompt,
-          title
-        })
-        this.recordLaunch(issue.id, assignment.id, launched.terminalHandle, {
-          worktreeId: launched.worktreeId,
-          ...(launched.branch ? { branch: launched.branch } : {})
-        })
-      }
+      this.recordLaunch(issue.id, assignment.id, launched.terminalHandle, launched.issuePatch)
     } catch (error) {
       this.stopAssignment(
         assignment.id,

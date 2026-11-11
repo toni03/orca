@@ -142,17 +142,6 @@
           "cleared_other": "Cleared {{count}} completed agents"
         }
       },
-      "agentTeam": {
-        "TeamDecisionForm": {
-          "openMergeRequest": "Open merge request"
-        },
-        "TeamPlanUsage": {
-          "fiveHour": "5 h",
-          "nearLimit": "Near limit",
-          "resets": "resets {{at}}",
-          "week": "Week"
-        }
-      },
       "automations": {
         "AutomationDetail": {
           "graceHours_one": "{{count}} hour",

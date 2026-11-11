@@ -41,7 +41,7 @@ export function TeamBoardNoIssues({
       <p className="text-xs text-muted-foreground">
         {translate(
           'auto.components.agentTeam.TeamBoard.noIssuesBody',
-          'Tell the Manager what you need, or link a project and its tracker in Team › Settings.'
+          'Tell the Manager what you need, or link a project and its tracker in Settings › Team.'
         )}
       </p>
       <div className="flex gap-2">

@@ -38,6 +38,7 @@ import { TeamTrackerSyncStatus } from './TeamTrackerSyncStatus'
 import { trackerLabel } from './team-labels'
 import { useAgentTeamCommand } from './use-agent-team-state'
 import { useNow } from './use-now'
+import { projectTracker } from '../../../../shared/agent-team/agent-team-project-tracker'
 
 const DONE_SHOWN = 20
 
@@ -269,7 +270,10 @@ export function TeamBoard({ state, onOpenSettings, onOpenManager }: Props): Reac
             onChange={(next) => updatePrefs({ ...prefs, projects: [...next] })}
             onSelectAll={() => updatePrefs({ ...prefs, projects: null })}
             getRepoHostLabel={(repo) => {
-              const tracker = state.projects.find((project) => project.repoId === repo.id)?.tracker
+              const tracker = projectTracker(
+                state.projects.find((project) => project.repoId === repo.id),
+                repo
+              )
               return tracker ? trackerLabel(tracker.provider) : null
             }}
             triggerClassName="h-8 min-w-44"

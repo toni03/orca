@@ -9,6 +9,7 @@ import { getMobileEmulatorSearchEntries } from '@/components/settings/mobile/emu
 import { getQuickCommandsPaneSearchEntries } from '@/components/settings/quick-commands/quick-commands-search'
 import { getShareSkillsSettingsSearchEntries } from '@/components/settings/skills/sharing/share-skills-settings-search'
 import { getTasksPaneSearchEntries } from '@/components/settings/tasks/tasks-search'
+import { getTeamSettingsNavSection } from '@/components/settings/team/team-settings-search'
 import { translate } from '@/i18n/i18n'
 import type { Translate } from '@/i18n/use-translate'
 import type { SettingsNavSection } from '@/lib/settings-navigation-types'
@@ -45,6 +46,7 @@ export function buildWorkflowSettingsSections(
       searchEntries: getAutomationsSettingsSearchEntries(),
       group: 'workflows'
     },
+    getTeamSettingsNavSection(t),
     {
       id: 'artifacts',
       title: t('auto.hooks.useSettingsNavigationMetadata.artifactsTitle', 'Artifacts'),

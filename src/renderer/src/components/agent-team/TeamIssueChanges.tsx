@@ -61,7 +61,7 @@ export function useIssueBranchChanges(issue: AgentTeamIssue, state: AgentTeamSta
         kind: 'unavailable',
         reason: translate(
           'auto.components.agentTeam.TeamIssueChanges.noBase',
-          'Set the base branch in Team › Settings › Projects to compare this branch.'
+          'Set the base branch in Settings › Team › Projects to compare this branch.'
         )
       })
       return

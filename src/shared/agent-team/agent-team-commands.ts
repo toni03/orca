@@ -28,9 +28,11 @@ import {
   resetRoleToTemplate,
   updateRole
 } from './agent-team-role-mutations'
+import { removeProjectGroup, setProjectGroup } from './agent-team-project-groups'
 import type {
   AgentTeamIssueScope,
   AgentTeamProject,
+  AgentTeamProjectGroup,
   AgentTeamState,
   AgentTeamStepResult,
   AgentTeamStepType,
@@ -77,6 +79,8 @@ export type AgentTeamStateCommand =
   | { kind: 'role.reset'; roleId: string }
   | { kind: 'role.delete'; roleId: string }
   | { kind: 'project.update'; repoId: string; patch: Partial<Omit<AgentTeamProject, 'repoId'>> }
+  | { kind: 'group.update'; group: AgentTeamProjectGroup }
+  | { kind: 'group.remove'; groupId: string }
   | ({ kind: 'issue.create' } & AgentTeamIssueInput)
   | {
       kind: 'issue.update'
@@ -144,6 +148,10 @@ export function applyAgentTeamStateCommand(
       return deleteRole(state, command.roleId)
     case 'project.update':
       return upsertProject(state, command.repoId, command.patch)
+    case 'group.update':
+      return setProjectGroup(state, command.group)
+    case 'group.remove':
+      return removeProjectGroup(state, command.groupId)
     case 'issue.create':
       return createIssue(state, command, ids).state
     case 'issue.update':

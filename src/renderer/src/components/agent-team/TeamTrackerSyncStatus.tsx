@@ -1,6 +1,8 @@
 import { translate } from '@/i18n/i18n'
+import { useAppStore } from '@/store'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import { formatDuration, trackerLabel } from './team-labels'
+import { projectTracker } from '../../../../shared/agent-team/agent-team-project-tracker'
 
 /** Which trackers the team updates and how fresh they are: moves wait for an idle Manager. */
 export function TeamTrackerSyncStatus({
@@ -10,9 +12,16 @@ export function TeamTrackerSyncStatus({
   state: AgentTeamState
   now: number
 }): React.JSX.Element | null {
+  const repos = useAppStore((s) => s.repos)
   const providers = [
     ...new Set(
-      state.projects.flatMap((project) => (project.tracker ? [project.tracker.provider] : []))
+      state.projects.flatMap((project) => {
+        const tracker = projectTracker(
+          project,
+          repos.find((repo) => repo.id === project.repoId)
+        )
+        return tracker ? [tracker.provider] : []
+      })
     )
   ]
   if (providers.length === 0) {

@@ -26,14 +26,14 @@ function pausedText(state: AgentTeamState, teamFilter: string): string | null {
     paused.length > 0
       ? translate(
           'auto.components.agentTeam.TeamPausedNotice.teams',
-          'Paused: {{teams}}. Running steps finish, nothing new starts. Resume in Settings › Teams.',
+          'Paused: {{teams}}. Running steps finish, nothing new starts. Resume in Settings › Team › Teams.',
           { teams: paused.map((team) => team.name).join(', ') }
         )
       : null,
     pausedSeats.length > 0
       ? translate(
           'auto.components.agentTeam.TeamPausedNotice.seats',
-          'Paused seats: {{seats}}. Their queued work goes to the other seats. Resume in Settings › Teams or Workflow.',
+          'Paused seats: {{seats}}. Their queued work goes to the other seats. Resume in Settings › Team › Teams or Workflow.',
           { seats: pausedSeats.map((seat) => seat.name).join(', ') }
         )
       : null

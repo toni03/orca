@@ -85,6 +85,24 @@ function closeAssignment(
   }
 }
 
+/** A later round's report replaces the issue's merge requests only when it names some. */
+function withMergeRequests(
+  issue: AgentTeamIssue,
+  result: Extract<AgentTeamStepResult, { kind: 'done' }>
+): AgentTeamIssue {
+  const urls = [
+    ...new Set([result.mergeRequestUrl, ...(result.mergeRequestUrls ?? [])].filter(Boolean))
+  ] as string[]
+  if (urls.length === 0) {
+    return issue
+  }
+  return {
+    ...issue,
+    mergeRequest: { url: urls[0] },
+    ...(urls.length > 1 ? { mergeRequests: urls.map((url) => ({ url })) } : {})
+  }
+}
+
 /** Moves an issue through its team's pipeline after a seat reports. */
 export function applyAgentTeamStepResult(args: {
   issue: AgentTeamIssue
@@ -99,13 +117,7 @@ export function applyAgentTeamStepResult(args: {
   const issue = closeAssignment(args.issue, args.assignmentId, { result }, now)
   switch (result.kind) {
     case 'done':
-      return advance(
-        result.mergeRequestUrl
-          ? { ...issue, mergeRequest: { url: result.mergeRequestUrl } }
-          : issue,
-        team,
-        now
-      )
+      return advance(withMergeRequests(issue, result), team, now)
     case 'pass':
       return advance(issue, team, now)
     case 'blocked':

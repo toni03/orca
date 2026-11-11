@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Check, GitBranch, Link2, Pause, Trash2 } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
+import { useAppStore } from '@/store'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -71,6 +72,40 @@ function checksLabel(checks: NonNullable<AgentTeamIssueLiveStatus['review']>['ch
   }
 }
 
+function TeamReviewLink({
+  review,
+  repoName
+}: {
+  review: NonNullable<AgentTeamIssueLiveStatus['review']>
+  repoName?: string
+}): React.JSX.Element {
+  const checks = checksLabel(review.checks)
+  return (
+    <a
+      href={review.url}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1 rounded-md border border-border px-1.5 py-0.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+    >
+      <GitBranch className="size-3" />
+      {repoName ? <span>{repoName}</span> : null}
+      {isMergeRequestUrl(review.url)
+        ? translate(
+            'auto.components.agentTeam.TeamIssueSheet.mergeRequestState',
+            'MR !{{number}}',
+            {
+              number: review.number
+            }
+          )
+        : translate('auto.components.agentTeam.TeamIssueSheet.pullRequestState', 'PR #{{number}}', {
+            number: review.number
+          })}
+      <span className="text-foreground">{reviewStateLabel(review)}</span>
+      {checks ? <span>· {checks}</span> : null}
+    </a>
+  )
+}
+
 /** Tracker state and labels, and the branch's pull request state, as their services report them. */
 export function TeamIssueLiveStatus({
   issue
@@ -78,11 +113,11 @@ export function TeamIssueLiveStatus({
   issue: AgentTeamIssue
 }): React.JSX.Element | null {
   const status = useIssueLiveStatus(issue)
-  if (!status || (!status.tracker && !status.review)) {
+  const repos = useAppStore((s) => s.repos)
+  if (!status || (!status.tracker && !status.review && !status.linkedReviews)) {
     return null
   }
   const { tracker, review } = status
-  const checks = review ? checksLabel(review.checks) : ''
   return (
     <div className="flex flex-wrap items-center gap-1.5 text-xs">
       {tracker ? (
@@ -107,33 +142,14 @@ export function TeamIssueLiveStatus({
           {label}
         </Badge>
       ))}
-      {review ? (
-        <a
-          href={review.url}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1 rounded-md border border-border px-1.5 py-0.5 text-muted-foreground hover:bg-accent hover:text-foreground"
-        >
-          <GitBranch className="size-3" />
-          {isMergeRequestUrl(review.url)
-            ? translate(
-                'auto.components.agentTeam.TeamIssueSheet.mergeRequestState',
-                'MR !{{number}}',
-                {
-                  number: review.number
-                }
-              )
-            : translate(
-                'auto.components.agentTeam.TeamIssueSheet.pullRequestState',
-                'PR #{{number}}',
-                {
-                  number: review.number
-                }
-              )}
-          <span className="text-foreground">{reviewStateLabel(review)}</span>
-          {checks ? <span>· {checks}</span> : null}
-        </a>
-      ) : null}
+      {review ? <TeamReviewLink review={review} /> : null}
+      {status.linkedReviews?.map((entry) => (
+        <TeamReviewLink
+          key={entry.repoId}
+          review={entry.review}
+          repoName={repos.find((repo) => repo.id === entry.repoId)?.displayName}
+        />
+      ))}
     </div>
   )
 }
@@ -192,7 +208,7 @@ export function TeamIssueActions({
             ) : null}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="max-h-80 w-72 overflow-auto">
+        <DropdownMenuContent align="start" className="max-h-80 w-72 overflow-auto scrollbar-sleek">
           <DropdownMenuLabel>
             {translate(
               'auto.components.agentTeam.TeamIssueSheet.dependsOnPicker',

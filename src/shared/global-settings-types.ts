@@ -249,6 +249,8 @@ export type GlobalSettings = GlobalSettingsBase & {
   showTasksButton: boolean
   /** Only toggles the sidebar shortcut; Automations stay reachable from Settings/View menu. */
   showAutomationsButton?: boolean
+  /** Only toggles the sidebar Team and Needs you entries; Team stays reachable from Settings. */
+  showTeamButton?: boolean
   /** Deprecated: Artifacts are always available. Use showArtifactsButton for sidebar visibility. */
   artifactsEnabled?: boolean
   /** Capability gate for agent-driven publishing; off until granted, enforced in main, not just the UI. */

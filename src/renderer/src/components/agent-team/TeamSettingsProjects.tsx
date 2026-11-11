@@ -1,43 +1,68 @@
 import { useEffect, useState } from 'react'
+import { FolderTree } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
-import { TASK_PROVIDERS } from '../../../../shared/work-items/task-providers'
-import { getRepoRoutingConnectionId } from '../../../../shared/execution-host'
+import type { ProjectGroup } from '../../../../shared/project-group-types'
+import type { Repo } from '../../../../shared/repo-types'
 import { effectiveProjectSpecStorage } from '../../../../shared/agent-team/agent-team-spec-storage'
+import { getFolderSourceRepos } from '../../../../shared/folder-workspaces/folder-workspace-source-repos'
+import { projectTracker } from '../../../../shared/agent-team/agent-team-project-tracker'
+import { TeamGroupSettings } from './TeamGroupSettings'
+import { TeamProjectFields } from './TeamProjectFields'
 import { TeamProjectSpecEditor } from './TeamProjectSpecEditor'
 import { TeamPromptPreview } from './TeamPromptPreview'
 import { trackerLabel } from './team-labels'
-import { useAgentTeamCommand } from './use-agent-team-state'
 
-const NO_TRACKER = 'none'
+type Selection = { kind: 'group' | 'repo'; id: string }
 
-export function TeamSettingsProjects({ state }: { state: AgentTeamState }): React.JSX.Element {
-  const repos = useAppStore((s) => s.repos)
-  const run = useAgentTeamCommand()
-  const teamRepos = repos.filter((repo) => repo.id !== state.managerRepoId)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+function TrackerHint({ state, repo }: { state: AgentTeamState; repo: Repo }): React.JSX.Element {
+  const tracker = projectTracker(
+    state.projects.find((entry) => entry.repoId === repo.id),
+    repo
+  )
+  return (
+    <span className="block text-2xs text-muted-foreground">
+      {tracker
+        ? trackerLabel(tracker.provider)
+        : translate(
+            'auto.components.agentTeam.TeamSettingsProjects.noTracker',
+            'No tracker linked'
+          )}
+    </span>
+  )
+}
+
+function ListButton({
+  current,
+  onClick,
+  children
+}: {
+  current: boolean
+  onClick: () => void
+  children: React.ReactNode
+}): React.JSX.Element {
+  return (
+    <button
+      type="button"
+      data-current={current ? 'true' : undefined}
+      onClick={onClick}
+      className={cn(
+        'rounded-md px-2.5 py-2 text-left text-sm hover:bg-accent',
+        current && 'bg-accent'
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
+/** The tracker, base branch and spec of one repo, with the prompt its seats get. */
+function ProjectDetail({ state, repo }: { state: AgentTeamState; repo: Repo }): React.JSX.Element {
+  const project = state.projects.find((candidate) => candidate.repoId === repo.id)
   const [specForPreview, setSpecForPreview] = useState<string | null>(null)
-  const repo = teamRepos.find((candidate) => candidate.id === selectedId) ?? teamRepos[0]
-  const project = repo
-    ? state.projects.find((candidate) => candidate.repoId === repo.id)
-    : undefined
-
   useEffect(() => {
-    if (!repo) {
-      return
-    }
     let cancelled = false
     void window.api.agentTeam.readProjectSpec(repo.id).then((read) => {
       if (!cancelled) {
@@ -48,38 +73,88 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
       cancelled = true
     }
   }, [repo, project?.specStorage, project?.localSpec])
+  return (
+    <>
+      <div className="flex flex-wrap items-start gap-3">
+        <TeamProjectFields repo={repo} project={project} />
+      </div>
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+        <TeamProjectSpecEditor
+          key={repo.id}
+          repoId={repo.id}
+          storage={effectiveProjectSpecStorage(project, repo)}
+        />
+        <TeamPromptPreview
+          state={state}
+          specText={specForPreview}
+          delivery={{
+            folder: repo.kind === 'folder',
+            baseBranch: project?.baseBranch?.trim() || null
+          }}
+        />
+      </div>
+    </>
+  )
+}
+
+export function TeamSettingsProjects({ state }: { state: AgentTeamState }): React.JSX.Element {
+  const repos = useAppStore((s) => s.repos)
+  const projectGroups = useAppStore((s) => s.projectGroups)
+  const teamRepos = repos.filter((repo) => repo.id !== state.managerRepoId)
+  // Orca groups with at least two git repos can be worked as one project.
+  const groups = projectGroups.flatMap((group) => {
+    const members = getFolderSourceRepos(teamRepos, projectGroups, group)
+    return members.length > 1 ? [{ group, members }] : []
+  })
+  const grouped = new Set((state.groups ?? []).flatMap((group) => group.repoIds))
+  const soloRepos = teamRepos.filter((repo) => !grouped.has(repo.id))
+  const [selection, setSelection] = useState<Selection | null>(null)
+  const selectedGroup =
+    selection?.kind === 'group'
+      ? groups.find((entry) => entry.group.id === selection.id)
+      : undefined
+  const selectedRepo =
+    selection?.kind === 'repo'
+      ? soloRepos.find((repo) => repo.id === selection.id)
+      : selectedGroup
+        ? undefined
+        : soloRepos[0]
+  const fallbackGroup = !selectedRepo && !selectedGroup ? groups[0] : undefined
+  const activeGroup = selectedGroup ?? fallbackGroup
 
   return (
     <div className="grid min-h-0 grid-cols-[240px_minmax(0,1fr)] gap-5">
       <section className="flex flex-col gap-1">
-        <h2 className="mb-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {groups.length > 0 ? (
+          <>
+            <h2 className="mb-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {translate('auto.components.agentTeam.TeamSettingsProjects.groups', 'Project groups')}
+            </h2>
+            {groups.map(({ group, members }) => (
+              <GroupListEntry
+                key={group.id}
+                group={group}
+                members={members}
+                state={state}
+                current={activeGroup?.group.id === group.id}
+                onClick={() => setSelection({ kind: 'group', id: group.id })}
+              />
+            ))}
+          </>
+        ) : null}
+        <h2 className="mb-1 mt-2 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
           {translate('auto.components.agentTeam.TeamSettingsProjects.projects', 'Projects')}
         </h2>
-        {teamRepos.map((candidate) => {
-          const tracker = state.projects.find((entry) => entry.repoId === candidate.id)?.tracker
-          return (
-            <button
-              key={candidate.id}
-              type="button"
-              data-current={candidate.id === repo?.id ? 'true' : undefined}
-              onClick={() => setSelectedId(candidate.id)}
-              className={cn(
-                'rounded-md px-2.5 py-2 text-left text-sm hover:bg-accent',
-                candidate.id === repo?.id && 'bg-accent'
-              )}
-            >
-              <span className="block truncate font-medium">{candidate.displayName}</span>
-              <span className="block text-2xs text-muted-foreground">
-                {tracker
-                  ? trackerLabel(tracker.provider)
-                  : translate(
-                      'auto.components.agentTeam.TeamSettingsProjects.noTracker',
-                      'No tracker linked'
-                    )}
-              </span>
-            </button>
-          )
-        })}
+        {soloRepos.map((candidate) => (
+          <ListButton
+            key={candidate.id}
+            current={candidate.id === selectedRepo?.id}
+            onClick={() => setSelection({ kind: 'repo', id: candidate.id })}
+          >
+            <span className="block truncate font-medium">{candidate.displayName}</span>
+            <TrackerHint state={state} repo={candidate} />
+          </ListButton>
+        ))}
         <p className="mt-2 text-xs text-muted-foreground">
           {translate(
             'auto.components.agentTeam.TeamSettingsProjects.foldersHint',
@@ -87,167 +162,12 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
           )}
         </p>
       </section>
-      {repo ? (
+      {activeGroup ? (
+        <GroupDetail state={state} group={activeGroup.group} members={activeGroup.members} />
+      ) : selectedRepo ? (
         <section className="flex min-w-0 flex-col gap-4">
-          <div className="flex flex-wrap items-end gap-3">
-            <h2 className="mr-auto text-base font-semibold">{repo.displayName}</h2>
-            <div className="flex flex-col gap-1.5">
-              <Label>
-                {translate('auto.components.agentTeam.TeamSettingsProjects.tracker', 'Tracker')}
-              </Label>
-              <Select
-                value={project?.tracker?.provider ?? NO_TRACKER}
-                onValueChange={(value) => {
-                  const provider = TASK_PROVIDERS.find((candidate) => candidate === value)
-                  void run({
-                    kind: 'project.update',
-                    repoId: repo.id,
-                    patch: {
-                      tracker: provider
-                        ? { provider, projectKey: project?.tracker?.projectKey }
-                        : undefined
-                    }
-                  })
-                }}
-              >
-                <SelectTrigger size="sm" className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={NO_TRACKER}>
-                    {translate('auto.components.agentTeam.TeamSettingsProjects.none', 'None')}
-                  </SelectItem>
-                  {TASK_PROVIDERS.map((provider) => (
-                    <SelectItem key={provider} value={provider}>
-                      {trackerLabel(provider)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {project?.tracker &&
-            (project.tracker.provider === 'jira' || project.tracker.provider === 'linear') ? (
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="agent-team-project-key">
-                  {translate(
-                    'auto.components.agentTeam.TeamSettingsProjects.projectKey',
-                    'Project or team key'
-                  )}
-                </Label>
-                <Input
-                  id="agent-team-project-key"
-                  key={`${repo.id}:${project.tracker.projectKey ?? ''}`}
-                  defaultValue={project.tracker.projectKey ?? ''}
-                  className="h-8 w-32"
-                  onBlur={(event) => {
-                    const tracker = project.tracker
-                    if (tracker && event.target.value !== (tracker.projectKey ?? '')) {
-                      void run({
-                        kind: 'project.update',
-                        repoId: repo.id,
-                        patch: {
-                          tracker: {
-                            ...tracker,
-                            projectKey: event.target.value.trim() || undefined
-                          }
-                        }
-                      })
-                    }
-                  }}
-                />
-              </div>
-            ) : null}
-            {repo.kind === 'folder' ? null : (
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="agent-team-base-branch">
-                  {translate(
-                    'auto.components.agentTeam.TeamSettingsProjects.baseBranch',
-                    'Base branch'
-                  )}
-                </Label>
-                <Input
-                  id="agent-team-base-branch"
-                  key={`${repo.id}:${project?.baseBranch ?? ''}`}
-                  defaultValue={project?.baseBranch ?? ''}
-                  placeholder={translate(
-                    'auto.components.agentTeam.TeamSettingsProjects.baseBranchDefault',
-                    'Project default'
-                  )}
-                  className="h-8 w-40"
-                  onBlur={(event) => {
-                    const next = event.target.value.trim()
-                    if (next !== (project?.baseBranch ?? '')) {
-                      void run({
-                        kind: 'project.update',
-                        repoId: repo.id,
-                        patch: { baseBranch: next || undefined }
-                      })
-                    }
-                  }}
-                />
-              </div>
-            )}
-            <div className="flex flex-col gap-1.5">
-              <Label>
-                {translate(
-                  'auto.components.agentTeam.TeamSettingsProjects.storage',
-                  'Spec saved in'
-                )}
-              </Label>
-              <ToggleGroup
-                type="single"
-                size="sm"
-                variant="outline"
-                value={effectiveProjectSpecStorage(project, repo)}
-                disabled={getRepoRoutingConnectionId(repo) !== null}
-                onValueChange={(value) => {
-                  if (value === 'repository' || value === 'local') {
-                    void run({
-                      kind: 'project.update',
-                      repoId: repo.id,
-                      patch: { specStorage: value }
-                    })
-                  }
-                }}
-              >
-                <ToggleGroupItem value="repository">
-                  {translate(
-                    'auto.components.agentTeam.TeamSettingsProjects.repository',
-                    'Repository · .orca/agent-team.md'
-                  )}
-                </ToggleGroupItem>
-                <ToggleGroupItem value="local">
-                  {translate(
-                    'auto.components.agentTeam.TeamSettingsProjects.local',
-                    'This computer'
-                  )}
-                </ToggleGroupItem>
-              </ToggleGroup>
-              {getRepoRoutingConnectionId(repo) !== null ? (
-                <span className="text-xs text-muted-foreground">
-                  {translate(
-                    'auto.components.agentTeam.TeamSettingsProjects.remoteStorageHint',
-                    'Remote project: its spec is kept on this computer, because Orca cannot read the remote checkout from here yet.'
-                  )}
-                </span>
-              ) : null}
-            </div>
-          </div>
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-            <TeamProjectSpecEditor
-              key={repo.id}
-              repoId={repo.id}
-              storage={effectiveProjectSpecStorage(project, repo)}
-            />
-            <TeamPromptPreview
-              state={state}
-              specText={specForPreview}
-              delivery={{
-                folder: repo.kind === 'folder',
-                baseBranch: project?.baseBranch?.trim() || null
-              }}
-            />
-          </div>
+          <h2 className="text-base font-semibold">{selectedRepo.displayName}</h2>
+          <ProjectDetail state={state} repo={selectedRepo} />
         </section>
       ) : (
         <p className="text-sm text-muted-foreground">
@@ -258,5 +178,61 @@ export function TeamSettingsProjects({ state }: { state: AgentTeamState }): Reac
         </p>
       )}
     </div>
+  )
+}
+
+function GroupListEntry({
+  group,
+  members,
+  state,
+  current,
+  onClick
+}: {
+  group: ProjectGroup
+  members: Repo[]
+  state: AgentTeamState
+  current: boolean
+  onClick: () => void
+}): React.JSX.Element {
+  const teamGroup = state.groups?.find((candidate) => candidate.groupId === group.id)
+  const trackerRepo = members.find((repo) => repo.id === teamGroup?.trackerRepoId)
+  return (
+    <ListButton current={current} onClick={onClick}>
+      <span className="flex items-center gap-1.5 truncate font-medium">
+        <FolderTree className="size-3.5 shrink-0 text-muted-foreground" />
+        {group.name}
+      </span>
+      {trackerRepo ? (
+        <TrackerHint state={state} repo={trackerRepo} />
+      ) : (
+        <span className="block text-2xs text-muted-foreground">
+          {translate(
+            'auto.components.agentTeam.TeamSettingsProjects.groupRepos',
+            '{{count}} repos · separate projects',
+            { count: members.length }
+          )}
+        </span>
+      )}
+    </ListButton>
+  )
+}
+
+function GroupDetail({
+  state,
+  group,
+  members
+}: {
+  state: AgentTeamState
+  group: ProjectGroup
+  members: Repo[]
+}): React.JSX.Element {
+  const teamGroup = state.groups?.find((candidate) => candidate.groupId === group.id)
+  const trackerRepo = members.find((repo) => repo.id === teamGroup?.trackerRepoId)
+  return (
+    <section className="flex min-w-0 flex-col gap-4">
+      <h2 className="text-base font-semibold">{group.name}</h2>
+      <TeamGroupSettings group={group} repos={members} teamGroup={teamGroup} />
+      {trackerRepo ? <ProjectDetail state={state} repo={trackerRepo} /> : null}
+    </section>
   )
 }

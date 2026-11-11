@@ -3,6 +3,7 @@ import {
   requireTeam,
   type AgentTeamMutationIds
 } from './agent-team-mutations'
+import { teamProjectRepoId } from './agent-team-project-groups'
 import type {
   AgentTeamIssue,
   AgentTeamIssueScope,
@@ -61,7 +62,7 @@ export function createIssue(
   }
   const issue: AgentTeamIssue = {
     id: ids.newId(),
-    repoId: input.repoId,
+    repoId: teamProjectRepoId(state, input.repoId),
     teamId: input.teamId,
     title,
     body: input.body?.trim() ?? '',
