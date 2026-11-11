@@ -19993,6 +19993,12 @@
           "title": "Connect a task source",
           "description": "Sign in to GitHub or GitLab, or connect Jira or Linear, to browse and start work from your tasks here.",
           "action": "Open integrations"
+        },
+        "checksPill": {
+          "pipelinePassed": "Pipeline passed",
+          "pipelineFailed": "Pipeline failed",
+          "pipelinePending": "Pipeline pending",
+          "pipelineUnresolved": "Pipeline unresolved"
         }
       },
       "agent-workspace-trust-decision": {
@@ -20003,14 +20009,6 @@
         "setting-global-off": "Folder trust is turned off in Agents settings, so agents always ask.",
         "keyword-trust": "trust",
         "keyword-hooks": "hooks"
-      },
-      "task-page": {
-        "checksPill": {
-          "pipelinePassed": "Pipeline passed",
-          "pipelineFailed": "Pipeline failed",
-          "pipelinePending": "Pipeline pending",
-          "pipelineUnresolved": "Pipeline unresolved"
-        }
       }
     },
     "i18n": {
