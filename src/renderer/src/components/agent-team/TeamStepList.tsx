@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/select'
 import { AgentIcon } from '@/components/agent/icons/AgentIcon'
 import { getAgentLabel } from '@/lib/agent-catalog/agent-catalog'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type {
   AgentTeam,
   AgentTeamSeat,

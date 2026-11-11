@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { Repo } from '../../../../shared/repo-types'
 
 /** Project colour square with its initial, the same colour the sidebar uses for the repo. */

@@ -12,7 +12,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { lastDaysRange, usageBy } from '../../../../shared/agent-team/agent-team-activity-stats'
 import { planAgentTeamAssignments } from '../../../../shared/agent-team/agent-team-scheduler'
 import type { Repo } from '../../../../shared/repo-types'

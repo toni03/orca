@@ -1,5 +1,5 @@
 import { useAppStore } from '@/store'
-import { revealTerminalPane } from '@/lib/reveal-terminal-pane'
+import { revealTerminalPane } from '@/lib/workspace/activation/reveal-terminal-pane'
 import { activateAndRevealWorktree } from '@/lib/workspace/activation/worktree-activation'
 import type { AgentStatusEntry } from '../../../../shared/agent-status/contracts/agent-status-types'
 

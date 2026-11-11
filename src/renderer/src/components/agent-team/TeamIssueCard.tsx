@@ -10,7 +10,7 @@ import {
 import { translate } from '@/i18n/i18n'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { openAssignment, stepRole } from '../../../../shared/agent-team/agent-team-pipeline'
 import type { AgentTeamWaitReason } from '../../../../shared/agent-team/agent-team-scheduler'
 import type { Repo } from '../../../../shared/repo-types'

@@ -5,7 +5,7 @@ import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
 import { formatTokens } from '@/components/stats/usage-formatters'
 import { AgentIcon } from '@/components/agent/icons/AgentIcon'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   lastDaysRange,
   seatRecentSessions,

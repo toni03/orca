@@ -1,5 +1,5 @@
 import { Label } from '@/components/ui/label'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 /** One settings row: label and hint on the left, the control on the right; stacks when narrow. */
 export function TeamFieldRow({

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { formatTokens } from '@/components/stats/usage-formatters'
 import { TeamIssueDescription } from './TeamIssueDescription'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type {
   AgentTeamAssignment,
   AgentTeamFinding,
