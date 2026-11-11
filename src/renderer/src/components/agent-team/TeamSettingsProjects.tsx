@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'react'
-import { FolderTree } from 'lucide-react'
+import { ChevronRight, FolderTree } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import { cn } from '@/lib/utils'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import type { ProjectGroup } from '../../../../shared/project-group-types'
 import type { Repo } from '../../../../shared/repo-types'
@@ -15,47 +24,18 @@ import { TeamProjectSpecEditor } from './TeamProjectSpecEditor'
 import { TeamPromptPreview } from './TeamPromptPreview'
 import { trackerLabel } from './team-labels'
 
-type Selection = { kind: 'group' | 'repo'; id: string }
+const SECTION = 'text-2xs font-semibold uppercase tracking-wider text-muted-foreground'
 
-function TrackerHint({ state, repo }: { state: AgentTeamState; repo: Repo }): React.JSX.Element {
-  const tracker = projectTracker(
-    state.projects.find((entry) => entry.repoId === repo.id),
-    repo
-  )
-  return (
-    <span className="block text-2xs text-muted-foreground">
-      {tracker
-        ? trackerLabel(tracker.provider)
-        : translate(
-            'auto.components.agentTeam.TeamSettingsProjects.noTracker',
-            'No tracker linked'
-          )}
-    </span>
-  )
-}
-
-function ListButton({
-  current,
-  onClick,
-  children
-}: {
-  current: boolean
-  onClick: () => void
-  children: React.ReactNode
-}): React.JSX.Element {
-  return (
-    <button
-      type="button"
-      data-current={current ? 'true' : undefined}
-      onClick={onClick}
-      className={cn(
-        'rounded-md px-2.5 py-2 text-left text-sm hover:bg-accent',
-        current && 'bg-accent'
-      )}
-    >
-      {children}
-    </button>
-  )
+function trackerSummary(state: AgentTeamState, repo: Repo | undefined): string {
+  const tracker = repo
+    ? projectTracker(
+        state.projects.find((entry) => entry.repoId === repo.id),
+        repo
+      )
+    : undefined
+  return tracker
+    ? trackerLabel(tracker.provider)
+    : translate('auto.components.agentTeam.TeamSettingsProjects.noTracker', 'No tracker linked')
 }
 
 /** The tracker, base branch and spec of one repo, with the prompt its seats get. */
@@ -75,145 +55,41 @@ function ProjectDetail({ state, repo }: { state: AgentTeamState; repo: Repo }): 
   }, [repo, project?.specStorage, project?.localSpec])
   return (
     <>
-      <div className="flex flex-wrap items-start gap-3">
+      <section className="flex flex-col gap-2">
+        <h3 className={SECTION}>
+          {translate(
+            'auto.components.agentTeam.TeamSettingsProjects.trackerAndBranch',
+            'Tracker and branch · {{repo}}',
+            { repo: repo.displayName }
+          )}
+        </h3>
         <TeamProjectFields repo={repo} project={project} />
-      </div>
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <TeamProjectSpecEditor
-          key={repo.id}
-          repoId={repo.id}
-          storage={effectiveProjectSpecStorage(project, repo)}
-        />
-        <TeamPromptPreview
-          state={state}
-          specText={specForPreview}
-          delivery={{
-            folder: repo.kind === 'folder',
-            baseBranch: project?.baseBranch?.trim() || null
-          }}
-        />
-      </div>
-    </>
-  )
-}
-
-export function TeamSettingsProjects({ state }: { state: AgentTeamState }): React.JSX.Element {
-  const repos = useAppStore((s) => s.repos)
-  const projectGroups = useAppStore((s) => s.projectGroups)
-  const teamRepos = repos.filter((repo) => repo.id !== state.managerRepoId)
-  // Orca groups with at least two git repos can be worked as one project.
-  const groups = projectGroups.flatMap((group) => {
-    const members = getFolderSourceRepos(teamRepos, projectGroups, group)
-    return members.length > 1 ? [{ group, members }] : []
-  })
-  const grouped = new Set((state.groups ?? []).flatMap((group) => group.repoIds))
-  const soloRepos = teamRepos.filter((repo) => !grouped.has(repo.id))
-  const [selection, setSelection] = useState<Selection | null>(null)
-  const selectedGroup =
-    selection?.kind === 'group'
-      ? groups.find((entry) => entry.group.id === selection.id)
-      : undefined
-  const selectedRepo =
-    selection?.kind === 'repo'
-      ? soloRepos.find((repo) => repo.id === selection.id)
-      : selectedGroup
-        ? undefined
-        : soloRepos[0]
-  const fallbackGroup = !selectedRepo && !selectedGroup ? groups[0] : undefined
-  const activeGroup = selectedGroup ?? fallbackGroup
-
-  return (
-    <div className="grid min-h-0 grid-cols-[240px_minmax(0,1fr)] gap-5">
-      <section className="flex flex-col gap-1">
-        {groups.length > 0 ? (
-          <>
-            <h2 className="mb-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {translate('auto.components.agentTeam.TeamSettingsProjects.groups', 'Project groups')}
-            </h2>
-            {groups.map(({ group, members }) => (
-              <GroupListEntry
-                key={group.id}
-                group={group}
-                members={members}
-                state={state}
-                current={activeGroup?.group.id === group.id}
-                onClick={() => setSelection({ kind: 'group', id: group.id })}
-              />
-            ))}
-          </>
-        ) : null}
-        <h2 className="mb-1 mt-2 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
-          {translate('auto.components.agentTeam.TeamSettingsProjects.projects', 'Projects')}
-        </h2>
-        {soloRepos.map((candidate) => (
-          <ListButton
-            key={candidate.id}
-            current={candidate.id === selectedRepo?.id}
-            onClick={() => setSelection({ kind: 'repo', id: candidate.id })}
-          >
-            <span className="block truncate font-medium">{candidate.displayName}</span>
-            <TrackerHint state={state} repo={candidate} />
-          </ListButton>
-        ))}
-        <p className="mt-2 text-xs text-muted-foreground">
-          {translate(
-            'auto.components.agentTeam.TeamSettingsProjects.foldersHint',
-            'Folder projects have no git worktrees: their issues run one at a time, directly in the folder.'
-          )}
-        </p>
       </section>
-      {activeGroup ? (
-        <GroupDetail state={state} group={activeGroup.group} members={activeGroup.members} />
-      ) : selectedRepo ? (
-        <section className="flex min-w-0 flex-col gap-4">
-          <h2 className="text-base font-semibold">{selectedRepo.displayName}</h2>
-          <ProjectDetail state={state} repo={selectedRepo} />
-        </section>
-      ) : (
-        <p className="text-sm text-muted-foreground">
+      <TeamProjectSpecEditor
+        key={repo.id}
+        repoId={repo.id}
+        storage={effectiveProjectSpecStorage(project, repo)}
+      />
+      <Collapsible className="rounded-lg border border-border bg-card">
+        <CollapsibleTrigger className="group flex w-full items-center gap-2 px-3.5 py-2.5 text-sm">
+          <ChevronRight className="size-4 transition-transform group-data-[state=open]:rotate-90" />
           {translate(
-            'auto.components.agentTeam.TeamSettingsProjects.noProjects',
-            'Add a git project to Orca to use it with a team.'
+            'auto.components.agentTeam.TeamSettingsProjects.showPreview',
+            'Prompt preview'
           )}
-        </p>
-      )}
-    </div>
-  )
-}
-
-function GroupListEntry({
-  group,
-  members,
-  state,
-  current,
-  onClick
-}: {
-  group: ProjectGroup
-  members: Repo[]
-  state: AgentTeamState
-  current: boolean
-  onClick: () => void
-}): React.JSX.Element {
-  const teamGroup = state.groups?.find((candidate) => candidate.groupId === group.id)
-  const trackerRepo = members.find((repo) => repo.id === teamGroup?.trackerRepoId)
-  return (
-    <ListButton current={current} onClick={onClick}>
-      <span className="flex items-center gap-1.5 truncate font-medium">
-        <FolderTree className="size-3.5 shrink-0 text-muted-foreground" />
-        {group.name}
-      </span>
-      {trackerRepo ? (
-        <TrackerHint state={state} repo={trackerRepo} />
-      ) : (
-        <span className="block text-2xs text-muted-foreground">
-          {translate(
-            'auto.components.agentTeam.TeamSettingsProjects.groupRepos',
-            '{{count}} repos · separate projects',
-            { count: members.length }
-          )}
-        </span>
-      )}
-    </ListButton>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="border-t border-border p-3.5">
+          <TeamPromptPreview
+            state={state}
+            specText={specForPreview}
+            delivery={{
+              folder: repo.kind === 'folder',
+              baseBranch: project?.baseBranch?.trim() || null
+            }}
+          />
+        </CollapsibleContent>
+      </Collapsible>
+    </>
   )
 }
 
@@ -229,10 +105,139 @@ function GroupDetail({
   const teamGroup = state.groups?.find((candidate) => candidate.groupId === group.id)
   const trackerRepo = members.find((repo) => repo.id === teamGroup?.trackerRepoId)
   return (
-    <section className="flex min-w-0 flex-col gap-4">
-      <h2 className="text-base font-semibold">{group.name}</h2>
-      <TeamGroupSettings group={group} repos={members} teamGroup={teamGroup} />
+    <>
+      <section className="flex flex-col gap-2">
+        <h3 className={SECTION}>
+          {translate('auto.components.agentTeam.TeamSettingsProjects.group', 'Group')}
+        </h3>
+        <TeamGroupSettings group={group} repos={members} teamGroup={teamGroup} />
+      </section>
       {trackerRepo ? <ProjectDetail state={state} repo={trackerRepo} /> : null}
-    </section>
+    </>
+  )
+}
+
+function ProjectPicker({
+  state,
+  groups,
+  soloRepos,
+  value,
+  onChange
+}: {
+  state: AgentTeamState
+  groups: { group: ProjectGroup; members: Repo[] }[]
+  soloRepos: Repo[]
+  value: string
+  onChange: (value: string) => void
+}): React.JSX.Element {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger
+        className="h-9 w-96 max-w-full"
+        aria-label={translate(
+          'auto.components.agentTeam.TeamSettingsProjects.projects',
+          'Projects'
+        )}
+      >
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {groups.length > 0 ? (
+          <SelectGroup>
+            <SelectLabel>
+              {translate('auto.components.agentTeam.TeamSettingsProjects.groups', 'Project groups')}
+            </SelectLabel>
+            {groups.map(({ group, members }) => {
+              const teamGroup = state.groups?.find((entry) => entry.groupId === group.id)
+              const trackerRepo = members.find((repo) => repo.id === teamGroup?.trackerRepoId)
+              return (
+                <SelectItem key={group.id} value={`group:${group.id}`}>
+                  <FolderTree className="text-muted-foreground" />
+                  <span className="font-semibold">{group.name}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {trackerRepo
+                      ? trackerSummary(state, trackerRepo)
+                      : translate(
+                          'auto.components.agentTeam.TeamSettingsProjects.groupRepos',
+                          '{{count}} repos · separate projects',
+                          { count: members.length }
+                        )}
+                  </span>
+                </SelectItem>
+              )
+            })}
+          </SelectGroup>
+        ) : null}
+        <SelectGroup>
+          <SelectLabel>
+            {translate('auto.components.agentTeam.TeamSettingsProjects.projects', 'Projects')}
+          </SelectLabel>
+          {soloRepos.map((repo) => (
+            <SelectItem key={repo.id} value={`repo:${repo.id}`}>
+              <span className="font-semibold">{repo.displayName}</span>
+              <span className="ml-2 text-xs text-muted-foreground">
+                {trackerSummary(state, repo)}
+              </span>
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  )
+}
+
+export function TeamSettingsProjects({ state }: { state: AgentTeamState }): React.JSX.Element {
+  const repos = useAppStore((s) => s.repos)
+  const projectGroups = useAppStore((s) => s.projectGroups)
+  const teamRepos = repos.filter((repo) => repo.id !== state.managerRepoId)
+  // Orca groups with at least two git repos can be worked as one project.
+  const groups = projectGroups.flatMap((group) => {
+    const members = getFolderSourceRepos(teamRepos, projectGroups, group)
+    return members.length > 1 ? [{ group, members }] : []
+  })
+  const grouped = new Set((state.groups ?? []).flatMap((group) => group.repoIds))
+  const soloRepos = teamRepos.filter((repo) => !grouped.has(repo.id))
+  const [selection, setSelection] = useState<string | null>(null)
+  const options = [
+    ...groups.map((entry) => `group:${entry.group.id}`),
+    ...soloRepos.map((repo) => `repo:${repo.id}`)
+  ]
+  const current = selection && options.includes(selection) ? selection : options[0]
+  const activeGroup = groups.find((entry) => `group:${entry.group.id}` === current)
+  const activeRepo = soloRepos.find((repo) => `repo:${repo.id}` === current)
+
+  if (!current) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        {translate(
+          'auto.components.agentTeam.TeamSettingsProjects.noProjects',
+          'Add a git project to Orca to use it with a team.'
+        )}
+      </p>
+    )
+  }
+  return (
+    <div className="flex min-w-0 flex-col gap-5">
+      <div className="flex flex-col gap-2 border-b border-border pb-4">
+        <ProjectPicker
+          state={state}
+          groups={groups}
+          soloRepos={soloRepos}
+          value={current}
+          onChange={setSelection}
+        />
+        <p className="text-xs text-muted-foreground">
+          {translate(
+            'auto.components.agentTeam.TeamSettingsProjects.foldersHint',
+            'Folder projects have no git worktrees: their issues run one at a time, directly in the folder.'
+          )}
+        </p>
+      </div>
+      {activeGroup ? (
+        <GroupDetail state={state} group={activeGroup.group} members={activeGroup.members} />
+      ) : activeRepo ? (
+        <ProjectDetail state={state} repo={activeRepo} />
+      ) : null}
+    </div>
   )
 }

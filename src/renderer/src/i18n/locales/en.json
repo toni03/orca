@@ -19839,7 +19839,6 @@
           "none": "None",
           "projectKey": "Project or team key",
           "storage": "Spec saved in",
-          "repository": "Repository · .orca/agent-team.md",
           "local": "This computer",
           "remoteStorageHint": "Remote project: its spec is kept on this computer, because Orca cannot read the remote checkout from here yet.",
           "noProjects": "Add a git project to Orca to use it with a team.",
@@ -19851,7 +19850,13 @@
           "baseBranchMissing": "No branch {{branch}} in this repo.",
           "repoDefaultBranch": "Repo default: {{branch}}",
           "trackerFromRepo": "{{tracker}} (repo)",
-          "trackerNotConnected": "{{tracker}} is not connected in this Orca: connect it in Settings › Task Sources."
+          "trackerNotConnected": "{{tracker}} is not connected in this Orca: connect it in Settings › Task Sources.",
+          "trackerHint": "Defaults to the repo's code host.",
+          "storageHint": "In the repository it lives at .orca/agent-team.md and is shared with everyone.",
+          "storageRepo": "Repository",
+          "trackerAndBranch": "Tracker and branch · {{repo}}",
+          "showPreview": "Prompt preview",
+          "group": "Group"
         },
         "TeamSeatDialog": {
           "addTitle": "Add seat",
@@ -19891,7 +19896,6 @@
           "organization": "Organization",
           "customised": "Customised",
           "yours": "Yours",
-          "name": "Role name",
           "reset": "Reset to template",
           "delete": "Delete role",
           "usedBy": "Used by {{steps}}",
@@ -19901,16 +19905,17 @@
           "stepType": "Step type",
           "buildHint": "Own worktree, edits code. Hands back done or blocked.",
           "checkHint": "Reads and tests the Build worktree. Hands back pass or changes, with findings.",
-          "stepTypeHint": "This is all Orca needs to route the issue. The name and prompt are yours.",
-          "skills": "Skills, comma separated",
           "revert": "Revert",
           "save": "Save role",
           "newRoleName": "New role",
           "roles": "Roles",
-          "newRole": "New role"
+          "newRole": "New role",
+          "roleActions": "Role actions",
+          "nameLabel": "Name",
+          "skillsLabel": "Skills",
+          "unsaved": "Unsaved changes · saves as v{{version}}"
         },
         "TeamSettingsTeams": {
-          "step": "Step {{n}}",
           "removeStep": "Remove step {{name}}",
           "stepName": "Step name",
           "role": "Role",
@@ -19929,7 +19934,9 @@
           "help": "A team is a pipeline of steps. Each step has a role (what to do) and seats (who does it). Orca only looks at the step type: Build gets its own worktree and changes code; Check reviews that worktree and passes the issue on or sends it back to the Build step for a new round.",
           "noTeams": "No teams yet. Start from a template with New team.",
           "resumeSeat": "Resume seat",
-          "pauseSeat": "Pause seat"
+          "pauseSeat": "Pause seat",
+          "teamActions": "Team actions",
+          "renameTeam": "Rename team"
         },
         "TeamSidebarButton": {
           "label": "Team",
@@ -20073,7 +20080,17 @@
           "trackerRepo": "Tracker repo",
           "trackerRepoHint": "Holds the group tracker, spec and base branch; the agent starts in its worktree.",
           "repos": "Repos",
-          "trackerTag": "tracker"
+          "include": "Include {{repo}}",
+          "trackerIn": "Tracker in {{repo}}",
+          "included": "Included"
+        },
+        "TeamStepList": {
+          "reorder": "Drag to reorder, or press Space and use the arrow keys",
+          "reorderLocked": "Steps cannot be reordered while the team is working on issues."
+        },
+        "TeamSkillsInput": {
+          "remove": "Remove {{skill}}",
+          "add": "Add skill…"
         }
       }
     },

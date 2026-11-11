@@ -22,7 +22,7 @@ function replaceTeam(state: AgentTeamState, team: AgentTeam): AgentTeamState {
   }
 }
 
-function teamHasActiveIssues(state: AgentTeamState, teamId: string): boolean {
+export function teamHasActiveIssues(state: AgentTeamState, teamId: string): boolean {
   return state.issues.some(
     (issue) =>
       issue.teamId === teamId && (issue.status === 'working' || openAssignment(issue) !== undefined)
@@ -136,6 +136,30 @@ export function removeTeamStep(
   }
   const team = requireTeam(state, teamId)
   return replaceTeam(state, { ...team, steps: team.steps.filter((step) => step.id !== stepId) })
+}
+
+export function moveTeamStep(
+  state: AgentTeamState,
+  teamId: string,
+  stepId: string,
+  toIndex: number
+): AgentTeamState {
+  if (teamHasActiveIssues(state, teamId)) {
+    throw new AgentTeamMutationError(
+      'Steps cannot be reordered while the team is working on issues.'
+    )
+  }
+  const team = requireTeam(state, teamId)
+  const step = team.steps.find((candidate) => candidate.id === stepId)
+  if (!step) {
+    throw new AgentTeamMutationError(`No step ${stepId}.`)
+  }
+  const rest = team.steps.filter((candidate) => candidate.id !== stepId)
+  const index = Math.max(0, Math.min(Math.trunc(toIndex), rest.length))
+  return replaceTeam(state, {
+    ...team,
+    steps: [...rest.slice(0, index), step, ...rest.slice(index)]
+  })
 }
 
 export function addSeat(

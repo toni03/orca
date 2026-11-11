@@ -1,19 +1,69 @@
 import { translate } from '@/i18n/i18n'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Switch } from '@/components/ui/switch'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
 import type { ProjectGroup } from '../../../../shared/project-group-types'
 import type { Repo } from '../../../../shared/repo-types'
 import type { AgentTeamProjectGroup } from '../../../../shared/agent-team/agent-team-types'
 import { projectTracker } from '../../../../shared/agent-team/agent-team-project-tracker'
+import { trackerLabel } from './team-labels'
 import { useAgentTeamCommand } from './use-agent-team-state'
+
+const ROW =
+  'grid grid-cols-[minmax(0,1fr)_5.5rem_5.5rem] items-center border-t border-border px-3.5'
+
+function RepoRow({
+  repo,
+  teamGroup,
+  onSave
+}: {
+  repo: Repo
+  teamGroup: AgentTeamProjectGroup
+  onSave: (next: AgentTeamProjectGroup) => void
+}): React.JSX.Element {
+  const isTracker = repo.id === teamGroup.trackerRepoId
+  const tracker = projectTracker(undefined, repo)
+  return (
+    <div className={`${ROW} py-2.5`}>
+      <span className="min-w-0 truncate text-sm">
+        <span className="font-medium">{repo.displayName}</span>
+        {tracker ? (
+          <span className="text-xs text-muted-foreground"> · {trackerLabel(tracker.provider)}</span>
+        ) : null}
+      </span>
+      <span className="flex justify-center">
+        <Checkbox
+          checked={teamGroup.repoIds.includes(repo.id)}
+          disabled={isTracker}
+          aria-label={translate(
+            'auto.components.agentTeam.TeamGroupSettings.include',
+            'Include {{repo}}',
+            { repo: repo.displayName }
+          )}
+          onCheckedChange={(checked) =>
+            onSave({
+              ...teamGroup,
+              repoIds:
+                checked === true
+                  ? [...teamGroup.repoIds, repo.id]
+                  : teamGroup.repoIds.filter((id) => id !== repo.id)
+            })
+          }
+        />
+      </span>
+      <span className="flex justify-center">
+        <RadioGroupItem
+          value={repo.id}
+          aria-label={translate(
+            'auto.components.agentTeam.TeamGroupSettings.trackerIn',
+            'Tracker in {{repo}}',
+            { repo: repo.displayName }
+          )}
+        />
+      </span>
+    </div>
+  )
+}
 
 /** Turns an Orca project group into one team project: one branch and worktree per repo for each issue. */
 export function TeamGroupSettings({
@@ -33,8 +83,8 @@ export function TeamGroupSettings({
   const suggestedTracker = repos.find((repo) => projectTracker(undefined, repo)) ?? repos[0]
 
   return (
-    <div className="flex max-w-2xl flex-col gap-4">
-      <label className="flex items-center justify-between gap-3 text-sm">
+    <div className="rounded-lg border border-border bg-card">
+      <label className="flex items-center justify-between gap-3 px-3.5 py-3 text-sm">
         <span>
           {translate(
             'auto.components.agentTeam.TeamGroupSettings.asOne',
@@ -65,72 +115,36 @@ export function TeamGroupSettings({
       </label>
       {teamGroup ? (
         <>
-          <div className="flex flex-col gap-1.5">
-            <Label>
+          <div className={`${ROW} py-2 text-2xs text-muted-foreground`}>
+            <span>{translate('auto.components.agentTeam.TeamGroupSettings.repos', 'Repos')}</span>
+            <span className="text-center">
+              {translate('auto.components.agentTeam.TeamGroupSettings.included', 'Included')}
+            </span>
+            <span className="text-center">
               {translate('auto.components.agentTeam.TeamGroupSettings.trackerRepo', 'Tracker repo')}
-            </Label>
-            <Select
-              value={teamGroup.trackerRepoId}
-              onValueChange={(trackerRepoId) =>
-                save({
-                  ...teamGroup,
-                  trackerRepoId,
-                  repoIds: [...new Set([...teamGroup.repoIds, trackerRepoId])]
-                })
-              }
-            >
-              <SelectTrigger size="sm" className="w-60">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {repos.map((repo) => (
-                  <SelectItem key={repo.id} value={repo.id}>
-                    {repo.displayName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <span className="text-xs text-muted-foreground">
-              {translate(
-                'auto.components.agentTeam.TeamGroupSettings.trackerRepoHint',
-                'Holds the group tracker, spec and base branch; the agent starts in its worktree.'
-              )}
             </span>
           </div>
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 text-sm font-medium">
-              {translate('auto.components.agentTeam.TeamGroupSettings.repos', 'Repos')}
-            </legend>
-            {repos.map((repo) => {
-              const isTracker = repo.id === teamGroup.trackerRepoId
-              return (
-                <label key={repo.id} className="flex items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={teamGroup.repoIds.includes(repo.id)}
-                    disabled={isTracker}
-                    onCheckedChange={(checked) =>
-                      save({
-                        ...teamGroup,
-                        repoIds:
-                          checked === true
-                            ? [...teamGroup.repoIds, repo.id]
-                            : teamGroup.repoIds.filter((id) => id !== repo.id)
-                      })
-                    }
-                  />
-                  <span>{repo.displayName}</span>
-                  {isTracker ? (
-                    <span className="text-xs text-muted-foreground">
-                      {translate(
-                        'auto.components.agentTeam.TeamGroupSettings.trackerTag',
-                        'tracker'
-                      )}
-                    </span>
-                  ) : null}
-                </label>
-              )
-            })}
-          </fieldset>
+          <RadioGroup
+            className="gap-0"
+            value={teamGroup.trackerRepoId}
+            onValueChange={(trackerRepoId) =>
+              save({
+                ...teamGroup,
+                trackerRepoId,
+                repoIds: [...new Set([...teamGroup.repoIds, trackerRepoId])]
+              })
+            }
+          >
+            {repos.map((repo) => (
+              <RepoRow key={repo.id} repo={repo} teamGroup={teamGroup} onSave={save} />
+            ))}
+          </RadioGroup>
+          <p className="border-t border-border px-3.5 py-2.5 text-xs text-muted-foreground">
+            {translate(
+              'auto.components.agentTeam.TeamGroupSettings.trackerRepoHint',
+              'Holds the group tracker, spec and base branch; the agent starts in its worktree.'
+            )}
+          </p>
         </>
       ) : null}
     </div>

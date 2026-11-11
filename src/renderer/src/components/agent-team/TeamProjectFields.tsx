@@ -1,6 +1,5 @@
 import { translate } from '@/i18n/i18n'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -20,12 +19,13 @@ import {
   trackerFromRepoRemote
 } from '../../../../shared/agent-team/agent-team-project-tracker'
 import { TeamBaseBranchField } from './TeamBaseBranchField'
+import { TeamFieldRow } from './TeamFieldRow'
 import { trackerLabel } from './team-labels'
 import { useAgentTeamCommand } from './use-agent-team-state'
 
 const NO_TRACKER = 'none'
 
-/** Tracker, base branch and spec storage of one team project. */
+/** Tracker, base branch and spec storage of one team project, as rows of one card. */
 export function TeamProjectFields({
   repo,
   project
@@ -48,13 +48,30 @@ export function TeamProjectFields({
     void run({ kind: 'project.update', repoId: repo.id, patch })
   }
   const remoteStorage = getRepoRoutingConnectionId(repo) !== null
+  const trackerMissing =
+    tracker !== undefined &&
+    !readiness[tracker.provider].connected &&
+    !readiness[tracker.provider].checking
 
   return (
-    <>
-      <div className="flex flex-col gap-1.5">
-        <Label>
-          {translate('auto.components.agentTeam.TeamSettingsProjects.tracker', 'Tracker')}
-        </Label>
+    <div className="rounded-lg border border-border bg-card">
+      <TeamFieldRow
+        id="agent-team-tracker"
+        label={translate('auto.components.agentTeam.TeamSettingsProjects.tracker', 'Tracker')}
+        error={trackerMissing}
+        hint={
+          trackerMissing && tracker
+            ? translate(
+                'auto.components.agentTeam.TeamSettingsProjects.trackerNotConnected',
+                '{{tracker}} is not connected in this Orca: connect it in Settings › Task Sources.',
+                { tracker: trackerLabel(tracker.provider) }
+              )
+            : translate(
+                'auto.components.agentTeam.TeamSettingsProjects.trackerHint',
+                "Defaults to the repo's code host."
+              )
+        }
+      >
         <Select
           value={tracker?.provider ?? NO_TRACKER}
           onValueChange={(value) => {
@@ -64,7 +81,12 @@ export function TeamProjectFields({
             })
           }}
         >
-          <SelectTrigger size="sm" className="w-44">
+          <SelectTrigger
+            id="agent-team-tracker"
+            size="sm"
+            className="w-full"
+            aria-labelledby="agent-team-tracker-label"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -84,31 +106,20 @@ export function TeamProjectFields({
             ))}
           </SelectContent>
         </Select>
-        {tracker &&
-        !readiness[tracker.provider].connected &&
-        !readiness[tracker.provider].checking ? (
-          <span className="text-xs text-destructive">
-            {translate(
-              'auto.components.agentTeam.TeamSettingsProjects.trackerNotConnected',
-              '{{tracker}} is not connected in this Orca: connect it in Settings › Task Sources.',
-              { tracker: trackerLabel(tracker.provider) }
-            )}
-          </span>
-        ) : null}
-      </div>
+      </TeamFieldRow>
       {tracker && (tracker.provider === 'jira' || tracker.provider === 'linear') ? (
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="agent-team-project-key">
-            {translate(
-              'auto.components.agentTeam.TeamSettingsProjects.projectKey',
-              'Project or team key'
-            )}
-          </Label>
+        <TeamFieldRow
+          id="agent-team-project-key"
+          label={translate(
+            'auto.components.agentTeam.TeamSettingsProjects.projectKey',
+            'Project or team key'
+          )}
+        >
           <Input
             id="agent-team-project-key"
             key={`${repo.id}:${tracker.projectKey ?? ''}`}
             defaultValue={tracker.projectKey ?? ''}
-            className="h-8 w-32"
+            className="h-8 w-full"
             onBlur={(event) => {
               if (event.target.value !== (tracker.projectKey ?? '')) {
                 update({
@@ -117,7 +128,7 @@ export function TeamProjectFields({
               }
             }}
           />
-        </div>
+        </TeamFieldRow>
       ) : null}
       {repo.kind === 'folder' ? null : (
         <TeamBaseBranchField
@@ -126,14 +137,26 @@ export function TeamProjectFields({
           onCommit={(next) => update({ baseBranch: next || undefined })}
         />
       )}
-      <div className="flex flex-col gap-1.5">
-        <Label>
-          {translate('auto.components.agentTeam.TeamSettingsProjects.storage', 'Spec saved in')}
-        </Label>
+      <TeamFieldRow
+        id="agent-team-spec-storage"
+        label={translate('auto.components.agentTeam.TeamSettingsProjects.storage', 'Spec saved in')}
+        hint={
+          remoteStorage
+            ? translate(
+                'auto.components.agentTeam.TeamSettingsProjects.remoteStorageHint',
+                'Remote project: its spec is kept on this computer, because Orca cannot read the remote checkout from here yet.'
+              )
+            : translate(
+                'auto.components.agentTeam.TeamSettingsProjects.storageHint',
+                'In the repository it lives at .orca/agent-team.md and is shared with everyone.'
+              )
+        }
+      >
         <ToggleGroup
+          id="agent-team-spec-storage"
           type="single"
-          size="sm"
-          variant="outline"
+          variant="segmented-card"
+          aria-labelledby="agent-team-spec-storage-label"
           value={effectiveProjectSpecStorage(project, repo)}
           disabled={remoteStorage}
           onValueChange={(value) => {
@@ -143,24 +166,13 @@ export function TeamProjectFields({
           }}
         >
           <ToggleGroupItem value="repository">
-            {translate(
-              'auto.components.agentTeam.TeamSettingsProjects.repository',
-              'Repository · .orca/agent-team.md'
-            )}
+            {translate('auto.components.agentTeam.TeamSettingsProjects.storageRepo', 'Repository')}
           </ToggleGroupItem>
           <ToggleGroupItem value="local">
             {translate('auto.components.agentTeam.TeamSettingsProjects.local', 'This computer')}
           </ToggleGroupItem>
         </ToggleGroup>
-        {remoteStorage ? (
-          <span className="text-xs text-muted-foreground">
-            {translate(
-              'auto.components.agentTeam.TeamSettingsProjects.remoteStorageHint',
-              'Remote project: its spec is kept on this computer, because Orca cannot read the remote checkout from here yet.'
-            )}
-          </span>
-        ) : null}
-      </div>
-    </>
+      </TeamFieldRow>
+    </div>
   )
 }
