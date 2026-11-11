@@ -63,13 +63,33 @@ export type AgentTeamProjectSpecStorage = 'repository' | 'local'
 
 export type AgentTeamProject = {
   repoId: string
-  tracker?: { provider: TaskProvider; projectKey?: string }
+  /** Absent follows the repo's code host (GitHub or GitLab); null means the project has no tracker. */
+  tracker?: { provider: TaskProvider; projectKey?: string } | null
   specStorage: AgentTeamProjectSpecStorage
   /** Only used when `specStorage` is `local`; repository specs live in the repo file. */
   localSpec?: string
   specTemplateId?: string
   /** Branch new worktrees start from and merge requests target; absent uses the repo default. */
   baseBranch?: string
+}
+
+/**
+ * An Orca project group worked as one project: each issue gets a worktree in every member repo on
+ * one branch. The tracker repo holds the project config and the issues; its worktree hosts the agent.
+ */
+export type AgentTeamProjectGroup = {
+  groupId: string
+  trackerRepoId: string
+  /** Git repos of the group that take part, the tracker repo included. */
+  repoIds: string[]
+}
+
+/** A member repo's worktree of a grouped issue, beside the tracker repo's `worktreeId`. */
+export type AgentTeamLinkedWorktree = {
+  repoId: string
+  worktreeId: string
+  path: string
+  branch?: string
 }
 
 export type AgentTeamIssueStatus =
@@ -93,7 +113,13 @@ export type AgentTeamFinding = {
 }
 
 export type AgentTeamStepResult =
-  | { kind: 'done'; summary: string; mergeRequestUrl?: string }
+  | {
+      kind: 'done'
+      summary: string
+      mergeRequestUrl?: string
+      /** Every merge request a grouped issue opened, one per changed repo; the first is mergeRequestUrl. */
+      mergeRequestUrls?: string[]
+    }
   | {
       kind: 'blocked'
       summary: string
@@ -148,6 +174,8 @@ export type AgentTeamIssue = {
   round: number
   worktreeId?: string
   branch?: string
+  /** Worktrees in the other repos of a project group, on the same branch. */
+  linkedWorktrees?: AgentTeamLinkedWorktree[]
   assignments: AgentTeamAssignment[]
   needsYou?: {
     reason: AgentTeamNeedsYouReason
@@ -158,6 +186,8 @@ export type AgentTeamIssue = {
   }
   /** Merge or pull request the Build step opened for review. */
   mergeRequest?: { url: string }
+  /** All merge requests of a grouped issue, mergeRequest first. */
+  mergeRequests?: { url: string }[]
   createdAt: number
   updatedAt: number
 }
@@ -205,6 +235,8 @@ export type AgentTeamState = {
   limitPauses?: AgentTeamLimitPause[]
   /** When the Manager last received the tracker moves, so the board can say how fresh trackers are. */
   trackerSyncedAt?: number
+  /** Project groups worked as one project; optional so older states still load. */
+  groups?: AgentTeamProjectGroup[]
   /** The Manager's own folder project, kept out of team project lists. */
   managerRepoId?: string
 }

@@ -1,4 +1,4 @@
-import { MessagesSquare, Pause, Play, X } from 'lucide-react'
+import { MessagesSquare, Pause, Play, Settings, X } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
@@ -15,7 +15,6 @@ import { TeamBoard } from './TeamBoard'
 import { TeamIconButton } from './TeamIconButton'
 import { TeamActivity } from './TeamActivity'
 import { TeamInbox } from './TeamInbox'
-import { TeamSettings } from './TeamSettings'
 import { TeamManagerPanel } from './TeamManagerPanel'
 import { useTeamManagerView } from './team-manager-view'
 import { formatDuration } from './team-labels'
@@ -23,7 +22,7 @@ import { useAgentTeamCommand, useAgentTeamState } from './use-agent-team-state'
 import { useNow } from './use-now'
 
 function isTeamTab(value: string): value is TeamPageTab {
-  return value === 'board' || value === 'activity' || value === 'needs-you' || value === 'settings'
+  return value === 'board' || value === 'activity' || value === 'needs-you'
 }
 
 function TeamSummary({ state }: { state: AgentTeamState }): React.JSX.Element {
@@ -58,7 +57,15 @@ export default function TeamPage(): React.JSX.Element {
   const { state, loadError } = useAgentTeamState()
   const run = useAgentTeamCommand()
   const closeTeamPage = useAppStore((s) => s.closeTeamPage)
-  const tab = useAppStore((s) => s.teamPageTab)
+  // Settings moved to Settings › Team; an older 'settings' tab opens the board.
+  const storedTab = useAppStore((s) => s.teamPageTab)
+  const tab = storedTab === 'settings' ? 'board' : storedTab
+  const openSettingsTarget = useAppStore((s) => s.openSettingsTarget)
+  const openSettingsPage = useAppStore((s) => s.openSettingsPage)
+  const openTeamSettings = (): void => {
+    openSettingsTarget({ pane: 'team', repoId: null })
+    openSettingsPage()
+  }
   const setTab = useAppStore((s) => s.setTeamPageTab)
   const [managerView, setManagerView] = useTeamManagerView()
   const managerOpen = managerView !== 'closed'
@@ -98,6 +105,14 @@ export default function TeamPage(): React.JSX.Element {
             <MessagesSquare />
             {translate('auto.components.agentTeam.TeamPage.manager', 'Manager')}
           </Button>
+          <TeamIconButton
+            variant="ghost"
+            size="icon-sm"
+            label={translate('auto.components.agentTeam.TeamPage.openSettings', 'Team settings')}
+            onClick={openTeamSettings}
+          >
+            <Settings />
+          </TeamIconButton>
           <TeamIconButton
             variant="ghost"
             size="icon-sm"
@@ -149,9 +164,6 @@ export default function TeamPage(): React.JSX.Element {
                     </span>
                   ) : null}
                 </TabsTrigger>
-                <TabsTrigger value="settings">
-                  {translate('auto.components.agentTeam.TeamPage.tabSettings', 'Settings')}
-                </TabsTrigger>
               </TabsList>
               {today && (today.activeMs > 0 || today.tokens > 0) ? (
                 <span className="text-xs text-muted-foreground">
@@ -167,7 +179,7 @@ export default function TeamPage(): React.JSX.Element {
               <div className="h-full overflow-auto px-5 py-4 scrollbar-sleek">
                 <TeamBoard
                   state={state}
-                  onOpenSettings={() => setTab('settings')}
+                  onOpenSettings={openTeamSettings}
                   onOpenManager={() => setManagerView('docked')}
                 />
               </div>
@@ -180,11 +192,6 @@ export default function TeamPage(): React.JSX.Element {
             <TabsContent value="needs-you" className="min-h-0 flex-1">
               <div className="h-full overflow-auto px-5 py-4 scrollbar-sleek">
                 <TeamInbox state={state} active={tab === 'needs-you'} />
-              </div>
-            </TabsContent>
-            <TabsContent value="settings" className="min-h-0 flex-1">
-              <div className="h-full overflow-auto px-5 py-4 scrollbar-sleek">
-                <TeamSettings state={state} />
               </div>
             </TabsContent>
           </Tabs>

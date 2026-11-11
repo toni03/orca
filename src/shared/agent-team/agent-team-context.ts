@@ -15,6 +15,8 @@ export type AgentTeamContext = {
     /** Branch issue worktrees start from and merge requests target; null is the repo default. */
     baseBranch: string | null
     spec: string
+    /** A project group worked as one project: every repo an issue of it gets a worktree in, this one first. */
+    groupRepos?: { repoId: string; name: string; path: string }[]
   }[]
   teams: {
     id: string

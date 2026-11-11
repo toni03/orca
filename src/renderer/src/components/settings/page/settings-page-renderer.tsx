@@ -4,6 +4,7 @@ import { getGeneralSubPageTitle } from '../general/general-sub-pages'
 import { ActiveSettingsSectionProvider } from '../section-layout/SettingsSection'
 import { SettingsContentScrollElementProvider } from './settings-content-scroll-element'
 import { SettingsSidebar } from '../navigation/SettingsSidebar'
+import { renderTeamSettingsSection } from '../team/team-settings-section'
 import { PluginInstallTrustDialogHost } from '../../plugins/dialogs/PluginInstallTrustDialog'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
@@ -175,6 +176,7 @@ export function renderSettingsPage(
                     {renderIntegrationsSettingsSection(context, t)}
                     {renderMobileSettingsSection(context, t)}
                     {renderAutomationsSettingsSection(context, t)}
+                    {renderTeamSettingsSection(context, t)}
                     {renderArtifactsSettingsSection(context, t)}
                     {renderShareSkillsSettingsSection(context, t)}
                     {renderSessionHistorySettingsSection(context, t)}

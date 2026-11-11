@@ -15,6 +15,7 @@ export const AgentTeamReportParams = z.object({
   questions: z.array(z.string()).optional(),
   options: z.array(z.string().trim().min(1).max(80)).max(4).optional(),
   mergeRequestUrl: z.string().optional(),
+  mergeRequestUrls: z.array(z.string()).optional(),
   findings: z.array(Finding).optional()
 })
 

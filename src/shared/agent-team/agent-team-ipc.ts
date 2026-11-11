@@ -41,4 +41,9 @@ export type AgentTeamIssueLiveStatus = {
     checks: CheckStatus
     reviewDecision?: PRReviewDecision
   } | null
+  /** Reviews of a grouped issue's other repos, one per linked worktree that has one. */
+  linkedReviews?: {
+    repoId: string
+    review: NonNullable<AgentTeamIssueLiveStatus['review']>
+  }[]
 }

@@ -28,7 +28,7 @@ export function TeamAgentPauseSettings({
         <span className="block text-xs text-muted-foreground">
           {translate(
             'auto.components.agentTeam.TeamAgentPauseSettings.hint',
-            'Pauses every seat that runs this agent, for example when its plan is out of credits. Running steps finish; queued work goes to the other seats. Pause one seat in Settings › Teams.'
+            'Pauses every seat that runs this agent, for example when its plan is out of credits. Running steps finish; queued work goes to the other seats. Pause one seat in Settings › Team › Teams.'
           )}
         </span>
       </span>

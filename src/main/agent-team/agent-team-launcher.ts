@@ -14,6 +14,8 @@ export type AgentTeamLauncher = {
   cliCommand(): string | null
   /** Folder projects have no git, so seats work in place and never open merge requests. */
   isFolderProject(repoId: string): boolean
+  /** The project's name as Orca shows it, for prompts that list several repos. */
+  repoName(repoId: string): string
   /** Build step without a worktree yet: create one from the base branch and start the agent in it. */
   launchInNewWorktree(args: {
     repoId: string
@@ -22,13 +24,23 @@ export type AgentTeamLauncher = {
     seat: AgentTeamSeat
     prompt: string
     title: string
+    /** Linked worktrees of a grouped issue the agent may also edit. */
+    extraDirs?: string[]
   }): Promise<{ worktreeId: string; branch?: string; terminalHandle: string }>
+  /** A grouped issue's worktree in another repo of the group, without an agent. */
+  createLinkedWorktree(args: {
+    repoId: string
+    name: string
+    baseBranch?: string
+    title: string
+  }): Promise<{ worktreeId: string; path: string; branch?: string }>
   /** Any later step: start the agent in the issue's worktree. */
   launchInWorktree(args: {
     worktreeId: string
     seat: AgentTeamSeat
     prompt: string
     title: string
+    extraDirs?: string[]
   }): Promise<{ terminalHandle: string }>
   readProjectSpec(project: AgentTeamProject | undefined, repoId: string): Promise<string | null>
   /** Resolves when the session's process exits; ptyId adopts a session started before a restart. */
@@ -69,7 +81,16 @@ export async function agentTeamStepPrompt(
       folder: launcher.isFolderProject(issue.repoId),
       baseBranch: project?.baseBranch?.trim() || null,
       ...(issue.mergeRequest ? { mergeRequestUrl: issue.mergeRequest.url } : {}),
-      ...(issue.tracker ? { tracker: issue.tracker } : {})
+      ...(issue.mergeRequests ? { mergeRequestUrls: issue.mergeRequests.map((mr) => mr.url) } : {}),
+      ...(issue.tracker ? { tracker: issue.tracker } : {}),
+      ...(issue.linkedWorktrees?.length
+        ? {
+            linked: issue.linkedWorktrees.map((linked) => ({
+              name: launcher.repoName(linked.repoId),
+              path: linked.path
+            }))
+          }
+        : {})
     }
   })
 }
@@ -94,13 +115,21 @@ export function closeAgentTeamSession(
   }
 }
 
-/** A done or discarded issue no longer needs its worktree; folder projects keep their folder. */
+/** A done or discarded issue no longer needs its worktrees; folder projects keep their folder. */
 export function removeFinishedAgentTeamWorktree(
   launcher: AgentTeamLauncher,
   issue: AgentTeamIssue
 ): void {
   const finished = issue.status === 'done' || issue.status === 'discarded'
-  if (finished && issue.worktreeId && !launcher.isFolderProject(issue.repoId)) {
-    void launcher.removeWorktree(issue.worktreeId).catch(() => undefined)
+  if (!finished || launcher.isFolderProject(issue.repoId)) {
+    return
+  }
+  for (const worktreeId of [
+    issue.worktreeId,
+    ...(issue.linkedWorktrees ?? []).map((linked) => linked.worktreeId)
+  ]) {
+    if (worktreeId) {
+      void launcher.removeWorktree(worktreeId).catch(() => undefined)
+    }
   }
 }

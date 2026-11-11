@@ -41,8 +41,8 @@ function SidebarEntry({
   )
 }
 
-/** Team and, while anything waits for the user, a Needs you entry that opens the inbox. */
-export function TeamSidebarButton(): React.JSX.Element {
+/** Team and, while anything waits for the user, a Needs you entry; hidden entries still raise Needs you toasts. */
+export function TeamSidebarButton({ visible }: { visible: boolean }): React.JSX.Element | null {
   const { state } = useAgentTeamState()
   useNeedsYouToasts(state)
   const openTeamPage = useAppStore((s) => s.openTeamPage)
@@ -51,6 +51,9 @@ export function TeamSidebarButton(): React.JSX.Element {
   const working = state?.issues.filter((issue) => issue.status === 'working').length ?? 0
   const needsYou = state?.issues.filter((issue) => issue.status === 'needs-you').length ?? 0
   const open = (next: TeamPageTab) => () => openTeamPage(next)
+  if (!visible) {
+    return null
+  }
 
   return (
     <>

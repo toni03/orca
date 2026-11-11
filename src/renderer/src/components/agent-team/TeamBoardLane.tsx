@@ -10,6 +10,7 @@ import type { AgentTeamIssue, AgentTeamState } from '../../../../shared/agent-te
 import type { BoardColumn } from './team-board-columns'
 import { TeamProjectAvatar } from './TeamProjectAvatar'
 import { formatDuration, trackerLabel } from './team-labels'
+import { projectTracker } from '../../../../shared/agent-team/agent-team-project-tracker'
 
 type Props = {
   repo: Repo
@@ -35,7 +36,10 @@ export function TeamBoardLane({
   onToggle,
   renderCards
 }: Props): React.JSX.Element {
-  const tracker = state.projects.find((project) => project.repoId === repo.id)?.tracker
+  const tracker = projectTracker(
+    state.projects.find((project) => project.repoId === repo.id),
+    repo
+  )
   return (
     <section
       aria-label={repo.displayName}

@@ -13954,6 +13954,18 @@
           "noMatches": "No matches.",
           "searchHosts": "Search hosts…",
           "searchLanguages": "Search languages…"
+        },
+        "team": {
+          "title": "Team",
+          "description": "Teams, roles, projects and workflow of the agent team, and whether Team appears in the sidebar.",
+          "showButton": "Show Team in the sidebar",
+          "showButtonDescription": "Show the Team and Needs you entries in the sidebar.",
+          "openTeam": "Open Team",
+          "keywordTeam": "team",
+          "keywordSeats": "seats",
+          "keywordRoles": "roles",
+          "keywordTracker": "tracker",
+          "keywordManager": "manager"
         }
       },
       "right": {
@@ -19682,7 +19694,7 @@
           "hiddenByFilter": "{{project}} · {{count}} issues hidden by the project filter",
           "show": "Show",
           "noIssues": "No issues in the queue",
-          "noIssuesBody": "Tell the Manager what you need, or link a project and its tracker in Team › Settings.",
+          "noIssuesBody": "Tell the Manager what you need, or link a project and its tracker in Settings › Team.",
           "messageManager": "Message the Manager",
           "connectProject": "Connect a project",
           "collapseLane": "Collapse {{project}}",
@@ -19760,19 +19772,19 @@
           "loadError": "Agent teams are not available in this window: {{message}}",
           "tabBoard": "Board",
           "tabActivity": "Activity",
-          "tabSettings": "Settings",
           "tabNeedsYou": "Needs you",
           "summary": "{{seats}} seats · {{working}} working · {{projects}} projects",
           "needYou": "· {{count}} need you",
           "resumeTeam": "Resume team",
           "pauseTeam": "Pause team",
           "today": "Today: {{time}} active · {{tokens}} tokens",
-          "loading": "Loading the team…"
+          "loading": "Loading the team…",
+          "openSettings": "Team settings"
         },
         "TeamPausedNotice": {
           "all": "All teams are paused: running steps finish, nothing new starts. Resume in Settings › Workflow.",
-          "teams": "Paused: {{teams}}. Running steps finish, nothing new starts. Resume in Settings › Teams.",
-          "seats": "Paused seats: {{seats}}. Their queued work goes to the other seats. Resume in Settings › Teams or Workflow."
+          "teams": "Paused: {{teams}}. Running steps finish, nothing new starts. Resume in Settings › Team › Teams.",
+          "seats": "Paused seats: {{seats}}. Their queued work goes to the other seats. Resume in Settings › Team › Teams or Workflow."
         },
         "TeamSettingsProjects": {
           "spec": "Project spec",
@@ -19795,7 +19807,14 @@
           "remoteStorageHint": "Remote project: its spec is kept on this computer, because Orca cannot read the remote checkout from here yet.",
           "noProjects": "Add a git project to Orca to use it with a team.",
           "baseBranch": "Base branch",
-          "baseBranchDefault": "Project default"
+          "baseBranchDefault": "Project default",
+          "groups": "Project groups",
+          "groupRepos": "{{count}} repos · separate projects",
+          "baseBranchDefaultNamed": "Default ({{branch}})",
+          "baseBranchMissing": "No branch {{branch}} in this repo.",
+          "repoDefaultBranch": "Repo default: {{branch}}",
+          "trackerFromRepo": "{{tracker}} (repo)",
+          "trackerNotConnected": "{{tracker}} is not connected in this Orca: connect it in Settings › Task Sources."
         },
         "TeamSeatDialog": {
           "addTitle": "Add seat",
@@ -19822,7 +19841,7 @@
           "batch": "Propose the next batch below",
           "batchHint": "The Manager proposes approved issues when fewer than this many are queued.",
           "pausedAll": "Pause all teams",
-          "pausedAllHint": "Running steps finish; no team starts anything new until you resume. To pause one team, use Settings › Teams.",
+          "pausedAllHint": "Running steps finish; no team starts anything new until you resume. To pause one team, use Settings › Team › Teams.",
           "syncTracker": "Keep trackers in step with the board",
           "syncTrackerHint": "When an issue with a tracker key moves, Orca asks the Manager to update its labels or state following the project spec. Moves wait until a Manager session is open and idle.",
           "teams": "Teams",
@@ -19885,13 +19904,12 @@
         },
         "TeamAgentPauseSettings": {
           "title": "Pause by agent",
-          "hint": "Pauses every seat that runs this agent, for example when its plan is out of credits. Running steps finish; queued work goes to the other seats. Pause one seat in Settings › Teams.",
+          "hint": "Pauses every seat that runs this agent, for example when its plan is out of credits. Running steps finish; queued work goes to the other seats. Pause one seat in Settings › Team › Teams.",
           "count": "{{paused}}/{{total}} seats paused"
         },
         "TeamDecisionForm": {
           "answerPlaceholder": "Answer the seat…",
           "changesPlaceholder": "Changes to request for a new round…",
-          "openMergeRequest": "Open merge request",
           "shortcut": "{{keys}} sends",
           "merge": "Merge in Orca",
           "quickAnswers": "Quick answers"
@@ -19958,10 +19976,6 @@
           "cancel": "Cancel"
         },
         "TeamPlanUsage": {
-          "fiveHour": "5 h",
-          "week": "Week",
-          "nearLimit": "Near limit",
-          "resets": "resets {{at}}",
           "percentNear": "{{percent}}% · near limit",
           "resetsAt": "Resets {{at}}",
           "unavailable": "Plan usage appears here once Orca can read the limits of the agents your seats use.",
@@ -19982,7 +19996,7 @@
         },
         "TeamIssueChanges": {
           "noWorktree": "This issue has no worktree open, so there is nothing to compare.",
-          "noBase": "Set the base branch in Team › Settings › Projects to compare this branch.",
+          "noBase": "Set the base branch in Settings › Team › Projects to compare this branch.",
           "loading": "Comparing the branch…",
           "summary": "{{files}} files against {{base}}",
           "viewAll": "Open the full diff",
@@ -20015,6 +20029,14 @@
         },
         "TeamActivityBreakdowns": {
           "manager": "Manager"
+        },
+        "TeamGroupSettings": {
+          "asOne": "Work this group as one project",
+          "asOneHint": "Each issue gets a worktree in every selected repo, all on one branch, and a merge request in each repo it changes. Its issues and tracker live in the tracker repo.",
+          "trackerRepo": "Tracker repo",
+          "trackerRepoHint": "Holds the group tracker, spec and base branch; the agent starts in its worktree.",
+          "repos": "Repos",
+          "trackerTag": "tracker"
         }
       },
       "agent-workspace-trust-decision": {
