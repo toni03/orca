@@ -1,7 +1,7 @@
 import { getIntlLocale, translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import { getAgentLabel } from '@/lib/agent-catalog/agent-catalog'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { AgentTeamSeat } from '../../../../shared/agent-team/agent-team-types'
 import type { RateLimitWindow } from '../../../../shared/rate-limit-types'
 import { agentPlanWindows } from '../../../../shared/agent-team/agent-team-plan-limits'

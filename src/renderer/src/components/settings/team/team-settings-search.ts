@@ -2,7 +2,7 @@ import { Users } from 'lucide-react'
 import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 import { translate } from '@/i18n/i18n'
 import type { Translate } from '@/i18n/use-translate'
-import type { SettingsNavSection } from '@/lib/settings-navigation-types'
+import type { SettingsNavSection } from '@/components/settings/navigation/settings-navigation-types'
 import { translateSearchKeyword } from '../search/settings-search-keywords'
 
 export const getTeamSettingsSearchEntries = createLocalizedCatalog(() => [

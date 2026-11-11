@@ -1,7 +1,7 @@
 import { Inbox, Users } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { TeamPageTab } from '@/store/slices/ui/ui-slice-contract-core'
 import { useAgentTeamState } from './use-agent-team-state'
 import { useNeedsYouToasts } from './use-needs-you-toasts'
