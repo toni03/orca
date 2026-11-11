@@ -78,7 +78,7 @@ export function createAgentTeamRuntimeLauncher(
           prompt,
           title,
           suppressStartupUpdatePrompt: true,
-          ...(seat.model ? { sessionOptions: { model: seat.model } } : {})
+          ...(launchPreferences(seat) ? { launchPreferences: launchPreferences(seat) } : {})
         })
         if (launched.ptyId) {
           ptyIdByHandle.set(launched.handle, launched.ptyId)
@@ -128,7 +128,7 @@ export function createAgentTeamRuntimeLauncher(
         title,
         suppressStartupUpdatePrompt: true,
         ...(extraAgentArgs ? { extraAgentArgs } : {}),
-        ...(seat.model ? { sessionOptions: { model: seat.model } } : {})
+        ...(launchPreferences(seat) ? { launchPreferences: launchPreferences(seat) } : {})
       })
       if (launched.ptyId) {
         ptyIdByHandle.set(launched.handle, launched.ptyId)
