@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { translate } from '@/i18n/i18n'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   getRuntimeRepoBaseRefDefault,
   searchRuntimeRepoBaseRefs
@@ -9,6 +8,7 @@ import {
 import type { Repo } from '../../../../shared/repo-types'
 import { getRepoExecutionHostId } from '../../../../shared/execution-host'
 import { normalizeHostedReviewBaseRef } from '../../../../shared/source-control/hosted-review/hosted-review-refs'
+import { TeamFieldRow } from './TeamFieldRow'
 
 /** The repo's default branch, so an empty base branch shows what it falls back to. */
 function useRepoDefaultBranch(repo: Repo): string | null {
@@ -68,10 +68,26 @@ export function TeamBaseBranchField({
   const defaultBranch = useRepoDefaultBranch(repo)
   const exists = useBranchExists(repo, value)
   return (
-    <div className="flex flex-col gap-1.5">
-      <Label htmlFor="agent-team-base-branch">
-        {translate('auto.components.agentTeam.TeamSettingsProjects.baseBranch', 'Base branch')}
-      </Label>
+    <TeamFieldRow
+      id="agent-team-base-branch"
+      label={translate('auto.components.agentTeam.TeamSettingsProjects.baseBranch', 'Base branch')}
+      error={exists === false}
+      hint={
+        exists === false
+          ? translate(
+              'auto.components.agentTeam.TeamSettingsProjects.baseBranchMissing',
+              'No branch {{branch}} in this repo.',
+              { branch: value }
+            )
+          : defaultBranch
+            ? translate(
+                'auto.components.agentTeam.TeamSettingsProjects.repoDefaultBranch',
+                'Repo default: {{branch}}',
+                { branch: defaultBranch }
+              )
+            : undefined
+      }
+    >
       <Input
         id="agent-team-base-branch"
         key={`${repo.id}:${value}`}
@@ -89,7 +105,7 @@ export function TeamBaseBranchField({
               )
         }
         aria-invalid={exists === false || undefined}
-        className="h-8 w-44"
+        className="h-8 w-full font-mono text-xs"
         onBlur={(event) => {
           const next = event.target.value.trim()
           if (next !== value) {
@@ -97,23 +113,6 @@ export function TeamBaseBranchField({
           }
         }}
       />
-      <span
-        className={exists === false ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}
-      >
-        {exists === false
-          ? translate(
-              'auto.components.agentTeam.TeamSettingsProjects.baseBranchMissing',
-              'No branch {{branch}} in this repo.',
-              { branch: value }
-            )
-          : defaultBranch
-            ? translate(
-                'auto.components.agentTeam.TeamSettingsProjects.repoDefaultBranch',
-                'Repo default: {{branch}}',
-                { branch: defaultBranch }
-              )
-            : null}
-      </span>
-    </div>
+    </TeamFieldRow>
   )
 }

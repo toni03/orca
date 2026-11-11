@@ -18996,7 +18996,6 @@
           "none": "Ninguno",
           "projectKey": "Clave del proyecto o equipo",
           "storage": "Prompt guardado en",
-          "repository": "Repositorio · .orca/agent-team.md",
           "local": "Este ordenador",
           "noProjects": "Añade un proyecto git a Orca para usarlo con un equipo.",
           "remoteStorageHint": "Proyecto remoto: su prompt se guarda en este ordenador, porque Orca todavía no puede leer desde aquí la copia remota.",
@@ -19008,14 +19007,19 @@
           "baseBranchMissing": "No hay ninguna rama {{branch}} en este repo.",
           "repoDefaultBranch": "Por defecto en el repo: {{branch}}",
           "trackerFromRepo": "{{tracker}} (repo)",
-          "trackerNotConnected": "{{tracker}} no está conectado en este Orca: conéctalo en Configuración › Fuentes de tareas."
+          "trackerNotConnected": "{{tracker}} no está conectado en este Orca: conéctalo en Configuración › Fuentes de tareas.",
+          "trackerHint": "Por defecto, el del alojamiento del repo.",
+          "storageHint": "En el repositorio se guarda en .orca/agent-team.md y se comparte con todos.",
+          "storageRepo": "Repositorio",
+          "trackerAndBranch": "Gestor de tareas y rama · {{repo}}",
+          "showPreview": "Vista previa del prompt",
+          "group": "Grupo"
         },
         "TeamSettingsRoles": {
           "builtin": "Integrado",
           "organization": "Organización",
           "customised": "Personalizado",
           "yours": "Tuyo",
-          "name": "Nombre del rol",
           "reset": "Restaurar la plantilla",
           "delete": "Eliminar rol",
           "usedBy": "Lo usa {{steps}}",
@@ -19025,16 +19029,17 @@
           "stepType": "Tipo de paso",
           "buildHint": "Worktree propio, edita código. Devuelve hecho o bloqueado.",
           "checkHint": "Lee y prueba el worktree del Build. Devuelve aprobado o cambios, con hallazgos.",
-          "stepTypeHint": "Es lo único que Orca necesita para mover la issue. El nombre y el prompt son tuyos.",
-          "skills": "Skills, separadas por comas",
           "revert": "Deshacer",
           "save": "Guardar rol",
           "newRoleName": "Rol nuevo",
           "roles": "Roles",
-          "newRole": "Nuevo rol"
+          "newRole": "Nuevo rol",
+          "roleActions": "Acciones del rol",
+          "nameLabel": "Nombre",
+          "skillsLabel": "Skills",
+          "unsaved": "Cambios sin guardar · se guardará como v{{version}}"
         },
         "TeamSettingsTeams": {
-          "step": "Paso {{n}}",
           "removeStep": "Quitar el paso {{name}}",
           "stepName": "Nombre del paso",
           "role": "Rol",
@@ -19053,7 +19058,9 @@
           "pausedBadge": "En pausa",
           "pause": "En pausa",
           "resumeSeat": "Reanudar sitio",
-          "pauseSeat": "Pausar sitio"
+          "pauseSeat": "Pausar sitio",
+          "teamActions": "Acciones del equipo",
+          "renameTeam": "Renombrar equipo"
         },
         "TeamSidebarButton": {
           "label": "Team",
@@ -19219,7 +19226,17 @@
           "trackerRepo": "Repo del tracker",
           "trackerRepoHint": "Guarda el gestor de tareas, la especificación y la rama base del grupo; el agente arranca en su worktree.",
           "repos": "Repos",
-          "trackerTag": "tracker"
+          "include": "Incluir {{repo}}",
+          "trackerIn": "Tracker en {{repo}}",
+          "included": "Incluido"
+        },
+        "TeamStepList": {
+          "reorder": "Arrastra para reordenar, o pulsa Espacio y usa las flechas",
+          "reorderLocked": "Los pasos no se pueden reordenar mientras el equipo trabaja en issues."
+        },
+        "TeamSkillsInput": {
+          "remove": "Quitar {{skill}}",
+          "add": "Añadir skill…"
         }
       },
       "agent-workspace-trust-decision": {

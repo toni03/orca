@@ -4,6 +4,7 @@ import {
   addTeamStep,
   createTeam,
   deleteTeam,
+  moveTeamStep,
   removeTeamStep,
   renameTeam,
   setSeatsPaused,
@@ -50,6 +51,7 @@ export type AgentTeamStateCommand =
   | { kind: 'step.add'; teamId: string; name: string; roleId: string }
   | { kind: 'step.update'; teamId: string; stepId: string; name?: string; roleId?: string }
   | { kind: 'step.remove'; teamId: string; stepId: string }
+  | { kind: 'step.move'; teamId: string; stepId: string; toIndex: number }
   | {
       kind: 'seat.add'
       teamId: string
@@ -130,6 +132,8 @@ export function applyAgentTeamStateCommand(
       return updateTeamStep(state, command.teamId, command.stepId, command)
     case 'step.remove':
       return removeTeamStep(state, command.teamId, command.stepId)
+    case 'step.move':
+      return moveTeamStep(state, command.teamId, command.stepId, command.toIndex)
     case 'seat.add':
       return addSeat(state, command, ids)
     case 'seat.update':
