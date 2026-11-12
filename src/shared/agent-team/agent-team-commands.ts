@@ -59,12 +59,14 @@ export type AgentTeamStateCommand =
       name: string
       agent: TuiAgent
       model?: string
+      effort?: string
     }
   | {
       kind: 'seat.update'
       seatId: string
       name?: string
       model?: string | null
+      effort?: string | null
       instructions?: string
     }
   | { kind: 'seat.retire'; seatId: string }

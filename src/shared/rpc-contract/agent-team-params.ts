@@ -76,6 +76,16 @@ export const AgentTeamIssueUpdateParams = z.object({
   dependsOn: z.array(z.string()).optional()
 })
 
+/** A seat by its id or, when unambiguous, its name; its agent CLI is fixed. */
+export const AgentTeamSeatUpdateParams = z.object({
+  seatId: requiredString('Missing --seat'),
+  name: z.string().trim().min(1).optional(),
+  /** Null goes back to the agent default. */
+  model: z.string().trim().min(1).nullable().optional(),
+  effort: z.string().trim().min(1).nullable().optional(),
+  instructions: z.string().optional()
+})
+
 const StepType = z.enum(['build', 'check'])
 
 /** A role by its id or, when unambiguous, its name. */

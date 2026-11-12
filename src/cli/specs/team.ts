@@ -146,6 +146,28 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
     ]
   },
   {
+    path: ['team', 'seat', 'update'],
+    summary: 'Change the name, model, reasoning level or instructions of a seat',
+    usage:
+      'orca team seat update --seat <seatId> [--name <text>] [--model <model> | --default-model] [--effort <level> | --default-effort] [--instructions <text> | --instructions-file <file>] [--json]',
+    allowedFlags: [
+      ...GLOBAL_FLAGS,
+      'seat',
+      'name',
+      'model',
+      'default-model',
+      'effort',
+      'default-effort',
+      'instructions',
+      'instructions-file'
+    ],
+    notes: [
+      'A seat is its Orca id or its name when only one seat has it. Its agent CLI cannot change.',
+      'Model and effort are the ids the agent CLI accepts (for example opus and high for Claude); they apply from the next session.'
+    ],
+    examples: ['orca team seat update --seat "Dev 1" --model opus --effort high']
+  },
+  {
     path: ['team', 'roles'],
     summary: 'List the agent team roles and the team steps that use them',
     usage: 'orca team roles [--json]',

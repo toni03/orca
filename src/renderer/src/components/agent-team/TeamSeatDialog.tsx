@@ -26,6 +26,7 @@ import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-ty
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 import { useAgentTeamCommand } from './use-agent-team-state'
 import { useEnabledAgents } from './use-enabled-agents'
+import { TeamSeatModelField, type TeamSeatModelChoice } from './TeamSeatModelField'
 
 export type TeamSeatDialogTarget =
   | { kind: 'add'; teamId: string; stepId: string }
@@ -57,7 +58,14 @@ function SeatForm({
   const enabled = useEnabledAgents()
   const [picked, setAgent] = useState<TuiAgent | null>(null)
   const agent = enabled.agents.some((entry) => entry.id === picked) ? picked : enabled.preferred
-  const [model, setModel] = useState(seat?.model ?? '')
+  // Models belong to one agent: picking another agent starts from its defaults.
+  const [choice, setChoice] = useState<TeamSeatModelChoice & { agent: TuiAgent | null }>({
+    agent: seat?.agent ?? null,
+    model: seat?.model ?? '',
+    effort: seat?.effort ?? ''
+  })
+  const modelAgent = seat?.agent ?? agent
+  const { model, effort } = choice.agent === modelAgent ? choice : { model: '', effort: '' }
   const [instructions, setInstructions] = useState(seat?.instructions ?? '')
 
   const save = async (): Promise<void> => {
@@ -68,6 +76,7 @@ function SeatForm({
         seatId: target.seatId,
         name,
         model: model.trim() || null,
+        effort: effort.trim() || null,
         instructions
       })
     } else if (agent) {
@@ -77,7 +86,8 @@ function SeatForm({
         stepId: target.stepId,
         name,
         agent,
-        model
+        model,
+        effort
       })
     }
     if (next) {
@@ -174,18 +184,13 @@ function SeatForm({
         </span>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="agent-team-seat-model">
-          {translate('auto.components.agentTeam.TeamSeatDialog.model', 'Model')}
-        </Label>
-        <Input
-          id="agent-team-seat-model"
-          value={model}
-          placeholder={translate(
-            'auto.components.agentTeam.TeamSeatDialog.modelPlaceholder',
-            "The agent's default"
-          )}
-          onChange={(event) => setModel(event.target.value)}
-        />
+        {modelAgent ? (
+          <TeamSeatModelField
+            agent={modelAgent}
+            value={{ model, effort }}
+            onChange={(next) => setChoice({ ...next, agent: modelAgent })}
+          />
+        ) : null}
         <span className="text-xs text-muted-foreground">
           {translate(
             'auto.components.agentTeam.TeamSeatDialog.modelHint',

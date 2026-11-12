@@ -17,7 +17,12 @@ const CLOSE_AFTER_REPORT_MS = 5_000
 export const AGENT_TEAM_PROJECT_SPEC_PATH = join('.orca', 'agent-team.md')
 
 function launchPreferences(seat: AgentTeamSeat): AgentLaunchPreferences | undefined {
-  return seat.model ? { model: seat.model } : undefined
+  return seat.model || seat.effort
+    ? {
+        ...(seat.model ? { model: seat.model } : {}),
+        ...(seat.effort ? { effort: seat.effort } : {})
+      }
+    : undefined
 }
 
 /** Claude edits outside its cwd only for added dirs; other agents get the linked paths in the prompt. */

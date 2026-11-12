@@ -1,6 +1,7 @@
 import type {
   AgentTeamProject,
   AgentTeamRole,
+  AgentTeamSeat,
   AgentTeamState
 } from '../../shared/agent-team/agent-team-types'
 import { projectGroupOfRepo } from '../../shared/agent-team/agent-team-project-groups'
@@ -44,6 +45,17 @@ export function resolveRole(state: AgentTeamState, ref: string): AgentTeamRole {
     (role) => role.name,
     'role',
     'orca team roles'
+  )
+}
+
+export function resolveSeat(state: AgentTeamState, ref: string): AgentTeamSeat {
+  return resolveByIdOrName(
+    state.seats.filter((seat) => seat.retiredAt === undefined),
+    ref,
+    (seat) => seat.id,
+    (seat) => seat.name,
+    'seat',
+    'orca team context'
   )
 }
 

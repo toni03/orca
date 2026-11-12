@@ -101,6 +101,17 @@ export function teamClause(kind: OrcaTeamCommandKind, count: number, live: boole
               defaultValue_one: 'Read the team settings'
             }
           )
+    case 'seatUpdate':
+      return live
+        ? translate('components.native-chat.tool.team.seatUpdateLive', 'Changing seats')
+        : translate(
+            'components.native-chat.tool.team.seatUpdate',
+            'Changed seats {{count}} times',
+            {
+              count,
+              defaultValue_one: 'Changed seats'
+            }
+          )
     case 'roleUpdate':
       return live
         ? translate('components.native-chat.tool.team.roleUpdateLive', 'Changing roles')

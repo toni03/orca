@@ -61,7 +61,7 @@ function formatContext(context: AgentTeamContext): string {
     ...team.steps.flatMap((step) =>
       step.seats.map(
         (seat) =>
-          `  ${step.name}: ${seat.id}  ${seat.name} (${seat.agent})${seat.paused ? ' paused' : ''}`
+          `  ${step.name}: ${seat.id}  ${seat.name} (${[seat.agent, seat.model, seat.effort].filter(Boolean).join(' · ')})${seat.paused ? ' paused' : ''}`
       )
     )
   ])

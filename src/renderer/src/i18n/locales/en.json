@@ -21290,7 +21290,10 @@
           "roleUpdate_other": "Changed roles {{count}} times",
           "projectUpdateLive": "Changing project settings",
           "projectUpdate_one": "Changed project settings",
-          "projectUpdate_other": "Changed project settings {{count}} times"
+          "projectUpdate_other": "Changed project settings {{count}} times",
+          "seatUpdateLive": "Changing seats",
+          "seatUpdate_one": "Changed seats",
+          "seatUpdate_other": "Changed seats {{count}} times"
         }
       },
       "providerFrame": {

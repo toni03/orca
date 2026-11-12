@@ -14,6 +14,7 @@ export const TEAM_HANDLER_GROUP: HandlerGroup = {
     'team issue discard',
     'team seat pause',
     'team seat resume',
+    'team seat update',
     'team roles',
     'team role show',
     'team role create',
