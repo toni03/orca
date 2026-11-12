@@ -5,19 +5,13 @@ import type {
   AgentTeamState
 } from '../../shared/agent-team/agent-team-types'
 import type { AutomationRunUsage } from '../../shared/automations/history/automation-run'
-import type { ClaudeUsageStore } from '../claude-usage/store'
-import type { CodexUsageStore } from '../codex-usage/store'
+import type { AutomationUsageClient } from '../../shared/backend-service-contract'
 import type { AgentTeamStore } from './agent-team-store'
 import type { AgentTeamManagerActivity } from '../../shared/agent-team/agent-team-ipc'
 
-type UsageLookup = Pick<
-  ClaudeUsageStore | CodexUsageStore,
-  'getAutomationRunUsage' | 'getRepoActivity'
->
-
 export type AgentTeamUsageSources = {
-  claude: () => UsageLookup | null
-  codex: () => UsageLookup | null
+  claude: () => AutomationUsageClient | null
+  codex: () => AutomationUsageClient | null
 }
 
 // Transcripts flush after the session ends; reading too early misses the last turn.

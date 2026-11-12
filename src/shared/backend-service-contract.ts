@@ -70,6 +70,8 @@ export type AutomationUsageInput = {
   startedAt: number | null
   completedAt: number | null
 }
+export type UsageRepoActivity = { tokens: number; activeMs: number }
 export type AutomationUsageClient = {
   getAutomationRunUsage(input: AutomationUsageInput): Promise<AutomationRunUsage>
+  getRepoActivity(repoId: string, from: number, to: number): Promise<UsageRepoActivity>
 }

@@ -18,6 +18,11 @@ const automationSchema = z.object({
   startedAt: z.number().nullable(),
   completedAt: z.number().nullable()
 })
+const repoActivitySchema = z.object({
+  repoId: z.string().min(1),
+  from: z.number(),
+  to: z.number()
+})
 type Handler = (params: unknown) => unknown
 
 type QueryStore<Scope, Range, Kind> = {
@@ -114,6 +119,14 @@ export function createUsageService(host: UsageStoreHost) {
     }
     if (privileged && method === 'codexUsage:getAutomationRunUsage') {
       return stores.codexUsage.getAutomationRunUsage(automationSchema.parse(params))
+    }
+    if (privileged && method === 'claudeUsage:getRepoActivity') {
+      const { repoId, from, to } = repoActivitySchema.parse(params)
+      return stores.claudeUsage.getRepoActivity(repoId, from, to)
+    }
+    if (privileged && method === 'codexUsage:getRepoActivity') {
+      const { repoId, from, to } = repoActivitySchema.parse(params)
+      return stores.codexUsage.getRepoActivity(repoId, from, to)
     }
     const handler = handlers.get(method)
     if (!handler) {

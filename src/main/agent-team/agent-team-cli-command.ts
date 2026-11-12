@@ -1,5 +1,5 @@
 import { getAppEnvironment, hasAppEnvironment } from '../../shared/app-environment'
-import { prependOrcaCliDirToChildPath } from '../cli/orca-cli-child-path'
+import { prependOrcaCliDirToChildPath } from '../cli/launchers/orca-cli-child-path'
 
 /** This app's own CLI launcher; agent CLIs may rebuild PATH and reach another Orca install. */
 export function resolveAgentTeamCliCommand(): string | null {
