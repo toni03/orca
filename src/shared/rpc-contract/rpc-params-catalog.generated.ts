@@ -104,7 +104,8 @@ import {
   AgentTeamRoleListParams,
   AgentTeamRoleRefParams,
   AgentTeamRoleUpdateParams,
-  AgentTeamSeatPauseParams
+  AgentTeamSeatPauseParams,
+  AgentTeamSeatUpdateParams
 } from './agent-team-params'
 import {
   AiVaultDeleteSessionParams,
@@ -1606,6 +1607,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'team.roleUpdate': AgentTeamRoleUpdateParams,
   'team.roles': AgentTeamRoleListParams,
   'team.seatPause': AgentTeamSeatPauseParams,
+  'team.seatUpdate': AgentTeamSeatUpdateParams,
   'terminal.ackOutput': TerminalAckOutput,
   'terminal.adoptOrphans': TerminalAdoptOrphans,
   'terminal.agentStatus': TerminalHandle,

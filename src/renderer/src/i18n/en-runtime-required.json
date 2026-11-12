@@ -2031,7 +2031,9 @@
           "seatPause_one": "Paused seats",
           "seatPause_other": "Paused seats {{count}} times",
           "seatResume_one": "Resumed seats",
-          "seatResume_other": "Resumed seats {{count}} times"
+          "seatResume_other": "Resumed seats {{count}} times",
+          "seatUpdate_one": "Changed seats",
+          "seatUpdate_other": "Changed seats {{count}} times"
         }
       },
       "turnDiff": {

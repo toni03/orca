@@ -76,6 +76,8 @@ export async function buildAgentTeamContext(
               id: seat.id,
               name: seat.name,
               agent: seat.agent,
+              model: seat.model ?? null,
+              effort: seat.effort ?? null,
               paused: seat.paused === true
             }))
         }

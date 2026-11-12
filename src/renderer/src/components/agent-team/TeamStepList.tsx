@@ -85,6 +85,7 @@ function SeatChip({
         <span className={cn('truncate text-muted-foreground', paused && 'opacity-60')}>
           {getAgentLabel(seat.agent)}
           {seat.model ? ` · ${seat.model}` : ''}
+          {seat.effort ? ` · ${seat.effort}` : ''}
         </span>
         {paused ? (
           <Badge variant="outline" className="shrink-0">

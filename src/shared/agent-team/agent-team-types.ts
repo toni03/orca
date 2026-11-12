@@ -45,6 +45,8 @@ export type AgentTeamSeat = {
   /** Fixed once the seat exists: correction rounds resume the same CLI. */
   agent: TuiAgent
   model?: string
+  /** Reasoning level the agent offers for the model, e.g. `high`; absent is its default. */
+  effort?: string
   instructions: string
   /** A paused seat takes no new steps, for example while its agent is out of credits. */
   paused?: boolean

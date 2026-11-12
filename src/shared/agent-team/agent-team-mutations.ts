@@ -164,7 +164,14 @@ export function moveTeamStep(
 
 export function addSeat(
   state: AgentTeamState,
-  input: { teamId: string; stepId: string; name: string; agent: TuiAgent; model?: string },
+  input: {
+    teamId: string
+    stepId: string
+    name: string
+    agent: TuiAgent
+    model?: string
+    effort?: string
+  },
   ids: AgentTeamMutationIds
 ): AgentTeamState {
   const team = requireTeam(state, input.teamId)
@@ -176,6 +183,7 @@ export function addSeat(
     name: input.name.trim() || 'Seat',
     agent: input.agent,
     ...(input.model?.trim() ? { model: input.model.trim() } : {}),
+    ...(input.effort?.trim() ? { effort: input.effort.trim() } : {}),
     instructions: '',
     createdAt: ids.now
   }
@@ -194,7 +202,7 @@ export function addSeat(
 export function updateSeat(
   state: AgentTeamState,
   seatId: string,
-  patch: { name?: string; model?: string | null; instructions?: string }
+  patch: { name?: string; model?: string | null; effort?: string | null; instructions?: string }
 ): AgentTeamState {
   return {
     ...state,
@@ -210,6 +218,11 @@ export function updateSeat(
         delete next.model
       } else if (patch.model) {
         next.model = patch.model.trim()
+      }
+      if (patch.effort === null || patch.effort?.trim() === '') {
+        delete next.effort
+      } else if (patch.effort) {
+        next.effort = patch.effort.trim()
       }
       if (patch.instructions !== undefined) {
         next.instructions = patch.instructions

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import type { AgentTeamRole } from '../../shared/agent-team/agent-team-types'
+import type { AgentTeamRole, AgentTeamSeat } from '../../shared/agent-team/agent-team-types'
 import type { CommandHandler } from '../dispatch'
 import {
   getOptionalStringFlag,
@@ -9,6 +9,13 @@ import {
   getRequiredStringFlag
 } from '../flags'
 import { printResult } from '../format'
+
+type SeatView = Pick<AgentTeamSeat, 'id' | 'name' | 'agent' | 'model' | 'effort'>
+
+function seatLine(seat: SeatView): string {
+  const runs = [seat.agent, seat.model, seat.effort].filter(Boolean).join(' · ')
+  return `${seat.id}  ${seat.name} (${runs})`
+}
 
 type RoleView = AgentTeamRole & { usedBy: { teamId: string; team: string; step: string }[] }
 
@@ -84,6 +91,27 @@ function stepTypeFlag(flags: Map<string, string | boolean>): 'build' | 'check' |
 
 /** Team settings from the CLI: roles, project settings and project groups. */
 export const TEAM_CONFIG_HANDLERS: Record<string, CommandHandler> = {
+  'team seat update': async ({ flags, client, cwd, json }) => {
+    const name = getOptionalStringFlag(flags, 'name')
+    const model = getOptionalStringFlag(flags, 'model')
+    const effort = getOptionalStringFlag(flags, 'effort')
+    const defaultModel = flags.get('default-model') === true
+    const defaultEffort = flags.get('default-effort') === true
+    if ((model && defaultModel) || (effort && defaultEffort)) {
+      throw new Error('Pass a value or its --default-* flag, not both.')
+    }
+    const instructions = await readTextFlag(flags, 'instructions', cwd)
+    const response = await client.call<{ seat: SeatView | null }>('team.seatUpdate', {
+      seatId: getRequiredStringFlag(flags, 'seat'),
+      ...(name !== undefined ? { name } : {}),
+      ...(model !== undefined || defaultModel ? { model: model ?? null } : {}),
+      ...(effort !== undefined || defaultEffort ? { effort: effort ?? null } : {}),
+      ...(instructions !== undefined ? { instructions } : {})
+    })
+    printResult(response, json, (result) =>
+      result.seat ? `Updated ${seatLine(result.seat)}` : 'Updated.'
+    )
+  },
   'team roles': async ({ client, json }) => {
     const response = await client.call<{ roles: RoleView[] }>('team.roles', {})
     printResult(response, json, (result) => result.roles.map(roleLine).join('\n') || 'No roles.')

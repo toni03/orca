@@ -7,7 +7,8 @@ import {
   AgentTeamRoleCreateParams,
   AgentTeamRoleListParams,
   AgentTeamRoleRefParams,
-  AgentTeamRoleUpdateParams
+  AgentTeamRoleUpdateParams,
+  AgentTeamSeatUpdateParams
 } from '../../../../../shared/rpc-contract/agent-team-params'
 import type { AgentTeamProject } from '../../../../../shared/agent-team/agent-team-types'
 import { projectTracker } from '../../../../../shared/agent-team/agent-team-project-tracker'
@@ -19,12 +20,31 @@ import {
   resolveGroup,
   resolveRepo,
   resolveRole,
+  resolveSeat,
   roleView,
   trackerPatch
 } from '../../../../agent-team/agent-team-config-views'
 import { requireAgentTeamService } from '../../../../agent-team/agent-team-service-registry'
 
 export const AGENT_TEAM_CONFIG_METHODS = [
+  defineMethod({
+    name: 'team.seatUpdate',
+    permission: 'workspace',
+    params: AgentTeamSeatUpdateParams,
+    handler: (params) => {
+      const service = requireAgentTeamService()
+      const seatId = resolveSeat(service.getState(), params.seatId).id
+      const state = service.execute({
+        kind: 'seat.update',
+        seatId,
+        ...(params.name !== undefined ? { name: params.name } : {}),
+        ...(params.model !== undefined ? { model: params.model } : {}),
+        ...(params.effort !== undefined ? { effort: params.effort } : {}),
+        ...(params.instructions !== undefined ? { instructions: params.instructions } : {})
+      })
+      return { seat: state.seats.find((seat) => seat.id === seatId) ?? null }
+    }
+  }),
   defineMethod({
     name: 'team.roles',
     permission: 'workspace',
