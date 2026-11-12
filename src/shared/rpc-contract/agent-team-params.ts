@@ -75,3 +75,59 @@ export const AgentTeamIssueUpdateParams = z.object({
   /** Replaces the dependencies; an empty list clears them. */
   dependsOn: z.array(z.string()).optional()
 })
+
+const StepType = z.enum(['build', 'check'])
+
+/** A role by its id or, when unambiguous, its name. */
+export const AgentTeamRoleListParams = z.object({
+  roleId: z.string().trim().min(1).optional()
+})
+
+export const AgentTeamRoleCreateParams = z.object({
+  name: requiredString('Missing --name'),
+  stepType: StepType,
+  prompt: z.string().optional(),
+  skills: z.array(z.string()).optional()
+})
+
+export const AgentTeamRoleUpdateParams = z.object({
+  roleId: requiredString('Missing --role'),
+  name: z.string().trim().min(1).optional(),
+  stepType: StepType.optional(),
+  prompt: z.string().optional(),
+  /** Replaces the skills; an empty list clears them. */
+  skills: z.array(z.string()).optional()
+})
+
+export const AgentTeamRoleRefParams = z.object({
+  roleId: requiredString('Missing --role')
+})
+
+/** A project by its repo id or, when unambiguous, its name. */
+export const AgentTeamProjectShowParams = z.object({
+  repoId: requiredString('Missing --repo')
+})
+
+export const AgentTeamProjectUpdateParams = z.object({
+  repoId: requiredString('Missing --repo'),
+  /** `default` follows the repo's code host; `none` means the project has no tracker. */
+  tracker: z.enum(['github', 'gitlab', 'jira', 'linear', 'none', 'default']).optional(),
+  /** Jira or Linear project key; an empty string clears it. */
+  projectKey: z.string().optional(),
+  /** Null goes back to the repo default branch. */
+  baseBranch: z.string().trim().min(1).nullable().optional(),
+  specStorage: z.enum(['repository', 'local']).optional(),
+  spec: z.string().optional()
+})
+
+/** An Orca project group by its id or, when unambiguous, its name. */
+export const AgentTeamGroupUpdateParams = z.object({
+  groupId: requiredString('Missing --group'),
+  trackerRepoId: z.string().trim().min(1).optional(),
+  /** Replaces the repos that take part; absent keeps them (or takes every git repo of the group). */
+  repoIds: z.array(z.string().trim().min(1)).optional()
+})
+
+export const AgentTeamGroupRefParams = z.object({
+  groupId: requiredString('Missing --group')
+})

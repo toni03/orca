@@ -5,6 +5,7 @@ import type { AgentTeamContext } from '../../shared/agent-team/agent-team-contex
 import type { CommandHandler } from '../dispatch'
 import { getOptionalStringFlag, getRepeatedStringFlag, getRequiredStringFlag } from '../flags'
 import { printResult } from '../format'
+import { TEAM_CONFIG_HANDLERS } from './team-config'
 
 const RESULTS = ['done', 'blocked', 'pass', 'changes'] as const
 
@@ -196,5 +197,6 @@ export const TEAM_HANDLERS: Record<string, CommandHandler> = {
         ? `Added ${result.issue.id} [${result.issue.status}] ${result.issue.title}`
         : 'Added.'
     )
-  }
+  },
+  ...TEAM_CONFIG_HANDLERS
 }

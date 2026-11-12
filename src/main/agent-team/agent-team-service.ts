@@ -10,6 +10,8 @@ import {
 import { AgentTeamMutationError } from '../../shared/agent-team/agent-team-mutations'
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
 import type { Store } from '../persistence/loading-store/store'
+import type { Repo } from '../../shared/repo-types'
+import type { ProjectGroup } from '../../shared/project-group-types'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import { AgentTeamEngine, AgentTeamError } from './agent-team-engine'
 import type { AgentTeamLauncher } from './agent-team-launcher'
@@ -186,6 +188,11 @@ export class AgentTeamService {
   /** The live Manager session, so the Team page can show it without starting one. */
   managerSession(): Promise<AgentTeamManagerSession | null> {
     return findLiveManagerSession(this.runtime, agentTeamManagerFolder())
+  }
+
+  /** Orca's repos and project groups, for CLI commands that name a project or group. */
+  repoCatalog(): { repos: Repo[]; projectGroups: ProjectGroup[] } {
+    return { repos: this.repos.getRepos(), projectGroups: this.repos.getProjectGroups() }
   }
 
   /** Display names for clients without the repo list, e.g. Orca Mobile. */

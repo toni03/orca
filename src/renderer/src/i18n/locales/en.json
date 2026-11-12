@@ -21303,7 +21303,16 @@
           "reportLive": "Reporting",
           "other_one": "Ran {{count}} team command",
           "other_other": "Ran {{count}} team commands",
-          "otherLive": "Running team commands"
+          "otherLive": "Running team commands",
+          "configReadLive": "Reading the team settings",
+          "configRead_one": "Read the team settings",
+          "configRead_other": "Read the team settings {{count}} times",
+          "roleUpdateLive": "Changing roles",
+          "roleUpdate_one": "Changed roles",
+          "roleUpdate_other": "Changed roles {{count}} times",
+          "projectUpdateLive": "Changing project settings",
+          "projectUpdate_one": "Changed project settings",
+          "projectUpdate_other": "Changed project settings {{count}} times"
         }
       },
       "providerFrame": {

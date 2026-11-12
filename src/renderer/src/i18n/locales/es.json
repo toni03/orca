@@ -19930,7 +19930,19 @@
           "seatPause_many": "Pausó seats {{count}} veces",
           "seatResume_many": "Reanudó seats {{count}} veces",
           "report_many": "Informó {{count}} veces",
-          "other_many": "Ejecutó {{count}} comandos del equipo"
+          "other_many": "Ejecutó {{count}} comandos del equipo",
+          "configReadLive": "Leyendo la configuración del equipo",
+          "configRead_one": "Leyó la configuración del equipo",
+          "configRead_other": "Leyó la configuración del equipo {{count}} veces",
+          "configRead_many": "Leyó la configuración del equipo {{count}} veces",
+          "roleUpdateLive": "Cambiando roles",
+          "roleUpdate_one": "Cambió roles",
+          "roleUpdate_other": "Cambió roles {{count}} veces",
+          "roleUpdate_many": "Cambió roles {{count}} veces",
+          "projectUpdateLive": "Cambiando la configuración de proyectos",
+          "projectUpdate_one": "Cambió la configuración de proyectos",
+          "projectUpdate_other": "Cambió la configuración de proyectos {{count}} veces",
+          "projectUpdate_many": "Cambió la configuración de proyectos {{count}} veces"
         }
       },
       "status": {

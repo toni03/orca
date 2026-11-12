@@ -5,7 +5,7 @@ import {
 } from '../../../../../../shared/native-chat/tools/native-chat-tool-run-sentence'
 import type { NativeChatToolCategory } from '../../../../../../shared/native-chat/tools/native-chat-tool-icon'
 import type { NativeChatBlock } from '../../../../../../shared/native-chat/native-chat-types'
-import type { OrcaTeamCommandKind } from '../../../../../../shared/native-chat/tools/native-chat-orca-team-command'
+import { teamClause } from './native-chat-team-tool-run-label'
 
 /** Extraction requires literal keys/fallbacks; parity tests keep these clauses aligned with mobile’s shared record. */
 function clause(category: NativeChatToolCategory, count: number, live: boolean): string {
@@ -145,112 +145,6 @@ function liveClause(category: NativeChatToolCategory, count: number): string {
         count,
         defaultValue_one: 'Using {{count}} tool'
       })
-  }
-}
-
-/** Agent team CLI calls by what they did; keys stay literal for extraction. */
-function teamClause(kind: OrcaTeamCommandKind, count: number, live: boolean): string {
-  switch (kind) {
-    case 'context':
-      return live
-        ? translate('components.native-chat.tool.team.contextLive', 'Reading the team state')
-        : translate(
-            'components.native-chat.tool.team.context',
-            'Read the team state {{count}} times',
-            {
-              count,
-              defaultValue_one: 'Read the team state'
-            }
-          )
-    case 'issues':
-      return live
-        ? translate('components.native-chat.tool.team.issuesLive', 'Listing issues')
-        : translate('components.native-chat.tool.team.issues', 'Listed issues {{count}} times', {
-            count,
-            defaultValue_one: 'Listed issues'
-          })
-    case 'issueAdd':
-      return live
-        ? translate('components.native-chat.tool.team.issueAddLive', 'Adding issues')
-        : translate('components.native-chat.tool.team.issueAdd', 'Added {{count}} issues', {
-            count,
-            defaultValue_one: 'Added {{count}} issue'
-          })
-    case 'issueApprove':
-      return live
-        ? translate('components.native-chat.tool.team.issueApproveLive', 'Approving issues')
-        : translate(
-            'components.native-chat.tool.team.issueApprove',
-            'Approved issues {{count}} times',
-            {
-              count,
-              defaultValue_one: 'Approved issues'
-            }
-          )
-    case 'issueHold':
-      return live
-        ? translate('components.native-chat.tool.team.issueHoldLive', 'Holding issues')
-        : translate('components.native-chat.tool.team.issueHold', 'Held issues {{count}} times', {
-            count,
-            defaultValue_one: 'Held issues'
-          })
-    case 'issueUpdate':
-      return live
-        ? translate('components.native-chat.tool.team.issueUpdateLive', 'Updating issues')
-        : translate('components.native-chat.tool.team.issueUpdate', 'Updated {{count}} issues', {
-            count,
-            defaultValue_one: 'Updated {{count}} issue'
-          })
-    case 'issueDiscard':
-      return live
-        ? translate('components.native-chat.tool.team.issueDiscardLive', 'Discarding issues')
-        : translate(
-            'components.native-chat.tool.team.issueDiscard',
-            'Discarded issues {{count}} times',
-            {
-              count,
-              defaultValue_one: 'Discarded issues'
-            }
-          )
-    case 'issueAnswer':
-      return live
-        ? translate('components.native-chat.tool.team.issueAnswerLive', 'Answering issues')
-        : translate('components.native-chat.tool.team.issueAnswer', 'Answered {{count}} issues', {
-            count,
-            defaultValue_one: 'Answered {{count}} issue'
-          })
-    case 'seatPause':
-      return live
-        ? translate('components.native-chat.tool.team.seatPauseLive', 'Pausing seats')
-        : translate('components.native-chat.tool.team.seatPause', 'Paused seats {{count}} times', {
-            count,
-            defaultValue_one: 'Paused seats'
-          })
-    case 'seatResume':
-      return live
-        ? translate('components.native-chat.tool.team.seatResumeLive', 'Resuming seats')
-        : translate(
-            'components.native-chat.tool.team.seatResume',
-            'Resumed seats {{count}} times',
-            {
-              count,
-              defaultValue_one: 'Resumed seats'
-            }
-          )
-    case 'report':
-      return live
-        ? translate('components.native-chat.tool.team.reportLive', 'Reporting')
-        : translate('components.native-chat.tool.team.report', 'Reported {{count}} times', {
-            count,
-            defaultValue_one: 'Reported the step'
-          })
-    case 'other':
-      return live
-        ? translate('components.native-chat.tool.team.otherLive', 'Running team commands')
-        : translate('components.native-chat.tool.team.other', 'Ran {{count}} team commands', {
-            count,
-            defaultValue_one: 'Ran {{count}} team command'
-          })
   }
 }
 

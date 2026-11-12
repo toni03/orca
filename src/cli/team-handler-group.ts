@@ -8,8 +8,22 @@ export const TEAM_HANDLER_GROUP: HandlerGroup = {
     'team issues',
     'team issue answer',
     'team issue add',
+    'team issue approve',
+    'team issue hold',
+    'team issue update',
+    'team issue discard',
     'team seat pause',
-    'team seat resume'
+    'team seat resume',
+    'team roles',
+    'team role show',
+    'team role create',
+    'team role update',
+    'team role reset',
+    'team role delete',
+    'team project show',
+    'team project update',
+    'team group update',
+    'team group remove'
   ],
   load: async () => (await import('./handlers/team.js')).TEAM_HANDLERS
 }
