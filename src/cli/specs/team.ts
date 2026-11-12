@@ -144,5 +144,116 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
       'Without --approved the issue is registered and waits for approval in the Team view.',
       '--exclusive keeps other issues of the project from running beside it (refactors, upgrades).'
     ]
+  },
+  {
+    path: ['team', 'roles'],
+    summary: 'List the agent team roles and the team steps that use them',
+    usage: 'orca team roles [--json]',
+    allowedFlags: [...GLOBAL_FLAGS]
+  },
+  {
+    path: ['team', 'role', 'show'],
+    summary: 'Show a role with its prompt and skills',
+    usage: 'orca team role show --role <roleId> [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'role'],
+    notes: ['A role is its Orca id or its name when only one role has it.']
+  },
+  {
+    path: ['team', 'role', 'create'],
+    summary: 'Create an agent team role',
+    usage:
+      'orca team role create --name <text> --type <build|check> [--prompt <text> | --prompt-file <file>] [--skill <name>]... [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'name', 'type', 'prompt', 'prompt-file', 'skill'],
+    repeatableFlags: ['skill'],
+    notes: [
+      'Build steps edit code in their own worktree; Check steps read and test the Build worktree.'
+    ]
+  },
+  {
+    path: ['team', 'role', 'update'],
+    summary: 'Change the name, step type, prompt or skills of a role',
+    usage:
+      'orca team role update --role <roleId> [--name <text>] [--type <build|check>] [--prompt <text> | --prompt-file <file>] [--skill <name>]... [--no-skills] [--json]',
+    allowedFlags: [
+      ...GLOBAL_FLAGS,
+      'role',
+      'name',
+      'type',
+      'prompt',
+      'prompt-file',
+      'skill',
+      'no-skills'
+    ],
+    repeatableFlags: ['skill'],
+    notes: [
+      'A new prompt bumps the role version; sessions already running keep the version they started with.',
+      '--skill replaces the whole list; --no-skills clears it.'
+    ],
+    examples: ['orca team role update --role Reviewer --prompt-file reviewer.md']
+  },
+  {
+    path: ['team', 'role', 'reset'],
+    summary: 'Reset a role copied from a template back to the template',
+    usage: 'orca team role reset --role <roleId> [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'role']
+  },
+  {
+    path: ['team', 'role', 'delete'],
+    summary: 'Delete a role no team step uses',
+    usage: 'orca team role delete --role <roleId> [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'role'],
+    notes: ['Roles from a template cannot be deleted; reset them instead.']
+  },
+  {
+    path: ['team', 'project', 'show'],
+    summary: 'Show the team settings of a project: tracker, base branch, spec and group',
+    usage: 'orca team project show --repo <repoId> [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'repo'],
+    notes: ['A project is its repo id or its name when only one project has it.']
+  },
+  {
+    path: ['team', 'project', 'update'],
+    summary: 'Change the tracker, base branch or spec of a project',
+    usage:
+      'orca team project update --repo <repoId> [--tracker <github|gitlab|jira|linear|none|default>] [--project-key <key>] [--base-branch <branch> | --default-branch] [--spec-storage <repository|local>] [--spec <text> | --spec-file <file>] [--json]',
+    allowedFlags: [
+      ...GLOBAL_FLAGS,
+      'repo',
+      'tracker',
+      'project-key',
+      'base-branch',
+      'default-branch',
+      'spec-storage',
+      'spec',
+      'spec-file'
+    ],
+    notes: [
+      '--tracker default follows the repo code host; none leaves the project without a tracker.',
+      '--project-key is the Jira or Linear project; --project-key "" clears it.',
+      'Repository specs are written to .orca/agent-team.md in the project; local specs stay in Orca.',
+      'A repo in a group worked as one project takes its settings from the group tracker repo.'
+    ],
+    examples: [
+      'orca team project update --repo api --tracker jira --project-key API',
+      'orca team project update --repo api --spec-file spec.md'
+    ]
+  },
+  {
+    path: ['team', 'group', 'update'],
+    summary: 'Work an Orca project group as one project, or change its tracker repo and repos',
+    usage:
+      'orca team group update --group <groupId> [--tracker-repo <repoId>] [--repo <repoId>]... [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'group', 'tracker-repo', 'repo'],
+    repeatableFlags: ['repo'],
+    notes: [
+      'Each issue of the group gets a worktree in every repo on one branch; its issues and tracker live in the tracker repo.',
+      '--repo replaces the repos that take part; without it a new group takes every git repo of the Orca group.'
+    ]
+  },
+  {
+    path: ['team', 'group', 'remove'],
+    summary: 'Stop working an Orca project group as one project',
+    usage: 'orca team group remove --group <groupId> [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'group']
   }
 ]

@@ -13,6 +13,9 @@ export type OrcaTeamCommandKind =
   | 'issueAnswer'
   | 'seatPause'
   | 'seatResume'
+  | 'configRead'
+  | 'roleUpdate'
+  | 'projectUpdate'
   | 'report'
   | 'other'
 
@@ -27,6 +30,16 @@ const SUBCOMMANDS: Record<string, OrcaTeamCommandKind> = {
   'issue answer': 'issueAnswer',
   'seat pause': 'seatPause',
   'seat resume': 'seatResume',
+  roles: 'configRead',
+  'role show': 'configRead',
+  'project show': 'configRead',
+  'role create': 'roleUpdate',
+  'role update': 'roleUpdate',
+  'role reset': 'roleUpdate',
+  'role delete': 'roleUpdate',
+  'project update': 'projectUpdate',
+  'group update': 'projectUpdate',
+  'group remove': 'projectUpdate',
   report: 'report'
 }
 
@@ -83,6 +96,21 @@ export const ORCA_TEAM_COMMAND_COPY: Record<
     one: 'Resumed seats',
     many: 'Resumed seats {{value0}} times',
     live: 'Resuming seats'
+  },
+  configRead: {
+    one: 'Read the team settings',
+    many: 'Read the team settings {{value0}} times',
+    live: 'Reading the team settings'
+  },
+  roleUpdate: {
+    one: 'Changed roles',
+    many: 'Changed roles {{value0}} times',
+    live: 'Changing roles'
+  },
+  projectUpdate: {
+    one: 'Changed project settings',
+    many: 'Changed project settings {{value0}} times',
+    live: 'Changing project settings'
   },
   report: { one: 'Reported the step', many: 'Reported {{value0}} times', live: 'Reporting' },
   other: {
