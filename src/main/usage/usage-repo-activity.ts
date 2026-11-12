@@ -1,6 +1,8 @@
-import { getLocalUsageDay } from './usage-calendar-range'
+import { getLocalUsageDay } from './reporting/range-query/usage-calendar-range'
 
-export type UsageRepoActivity = { tokens: number; activeMs: number }
+import type { UsageRepoActivity } from '../../shared/backend-service-contract'
+
+export type { UsageRepoActivity }
 
 type SessionSpan = { firstTimestamp: string; lastTimestamp: string; primaryRepoId: string | null }
 type DayTokens = { day: string; repoId: string | null; tokens: number }
