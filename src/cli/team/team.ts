@@ -3,7 +3,11 @@ import { resolve } from 'node:path'
 import type { AgentTeamIssue } from '../../shared/agent-team/agent-team-types'
 import type { AgentTeamContext } from '../../shared/agent-team/agent-team-context'
 import type { CommandHandler } from '../dispatch/dispatch'
-import { getOptionalStringFlag, getRepeatedStringFlag, getRequiredStringFlag } from '../arguments/flags'
+import {
+  getOptionalStringFlag,
+  getRepeatedStringFlag,
+  getRequiredStringFlag
+} from '../arguments/flags'
 import { printResult } from '../output/command-result-output'
 import { TEAM_CONFIG_HANDLERS } from './team-config'
 import { TEAM_STRUCTURE_HANDLERS } from './team-structure'
