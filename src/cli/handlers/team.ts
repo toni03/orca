@@ -6,6 +6,7 @@ import type { CommandHandler } from '../dispatch'
 import { getOptionalStringFlag, getRepeatedStringFlag, getRequiredStringFlag } from '../flags'
 import { printResult } from '../format'
 import { TEAM_CONFIG_HANDLERS } from './team-config'
+import { TEAM_STRUCTURE_HANDLERS } from './team-structure'
 
 const RESULTS = ['done', 'blocked', 'pass', 'changes'] as const
 
@@ -198,5 +199,6 @@ export const TEAM_HANDLERS: Record<string, CommandHandler> = {
         : 'Added.'
     )
   },
-  ...TEAM_CONFIG_HANDLERS
+  ...TEAM_CONFIG_HANDLERS,
+  ...TEAM_STRUCTURE_HANDLERS
 }

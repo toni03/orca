@@ -41,6 +41,7 @@ import { TeamIconButton } from './TeamIconButton'
 import type { TeamSeatDialogTarget } from './TeamSeatDialog'
 import { stepTypeLabel } from './team-labels'
 import { useAgentTeamCommand } from './use-agent-team-state'
+import { sortByName } from '../../../../shared/agent-team/agent-team-name-order'
 
 const pointerOptions = { activationConstraint: { distance: 4 } }
 const keyboardOptions = { coordinateGetter: sortableKeyboardCoordinates }
@@ -195,7 +196,7 @@ function StepRow({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {state.roles.map((candidate) => (
+              {sortByName(state.roles).map((candidate) => (
                 <SelectItem key={candidate.id} value={candidate.id}>
                   {candidate.name} · {stepTypeLabel(candidate.stepType)}
                 </SelectItem>
@@ -245,7 +246,7 @@ function AddStepRow({
   state: AgentTeamState
 }): React.JSX.Element {
   const run = useAgentTeamCommand()
-  const [newStepRole, setNewStepRole] = useState(state.roles[0]?.id ?? '')
+  const [newStepRole, setNewStepRole] = useState(sortByName(state.roles)[0]?.id ?? '')
   return (
     <li className="flex gap-3.5">
       <Rail
@@ -269,7 +270,7 @@ function AddStepRow({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {state.roles.map((role) => (
+            {sortByName(state.roles).map((role) => (
               <SelectItem key={role.id} value={role.id}>
                 {role.name} · {stepTypeLabel(role.stepType)}
               </SelectItem>

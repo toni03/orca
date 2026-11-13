@@ -24,6 +24,7 @@ import { Textarea } from '@/components/ui/textarea'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import { useAgentTeamCommand } from './use-agent-team-state'
 import { projectTracker } from '../../../../shared/agent-team/agent-team-project-tracker'
+import { sortByLabel, sortByName } from '../../../../shared/agent-team/agent-team-name-order'
 
 type Props = {
   open: boolean
@@ -45,10 +46,14 @@ export function TeamNewIssueDialog(props: Props): React.JSX.Element {
 // Mounted per opening so every field starts empty.
 function NewIssueForm({ onOpenChange, state, defaultTeamId }: Props): React.JSX.Element {
   const repos = useAppStore((s) => s.repos)
-  const teamRepos = repos.filter((repo) => repo.id !== state.managerRepoId)
+  const teamRepos = sortByLabel(
+    repos.filter((repo) => repo.id !== state.managerRepoId),
+    (repo) => repo.displayName
+  )
+  const teams = sortByName(state.teams)
   const run = useAgentTeamCommand()
   const [repoId, setRepoId] = useState(() => teamRepos[0]?.id ?? '')
-  const [teamId, setTeamId] = useState(() => defaultTeamId ?? state.teams[0]?.id ?? '')
+  const [teamId, setTeamId] = useState(() => defaultTeamId ?? teams[0]?.id ?? '')
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [criteria, setCriteria] = useState('')
@@ -128,7 +133,7 @@ function NewIssueForm({ onOpenChange, state, defaultTeamId }: Props): React.JSX.
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {state.teams.map((team) => (
+                {teams.map((team) => (
                   <SelectItem key={team.id} value={team.id}>
                     {team.name}
                   </SelectItem>

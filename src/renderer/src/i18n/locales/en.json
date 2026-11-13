@@ -21293,7 +21293,10 @@
           "projectUpdate_other": "Changed project settings {{count}} times",
           "seatUpdateLive": "Changing seats",
           "seatUpdate_one": "Changed seats",
-          "seatUpdate_other": "Changed seats {{count}} times"
+          "seatUpdate_other": "Changed seats {{count}} times",
+          "teamUpdateLive": "Changing teams",
+          "teamUpdate_one": "Changed teams",
+          "teamUpdate_other": "Changed teams {{count}} times"
         }
       },
       "providerFrame": {

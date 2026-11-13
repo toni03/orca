@@ -19946,7 +19946,11 @@
           "seatUpdateLive": "Cambiando puestos",
           "seatUpdate_one": "Cambió puestos",
           "seatUpdate_other": "Cambió puestos {{count}} veces",
-          "seatUpdate_many": "Cambió puestos {{count}} veces"
+          "seatUpdate_many": "Cambió puestos {{count}} veces",
+          "teamUpdateLive": "Cambiando equipos",
+          "teamUpdate_one": "Cambió equipos",
+          "teamUpdate_other": "Cambió equipos {{count}} veces",
+          "teamUpdate_many": "Cambió equipos {{count}} veces"
         }
       },
       "status": {

@@ -1,5 +1,6 @@
 import { BUILTIN_TEAM_TEMPLATES } from './agent-team-builtin-templates'
 import { openAssignment } from './agent-team-pipeline'
+import { retireSeatsOutsideSteps } from './agent-team-seat-membership'
 import type { AgentTeam, AgentTeamSeat, AgentTeamState } from './agent-team-types'
 import type { TuiAgent } from '../agent-launch/catalog/tui-agent'
 
@@ -129,13 +130,19 @@ export function updateTeamStep(
 export function removeTeamStep(
   state: AgentTeamState,
   teamId: string,
-  stepId: string
+  stepId: string,
+  now: number
 ): AgentTeamState {
   if (teamHasActiveIssues(state, teamId)) {
     throw new AgentTeamMutationError('Steps cannot be removed while the team is working on issues.')
   }
   const team = requireTeam(state, teamId)
-  return replaceTeam(state, { ...team, steps: team.steps.filter((step) => step.id !== stepId) })
+  const next = replaceTeam(state, {
+    ...team,
+    steps: team.steps.filter((step) => step.id !== stepId)
+  })
+  // Its seats belong to no other step, so they leave with it.
+  return { ...next, seats: retireSeatsOutsideSteps(next, next.teams, now) }
 }
 
 export function moveTeamStep(
@@ -245,8 +252,18 @@ export function setSeatsPaused(
 }
 
 export function retireSeat(state: AgentTeamState, seatId: string, now: number): AgentTeamState {
+  if (!state.seats.some((seat) => seat.id === seatId && seat.retiredAt === undefined)) {
+    throw new AgentTeamMutationError(`No seat ${seatId}.`)
+  }
   return {
     ...state,
+    teams: state.teams.map((team) => ({
+      ...team,
+      steps: team.steps.map((step) => ({
+        ...step,
+        seatIds: step.seatIds.filter((id) => id !== seatId)
+      }))
+    })),
     seats: state.seats.map((seat) => (seat.id === seatId ? { ...seat, retiredAt: now } : seat))
   }
 }

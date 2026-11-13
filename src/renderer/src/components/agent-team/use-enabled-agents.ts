@@ -3,6 +3,7 @@ import { useAppStore } from '@/store'
 import { getAgentCatalog } from '@/lib/agent-catalog/agent-catalog'
 import { isTuiAgentEnabled } from '../../../../shared/agent-launch/catalog/tui-agent-selection'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
+import { sortByLabel } from '../../../../shared/agent-team/agent-team-name-order'
 
 /** Agent CLIs installed on this computer and switched on in Settings › Agents. */
 export function useEnabledAgents(): {
@@ -17,7 +18,7 @@ export function useEnabledAgents(): {
     void ensureDetectedAgents().catch(() => undefined)
   }, [ensureDetectedAgents])
 
-  const agents = getAgentCatalog().filter(
+  const agents = sortByLabel(getAgentCatalog(), (entry) => entry.label).filter(
     (entry) =>
       detectedIds?.includes(entry.id) === true &&
       isTuiAgentEnabled(entry.id, settings?.disabledTuiAgents)

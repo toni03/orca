@@ -1,3 +1,5 @@
+import { formatTeamFlagHelp } from './team-flag-help'
+
 // File focus differs from terminal create's shared --focus help.
 const FILE_OPEN_FOCUS_HELP =
   "--focus                Bring the user to the file (switches Orca's window to its worktree)"
@@ -129,5 +131,5 @@ const COMMAND_SCOPED_FLAG_HELP: Record<string, Record<string, string>> = {
 }
 
 export function formatCommandScopedFlagHelp(command: string, flag: string): string | undefined {
-  return COMMAND_SCOPED_FLAG_HELP[command]?.[flag]
+  return COMMAND_SCOPED_FLAG_HELP[command]?.[flag] ?? formatTeamFlagHelp(command, flag)
 }

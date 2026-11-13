@@ -23,6 +23,7 @@ import { TeamIconButton } from './TeamIconButton'
 import { TeamSeatDialog, type TeamSeatDialogTarget } from './TeamSeatDialog'
 import { TeamStepList } from './TeamStepList'
 import { useAgentTeamCommand } from './use-agent-team-state'
+import { sortByName } from '../../../../shared/agent-team/agent-team-name-order'
 
 function teamSummary(team: AgentTeam): string {
   return translate(
@@ -53,7 +54,7 @@ function TeamPicker({
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {state.teams.map((candidate) => (
+        {sortByName(state.teams).map((candidate) => (
           <SelectItem key={candidate.id} value={candidate.id}>
             <span className="font-semibold">{candidate.name}</span>
             <span className="ml-2 text-xs text-muted-foreground">
@@ -144,7 +145,8 @@ export function TeamSettingsTeams({ state }: { state: AgentTeamState }): React.J
   const [creating, setCreating] = useState(false)
   const [renaming, setRenaming] = useState(false)
   const [seatDialog, setSeatDialog] = useState<TeamSeatDialogTarget | null>(null)
-  const team = state.teams.find((candidate) => candidate.id === selectedId) ?? state.teams[0]
+  const team =
+    state.teams.find((candidate) => candidate.id === selectedId) ?? sortByName(state.teams)[0]
 
   return (
     <div className="flex min-w-0 flex-col gap-4">

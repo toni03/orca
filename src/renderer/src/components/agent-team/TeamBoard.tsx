@@ -39,6 +39,7 @@ import { trackerLabel } from './team-labels'
 import { useAgentTeamCommand } from './use-agent-team-state'
 import { useNow } from './use-now'
 import { projectTracker } from '../../../../shared/agent-team/agent-team-project-tracker'
+import { sortByLabel, sortByName } from '../../../../shared/agent-team/agent-team-name-order'
 
 const DONE_SHOWN = 20
 
@@ -67,7 +68,10 @@ export function TeamBoard({ state, onOpenSettings, onOpenManager }: Props): Reac
       ...state.issues.map((issue) => issue.repoId)
     ])
     ids.delete(state.managerRepoId ?? '')
-    return repos.filter((repo) => ids.has(repo.id))
+    return sortByLabel(
+      repos.filter((repo) => ids.has(repo.id)),
+      (repo) => repo.displayName
+    )
   }, [repos, state.projects, state.issues, state.managerRepoId])
   const selected = useMemo<ReadonlySet<string>>(
     () => new Set(prefs.projects ?? projectRepos.map((repo) => repo.id)),
@@ -256,7 +260,7 @@ export function TeamBoard({ state, onOpenSettings, onOpenManager }: Props): Reac
             <SelectItem value={ALL_TEAMS}>
               {translate('auto.components.agentTeam.TeamBoard.allTeams', 'All teams')}
             </SelectItem>
-            {state.teams.map((team) => (
+            {sortByName(state.teams).map((team) => (
               <SelectItem key={team.id} value={team.id}>
                 {team.name}
               </SelectItem>
@@ -378,7 +382,7 @@ export function TeamBoard({ state, onOpenSettings, onOpenManager }: Props): Reac
         open={creating}
         onOpenChange={setCreating}
         state={state}
-        defaultTeamId={teamFilter === ALL_TEAMS ? state.teams[0]?.id : teamFilter}
+        defaultTeamId={teamFilter === ALL_TEAMS ? sortByName(state.teams)[0]?.id : teamFilter}
       />
       <TeamIssueSheet issueId={sheetId} state={state} onClose={() => setSheetId(null)} />
     </div>

@@ -17,6 +17,7 @@ import { nativeChatComposerDestination } from '../native-chat/composer/focus/nat
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import { issueKey } from './team-labels'
 import { TeamProjectAvatar } from './TeamProjectAvatar'
+import { sortByLabel } from '../../../../shared/agent-team/agent-team-name-order'
 
 /** Inserts `#issue` or `@project` references into the Manager composer under `composerRoot`. */
 export function TeamManagerMentions({
@@ -33,7 +34,10 @@ export function TeamManagerMentions({
     ...state.issues.map((issue) => issue.repoId)
   ])
   projectIds.delete(state.managerRepoId ?? '')
-  const projects = repos.filter((repo) => projectIds.has(repo.id))
+  const projects = sortByLabel(
+    repos.filter((repo) => projectIds.has(repo.id)),
+    (repo) => repo.displayName
+  )
   const issues = state.issues
     .filter((issue) => issue.status !== 'done' && issue.status !== 'discarded')
     .sort((a, b) => a.priority - b.priority)

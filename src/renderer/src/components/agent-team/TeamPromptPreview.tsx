@@ -12,6 +12,7 @@ import {
   type AgentTeamDelivery
 } from '../../../../shared/agent-team/agent-team-session-prompt'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
+import { sortByName } from '../../../../shared/agent-team/agent-team-name-order'
 
 export function TeamPromptPreview({
   state,
@@ -22,7 +23,7 @@ export function TeamPromptPreview({
   specText: string | null
   delivery: AgentTeamDelivery
 }): React.JSX.Element {
-  const [roleId, setRoleId] = useState(state.roles[0]?.id ?? '')
+  const [roleId, setRoleId] = useState(sortByName(state.roles)[0]?.id ?? '')
   const role = state.roles.find((candidate) => candidate.id === roleId)
   const { folder, baseBranch } = delivery
   const prompt = useMemo(() => {
@@ -80,7 +81,7 @@ export function TeamPromptPreview({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {state.roles.map((candidate) => (
+            {sortByName(state.roles).map((candidate) => (
               <SelectItem key={candidate.id} value={candidate.id}>
                 {candidate.name}
               </SelectItem>

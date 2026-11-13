@@ -27,6 +27,7 @@ import { TeamProjectAvatar } from './TeamProjectAvatar'
 import { formatDuration, issueKey, needsYouLabel, trackerLabel } from './team-labels'
 import { useAgentTeamCommand } from './use-agent-team-state'
 import { useNow } from './use-now'
+import { sortByLabel } from '../../../../shared/agent-team/agent-team-name-order'
 
 type InboxTab = 'all' | 'questions' | 'decisions' | 'escalated' | 'ready'
 const ALL_PROJECTS = 'all'
@@ -108,7 +109,9 @@ export function TeamInbox({
     (issue) => tab === 'all' || (issue.needsYou && TAB_REASONS[tab].includes(issue.needsYou.reason))
   )
   const selected = items.find((issue) => issue.id === selectedId) ?? items[0]
-  const projectIds = [...new Set(waiting.map((issue) => issue.repoId))]
+  const projectName = (id: string): string =>
+    repos.find((repo) => repo.id === id)?.displayName ?? id
+  const projectIds = sortByLabel([...new Set(waiting.map((issue) => issue.repoId))], projectName)
 
   useEffect(() => {
     if (!active) {
@@ -192,7 +195,7 @@ export function TeamInbox({
               </SelectItem>
               {projectIds.map((id) => (
                 <SelectItem key={id} value={id}>
-                  {repos.find((repo) => repo.id === id)?.displayName ?? id}
+                  {projectName(id)}
                 </SelectItem>
               ))}
             </SelectContent>

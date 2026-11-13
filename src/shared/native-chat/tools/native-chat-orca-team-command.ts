@@ -17,6 +17,7 @@ export type OrcaTeamCommandKind =
   | 'seatUpdate'
   | 'roleUpdate'
   | 'projectUpdate'
+  | 'teamUpdate'
   | 'report'
   | 'other'
 
@@ -35,6 +36,15 @@ const SUBCOMMANDS: Record<string, OrcaTeamCommandKind> = {
   'role show': 'configRead',
   'project show': 'configRead',
   'seat update': 'seatUpdate',
+  'seat add': 'seatUpdate',
+  'seat retire': 'seatUpdate',
+  show: 'configRead',
+  create: 'teamUpdate',
+  update: 'teamUpdate',
+  delete: 'teamUpdate',
+  'step add': 'teamUpdate',
+  'step update': 'teamUpdate',
+  'step remove': 'teamUpdate',
   'role create': 'roleUpdate',
   'role update': 'roleUpdate',
   'role reset': 'roleUpdate',
@@ -118,6 +128,11 @@ export const ORCA_TEAM_COMMAND_COPY: Record<
     one: 'Changed project settings',
     many: 'Changed project settings {{value0}} times',
     live: 'Changing project settings'
+  },
+  teamUpdate: {
+    one: 'Changed teams',
+    many: 'Changed teams {{value0}} times',
+    live: 'Changing teams'
   },
   report: { one: 'Reported the step', many: 'Reported {{value0}} times', live: 'Reporting' },
   other: {
