@@ -25,6 +25,7 @@ import { TeamIconButton } from './TeamIconButton'
 import { TeamSkillsInput } from './TeamSkillsInput'
 import { stepTypeLabel } from './team-labels'
 import { useAgentTeamCommand } from './use-agent-team-state'
+import { sortByName } from '../../../../shared/agent-team/agent-team-name-order'
 
 function originLabel(role: AgentTeamRole): string {
   switch (role.origin) {
@@ -224,7 +225,8 @@ function RoleEditor({
 export function TeamSettingsRoles({ state }: { state: AgentTeamState }): React.JSX.Element {
   const run = useAgentTeamCommand()
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const role = state.roles.find((candidate) => candidate.id === selectedId) ?? state.roles[0]
+  const roles = sortByName(state.roles)
+  const role = roles.find((candidate) => candidate.id === selectedId) ?? roles[0]
 
   const createRole = async (): Promise<void> => {
     const before = new Set(state.roles.map((candidate) => candidate.id))
@@ -252,7 +254,7 @@ export function TeamSettingsRoles({ state }: { state: AgentTeamState }): React.J
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {state.roles.map((candidate) => (
+              {roles.map((candidate) => (
                 <SelectItem key={candidate.id} value={candidate.id}>
                   <span className="font-semibold">{candidate.name}</span>
                   <Badge variant="outline" className="ml-2">

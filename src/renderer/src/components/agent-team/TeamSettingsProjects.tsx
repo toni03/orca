@@ -23,6 +23,7 @@ import { TeamProjectFields } from './TeamProjectFields'
 import { TeamProjectSpecEditor } from './TeamProjectSpecEditor'
 import { TeamPromptPreview } from './TeamPromptPreview'
 import { trackerLabel } from './team-labels'
+import { sortByLabel, sortByName } from '../../../../shared/agent-team/agent-team-name-order'
 
 const SECTION = 'text-2xs font-semibold uppercase tracking-wider text-muted-foreground'
 
@@ -189,9 +190,12 @@ function ProjectPicker({
 export function TeamSettingsProjects({ state }: { state: AgentTeamState }): React.JSX.Element {
   const repos = useAppStore((s) => s.repos)
   const projectGroups = useAppStore((s) => s.projectGroups)
-  const teamRepos = repos.filter((repo) => repo.id !== state.managerRepoId)
+  const teamRepos = sortByLabel(
+    repos.filter((repo) => repo.id !== state.managerRepoId),
+    (repo) => repo.displayName
+  )
   // Orca groups with at least two git repos can be worked as one project.
-  const groups = projectGroups.flatMap((group) => {
+  const groups = sortByName(projectGroups).flatMap((group) => {
     const members = getFolderSourceRepos(teamRepos, projectGroups, group)
     return members.length > 1 ? [{ group, members }] : []
   })

@@ -141,3 +141,53 @@ export const AgentTeamGroupUpdateParams = z.object({
 export const AgentTeamGroupRefParams = z.object({
   groupId: requiredString('Missing --group')
 })
+
+/** A team by its id or, when unambiguous, its name. */
+export const AgentTeamRefParams = z.object({
+  teamId: requiredString('Missing --team')
+})
+
+export const AgentTeamCreateParams = z.object({
+  name: requiredString('Missing --name'),
+  /** development, security or design: their steps come with the team, without seats. */
+  templateId: z.string().trim().min(1).optional()
+})
+
+export const AgentTeamUpdateParams = z.object({
+  teamId: requiredString('Missing --team'),
+  name: z.string().trim().min(1).optional()
+})
+
+export const AgentTeamStepAddParams = z.object({
+  teamId: requiredString('Missing --team'),
+  name: requiredString('Missing --name'),
+  roleId: requiredString('Missing --role'),
+  /** 1-based place among the steps; absent adds it last. */
+  position: z.number().int().positive().optional()
+})
+
+export const AgentTeamStepUpdateParams = z.object({
+  teamId: requiredString('Missing --team'),
+  stepId: requiredString('Missing --step'),
+  name: z.string().trim().min(1).optional(),
+  roleId: z.string().trim().min(1).optional(),
+  position: z.number().int().positive().optional()
+})
+
+export const AgentTeamStepRefParams = z.object({
+  teamId: requiredString('Missing --team'),
+  stepId: requiredString('Missing --step')
+})
+
+export const AgentTeamSeatAddParams = z.object({
+  teamId: requiredString('Missing --team'),
+  stepId: requiredString('Missing --step'),
+  agent: requiredString('Missing --agent'),
+  name: z.string().trim().min(1).optional(),
+  model: z.string().trim().min(1).optional(),
+  effort: z.string().trim().min(1).optional()
+})
+
+export const AgentTeamSeatRefParams = z.object({
+  seatId: requiredString('Missing --seat')
+})

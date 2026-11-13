@@ -133,7 +133,7 @@ export function applyAgentTeamStateCommand(
     case 'step.update':
       return updateTeamStep(state, command.teamId, command.stepId, command)
     case 'step.remove':
-      return removeTeamStep(state, command.teamId, command.stepId)
+      return removeTeamStep(state, command.teamId, command.stepId, ids.now)
     case 'step.move':
       return moveTeamStep(state, command.teamId, command.stepId, command.toIndex)
     case 'seat.add':

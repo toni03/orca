@@ -31,6 +31,7 @@ import { PROFILE_STATE_COMMAND_SPECS } from './profile-state'
 import { REFERENCE_COMMAND_SPECS } from './reference'
 import { PORTS_COMMAND_SPECS } from './ports'
 import { TEAM_COMMAND_SPECS } from './team'
+import { TEAM_STRUCTURE_COMMAND_SPECS } from './team-structure'
 import { PLUGIN_AUTHORING_COMMAND_SPECS, PLUGIN_RUNTIME_COMMAND_SPECS } from './plugin'
 import { PAIR_COMMAND_SPECS } from './pair'
 import { PLUGIN_VIEW_COMMAND_SPECS } from './plugin-view'
@@ -68,6 +69,7 @@ export const COMMAND_SPECS: CommandSpec[] = [
   ...PROFILE_STATE_COMMAND_SPECS,
   ...PORTS_COMMAND_SPECS,
   ...TEAM_COMMAND_SPECS,
+  ...TEAM_STRUCTURE_COMMAND_SPECS,
   ...PLUGIN_AUTHORING_COMMAND_SPECS,
   ...PLUGIN_RUNTIME_COMMAND_SPECS,
   ...PLUGIN_VIEW_COMMAND_SPECS,

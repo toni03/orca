@@ -137,6 +137,17 @@ export function teamClause(kind: OrcaTeamCommandKind, count: number, live: boole
               defaultValue_one: 'Changed project settings'
             }
           )
+    case 'teamUpdate':
+      return live
+        ? translate('components.native-chat.tool.team.teamUpdateLive', 'Changing teams')
+        : translate(
+            'components.native-chat.tool.team.teamUpdate',
+            'Changed teams {{count}} times',
+            {
+              count,
+              defaultValue_one: 'Changed teams'
+            }
+          )
     case 'report':
       return live
         ? translate('components.native-chat.tool.team.reportLive', 'Reporting')

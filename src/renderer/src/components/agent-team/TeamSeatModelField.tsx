@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { translate } from '@/i18n/i18n'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -6,12 +7,28 @@ import { useAgentSettingsModelCatalog } from '@/components/agent/launch-settings
 import { sourceControlActionAgentPicksModel } from '../../../../shared/source-control/ai/recipes/source-control-action-options'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 import type { RuntimeClientTarget } from '../../../../shared/runtime-client-target'
+import type { AgentSessionModelCatalogResult } from '../../../../shared/agent-session/agent-session-wire'
 
 // Team seats run on this computer, so its CLIs and accounts list the models.
 const LOCAL_HOST: RuntimeClientTarget = { kind: 'local' }
 const EFFORT_ONLY = ['effort']
 
 export type TeamSeatModelChoice = { model: string; effort: string }
+
+/** Older seats saved the shown name ("Opus 5.5"); the CLI only takes the id. */
+function listedModelId(
+  catalog: AgentSessionModelCatalogResult | undefined,
+  model: string
+): string | null {
+  if (!catalog || catalog.origin === 'unknown' || !model) {
+    return null
+  }
+  const wanted = model.trim().toLowerCase()
+  if (catalog.models.some((entry) => entry.id.toLowerCase() === wanted)) {
+    return null
+  }
+  return catalog.models.find((entry) => entry.label.trim().toLowerCase() === wanted)?.id ?? null
+}
 
 /** The seat's model and reasoning level from the agent's own list; free text for agents Orca cannot list. */
 export function TeamSeatModelField({
@@ -24,6 +41,12 @@ export function TeamSeatModelField({
   onChange: (value: TeamSeatModelChoice) => void
 }): React.JSX.Element {
   const { catalog, usesSeedModels } = useAgentSettingsModelCatalog(agent, LOCAL_HOST)
+  const fixedId = listedModelId(catalog, value.model)
+  useEffect(() => {
+    if (fixedId) {
+      onChange({ ...value, model: fixedId })
+    }
+  }, [fixedId, onChange, value])
   if (!sourceControlActionAgentPicksModel(agent)) {
     return (
       <div className="flex flex-col gap-1.5">

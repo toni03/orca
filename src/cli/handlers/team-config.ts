@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import type { AgentTeamRole, AgentTeamSeat } from '../../shared/agent-team/agent-team-types'
+import type { AgentTeamRole } from '../../shared/agent-team/agent-team-types'
 import type { CommandHandler } from '../dispatch'
 import {
   getOptionalStringFlag,
@@ -9,13 +9,7 @@ import {
   getRequiredStringFlag
 } from '../flags'
 import { printResult } from '../format'
-
-type SeatView = Pick<AgentTeamSeat, 'id' | 'name' | 'agent' | 'model' | 'effort'>
-
-function seatLine(seat: SeatView): string {
-  const runs = [seat.agent, seat.model, seat.effort].filter(Boolean).join(' · ')
-  return `${seat.id}  ${seat.name} (${runs})`
-}
+import { seatLine, type SeatView } from './team-structure'
 
 type RoleView = AgentTeamRole & { usedBy: { teamId: string; team: string; step: string }[] }
 

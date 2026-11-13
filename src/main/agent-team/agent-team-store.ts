@@ -6,6 +6,7 @@ import {
   builtinRole,
   createInitialAgentTeamState
 } from '../../shared/agent-team/agent-team-builtin-templates'
+import { withConsistentSeats } from '../../shared/agent-team/agent-team-seat-membership'
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
 import {
   durableWriteTempPath,
@@ -68,7 +69,7 @@ export function readAgentTeamState(file: string, now: number): AgentTeamState {
   try {
     const parsed: unknown = JSON.parse(readFileSync(file, 'utf8'))
     if (isAgentTeamState(parsed)) {
-      return withBuiltinRoles(parsed, now)
+      return withConsistentSeats(withBuiltinRoles(parsed, now), now)
     }
   } catch {
     // Fall through: keep the unreadable file aside instead of overwriting the user's data.
