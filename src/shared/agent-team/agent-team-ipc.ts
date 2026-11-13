@@ -1,5 +1,5 @@
 import type { TuiAgent } from '../agent-launch/catalog/tui-agent'
-import type { CheckStatus, PRReviewDecision } from '../github/pull-request-types'
+import type { CheckStatus, PRReviewDecision } from '../github/pull-requests/pull-request-types'
 import type {
   HostedReviewProvider,
   HostedReviewState
