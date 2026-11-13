@@ -14,7 +14,7 @@ import {
   resolveVisibleTaskProvider,
   type TaskProvider
 } from '../../../../shared/work-items/task-providers'
-import { useTaskProviderConnections } from '@/components/feature-wall/use-integration-connection-status'
+import { useTaskProviderConnections } from '@/components/feature-wall/setup/integrations/use-integration-connection-status'
 import {
   getSourceOptions,
   getGitHubModeButtons,

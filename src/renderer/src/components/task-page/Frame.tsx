@@ -2,7 +2,7 @@ import type { TaskPageComposerActionsModel } from './use-task-page-composer-acti
 import { TaskPageListChrome } from './ListChrome'
 import { TaskPageContent } from './Content'
 import { TaskPageNoConnectedSource } from './NoConnectedSource'
-import { useTaskProviderConnections } from '@/components/feature-wall/use-integration-connection-status'
+import { useTaskProviderConnections } from '@/components/feature-wall/setup/integrations/use-integration-connection-status'
 import { areAllTaskProvidersDisconnected } from '../../../../shared/work-items/task-providers'
 export function TaskPageFrame({
   model

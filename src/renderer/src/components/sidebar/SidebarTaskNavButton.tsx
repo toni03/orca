@@ -13,7 +13,7 @@ import { getLocalPreflightContext } from '@/runtime/hosts/preflight/local-prefli
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store/index'
 import { useRepoMap } from '@/store/repos/use-repository-catalog'
-import { useTaskProviderConnections } from '@/components/feature-wall/use-integration-connection-status'
+import { useTaskProviderConnections } from '@/components/feature-wall/setup/integrations/use-integration-connection-status'
 import { useTranslate } from '@/i18n/use-translate'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
 import { getTaskPresetQuery } from '../../../../shared/work-items/task-preset-query'

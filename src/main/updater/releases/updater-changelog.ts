@@ -11,7 +11,7 @@ type ChangelogEntry = {
   releaseNotesUrl: string
 }
 
-const CHANGELOG_URL = 'https://onorca.dev/changelog'
+const CHANGELOG_URL = 'https://orca.dev/changelog'
 
 function isValidEntry(entry: ChangelogEntry): boolean {
   return (
@@ -30,11 +30,11 @@ export async function fetchChangelog(
   incomingVersion: string,
   localVersion: string
 ): Promise<ChangelogData | null> {
-  // onorca.dev only describes upstream releases; forks fall back to their release notes link.
+  // orca.dev only describes upstream releases; forks fall back to their release notes link.
   if (IS_FORK_DISTRIBUTION) {
     return null
   }
-  const res = await net.fetch('https://onorca.dev/whats-new/changelog.json', {
+  const res = await net.fetch('https://orca.dev/whats-new/changelog.json', {
     signal: AbortSignal.timeout(5000)
   })
   if (!res.ok) {

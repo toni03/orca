@@ -16,7 +16,7 @@ import {
   openComposerForGitLabWorkItem,
   openComposerForJiraIssue
 } from '@/components/task-page/work-item-workspace-composer'
-import type { GitHubWorkItem } from '../../../../shared/github/work-item-types'
+import type { GitHubWorkItem } from '../../../../shared/github/work-items/work-item-types'
 import type { GitLabWorkItem } from '../../../../shared/gitlab-types'
 import type { JiraIssue } from '../../../../shared/jira/jira-types'
 import { getQuickTasksRepos } from './quick-tasks-repos'
