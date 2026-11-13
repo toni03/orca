@@ -12,7 +12,6 @@ export function renderTeamSettingsSection(
   return (
     <SettingsSection
       id="team"
-      grouped
       title={t('auto.components.settings.team.title', 'Team')}
       description={t(
         'auto.components.settings.team.description',
