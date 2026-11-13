@@ -10,6 +10,7 @@ import { AGENT_TEAM_CONFIG_METHODS } from './agent-team/agent-team-config'
 import { AGENT_TEAM_STRUCTURE_METHODS } from './agent-team/agent-team-structure'
 import { REPO_METHODS } from './projects/repo'
 import { WORKTREE_METHODS } from './workspaces/worktree'
+import { WORKSPACE_CLEANUP_RUNNER_METHODS } from './workspaces/workspace-cleanup-runner-methods'
 import { AGENT_ACTIVITY_METHODS } from './workspaces/agent-activity-methods'
 import { REFERENCE_METHODS } from './reference/reference'
 import { TERMINAL_METHODS } from './terminal/terminal'
@@ -100,6 +101,7 @@ export const ALL_RPC_METHODS = [
   ...AGENT_TEAM_STRUCTURE_METHODS,
   ...REPO_METHODS,
   ...WORKTREE_METHODS,
+  ...WORKSPACE_CLEANUP_RUNNER_METHODS,
   ...AGENT_ACTIVITY_METHODS,
   ...REFERENCE_METHODS,
   ...AGENT_SESSION_METHODS,

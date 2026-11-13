@@ -625,6 +625,7 @@ import {
   RepoReorder,
   RepoSearchRefs,
   RepoSetBaseRef,
+  RepoSetHidden,
   RepoSparsePresetSave,
   RepoUpdate
 } from './repo-params'
@@ -723,6 +724,7 @@ import {
 import {
   AgentTeamsPrepareLaunch,
   AgentTeamsTmuxCompat,
+  TerminalAgentId,
   TerminalCloseAll,
   TerminalCreateParams,
   TerminalFocus,
@@ -758,6 +760,12 @@ import {
   UsageCredentialSessionCookieParams
 } from './usage-credentials-params'
 import { CancelUsageLimitContinueParams } from './usage-limit-continue-params'
+import {
+  WorkspaceCleanupPreviewParams,
+  WorkspaceCleanupReportUnsavedEditorsParams,
+  WorkspaceCleanupRunNowParams
+} from './workspace-cleanup-runner-params'
+import { WorkspaceCleanupScanParams } from './workspace-cleanup-scan-params'
 import { LayoutReopenHeldPanesParams } from './workspace-layout-held-panes-params'
 import {
   LayoutApplyParams,
@@ -1133,6 +1141,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'folderWorkspace.update': FolderWorkspaceUpdate,
   'git.abortMerge': WorktreeSelectorOfGitParams,
   'git.abortRebase': WorktreeSelectorOfGitParams,
+  'git.atRiskLocalFiles': WorktreeSelectorOfGitParams,
   'git.branchCompare': GitBranchCompare,
   'git.branchDiff': GitBranchDiff,
   'git.bulkDiscard': GitBulkPaths,
@@ -1510,6 +1519,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'repo.saveSparsePreset': RepoSparsePresetSave,
   'repo.searchRefs': RepoSearchRefs,
   'repo.setBaseRef': RepoSetBaseRef,
+  'repo.setHidden': RepoSetHidden,
   'repo.setupScriptImports': RepoSelector,
   'repo.show': RepoShow,
   'repo.sparsePresets': RepoSelector,
@@ -1627,6 +1637,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'team.update': AgentTeamUpdateParams,
   'terminal.ackOutput': TerminalAckOutput,
   'terminal.adoptOrphans': TerminalAdoptOrphans,
+  'terminal.agentId': TerminalAgentId,
   'terminal.agentStatus': TerminalHandle,
   'terminal.clearBuffer': TerminalHandle,
   'terminal.close': TerminalHandle,
@@ -1687,6 +1698,11 @@ export const RPC_PARAMS_BY_METHOD = {
   'updater.download': null,
   'updater.getStatus': null,
   'updater.install': null,
+  'workspaceCleanup.preview': WorkspaceCleanupPreviewParams,
+  'workspaceCleanup.report': null,
+  'workspaceCleanup.reportUnsavedEditors': WorkspaceCleanupReportUnsavedEditorsParams,
+  'workspaceCleanup.runNow': WorkspaceCleanupRunNowParams,
+  'workspaceCleanup.scan': WorkspaceCleanupScanParams,
   'workspacePorts.kill': WorkspacePortKillParams,
   'workspacePorts.killHost': WorkspacePortKillHostParams,
   'workspacePorts.probePage': WorkspacePortProbePageParams,
