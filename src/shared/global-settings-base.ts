@@ -1,3 +1,4 @@
+import type { AgentTeamGlobalSettings } from './agent-team/agent-team-global-settings'
 import type { AntigravityChatAuthSettings } from './antigravity-chat-auth-config'
 import type { EmulatorOpeningSettings } from './emulator-opening-preferences'
 import type { BrowserExtensionGlobalSettings } from './browser/extensions/browser-extension-settings'
@@ -27,6 +28,7 @@ import type { WorkspaceCleanupPolicySettings } from './workspace-cleanup/workspa
 
 /** Settings groups owned by their feature modules and composed into GlobalSettings. */
 export type GlobalSettingsBase = AntigravityChatAuthSettings &
+  AgentTeamGlobalSettings &
   EmulatorOpeningSettings &
   SshRemoteControlSettings &
   ClaudeAgentViewSettings &
