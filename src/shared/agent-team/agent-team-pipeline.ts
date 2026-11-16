@@ -192,7 +192,8 @@ export type AgentTeamUserDecision =
   | { kind: 'resume' }
   /** Answers a blocked or stopped step; the same step runs again with the answer. */
   | { kind: 'answer'; note: string }
-  | { kind: 'request-changes'; note: string }
+  /** Returns the work to a Build step; without stepIndex, the closest Build before the current step. */
+  | { kind: 'request-changes'; note: string; stepIndex?: number }
   | { kind: 'done' }
   | { kind: 'discard' }
 
@@ -239,7 +240,7 @@ export function applyAgentTeamUserDecision(args: {
         ...base,
         status: 'working',
         round: issue.round + 1,
-        stepIndex: reworkStepIndex(team, from, roles),
+        stepIndex: decision.stepIndex ?? reworkStepIndex(team, from, roles),
         body: note
           ? `${issue.body.trim()}\n\nRequested changes (round ${issue.round + 1}):\n${note}`
           : issue.body
@@ -250,6 +251,67 @@ export function applyAgentTeamUserDecision(args: {
     case 'discard':
       return { ...base, status: 'discarded' }
   }
+}
+
+const REQUEST_CHANGES_REASONS = new Set(['ready', 'escalated', 'blocked'])
+
+/**
+ * Where a request for changes sends an issue that waits after a Check, and whether it goes past
+ * the rounds per issue. Throws when the issue is not waiting after a Check or the step is not a
+ * Build before it.
+ */
+export function planRequestChanges(args: {
+  issue: AgentTeamIssue
+  team: AgentTeam
+  roles: readonly AgentTeamRole[]
+  workflow: AgentTeamWorkflow
+  step?: string
+}): { stepIndex: number; round: number; overLimit: boolean } {
+  const { issue, team, roles, workflow } = args
+  const reason = issue.needsYou?.reason
+  if (issue.status !== 'needs-you' || !reason || !REQUEST_CHANGES_REASONS.has(reason)) {
+    throw new Error(
+      `Issue ${issue.id} is ${issue.status}${reason ? ` (${reason})` : ''}; only issues ready, escalated or blocked after a Check step take a request for changes.`
+    )
+  }
+  const from = Math.min(issue.stepIndex, team.steps.length)
+  const current = team.steps[from]
+  if (current && stepRole(team, from, roles)?.stepType === 'build') {
+    throw new Error(
+      `Issue ${issue.id} is already in the Build step ${current.name}; answer it with orca team issue answer instead.`
+    )
+  }
+  const stepIndex = args.step
+    ? namedBuildStep(team, roles, args.step, from)
+    : reworkStepIndex(team, from, roles)
+  const round = issue.round + 1
+  return { stepIndex, round, overLimit: round > workflow.roundsPerIssue }
+}
+
+function namedBuildStep(
+  team: AgentTeam,
+  roles: readonly AgentTeamRole[],
+  ref: string,
+  before: number
+): number {
+  const wanted = ref.trim().toLowerCase()
+  const index = team.steps.findIndex(
+    (step) => step.id === ref.trim() || step.name.trim().toLowerCase() === wanted
+  )
+  if (index === -1) {
+    throw new Error(
+      `Team ${team.name} has no step ${ref}. Steps: ${team.steps.map((step) => step.name).join(', ')}.`
+    )
+  }
+  if (stepRole(team, index, roles)?.stepType !== 'build') {
+    throw new Error(`Step ${team.steps[index].name} is a Check; pass a Build step.`)
+  }
+  if (index >= before) {
+    throw new Error(
+      `Step ${team.steps[index].name} comes after the current step; pass a Build step before it.`
+    )
+  }
+  return index
 }
 
 /** Findings from the last rejected check, as text for the next Build round. */

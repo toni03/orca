@@ -5,6 +5,7 @@ import {
 } from './agent-team-mutations'
 import { teamProjectRepoId } from './agent-team-project-groups'
 import type {
+  AgentTeamAssignment,
   AgentTeamIssue,
   AgentTeamIssueScope,
   AgentTeamProject,
@@ -121,7 +122,10 @@ export function reorderQueue(
   }
 }
 
-/** Puts queued issues that have not started back in Not approved, so no seat takes them. */
+/**
+ * Puts issues back in Not approved so no seat takes them. A started issue keeps its step, round,
+ * history, branch and worktree; its open session is cancelled and the caller closes it.
+ */
 export function holdIssues(
   state: AgentTeamState,
   issueIds: readonly string[],
@@ -129,9 +133,13 @@ export function holdIssues(
 ): AgentTeamState {
   for (const id of issueIds) {
     const issue = requireIssue(state, id)
-    if (issue.status !== 'queued' && issue.status !== 'registered') {
+    if (issue.status === 'done' || issue.status === 'discarded') {
+      throw new AgentTeamMutationError(`Issue ${id} is ${issue.status}; it cannot be held.`)
+    }
+    const team = state.teams.find((candidate) => candidate.id === issue.teamId)
+    if (issue.status === 'needs-you' && team && issue.stepIndex >= team.steps.length) {
       throw new AgentTeamMutationError(
-        `Issue ${id} is ${issue.status}; only queued issues that have not started can be held.`
+        `Issue ${id} passed every step; mark it done or request changes instead of holding it.`
       )
     }
   }
@@ -139,11 +147,31 @@ export function holdIssues(
   return {
     ...state,
     issues: state.issues.map((issue) =>
-      wanted.has(issue.id) && issue.status === 'queued'
-        ? { ...issue, status: 'registered', updatedAt: now }
+      wanted.has(issue.id) && issue.status !== 'registered'
+        ? {
+            ...issue,
+            status: 'registered',
+            needsYou: undefined,
+            assignments: issue.assignments.map((assignment) =>
+              assignment.endedAt === undefined
+                ? { ...assignment, stopReason: 'cancelled', endedAt: now }
+                : assignment
+            ),
+            updatedAt: now
+          }
         : issue
     )
   }
+}
+
+/** Open assignments of these issues, whose sessions a hold must close. */
+export function runningAssignments(
+  state: AgentTeamState,
+  issueIds: readonly string[]
+): AgentTeamAssignment[] {
+  return state.issues
+    .filter((issue) => issueIds.includes(issue.id))
+    .flatMap((issue) => issue.assignments.filter((assignment) => assignment.endedAt === undefined))
 }
 
 function requireIssue(state: AgentTeamState, issueId: string): AgentTeamIssue {

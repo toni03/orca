@@ -1,4 +1,4 @@
-import type { AgentTeamState } from './agent-team-types'
+import type { AgentTeamNeedsYouReason, AgentTeamState, AgentTeamStepType } from './agent-team-types'
 
 /** A paused seat takes no new steps until it is resumed. */
 export type AgentTeamContextSeat = {
@@ -40,6 +40,13 @@ export type AgentTeamContext = {
     title: string
     status: string
     key: string | null
+    /** The step the issue is in; null once it has passed every step. */
+    step: string | null
+    /** build: answer it to continue; check: request changes to send it back to a Build. */
+    stepType: AgentTeamStepType | null
+    /** Why it waits for the user when its status is needs-you. */
+    needsYou: AgentTeamNeedsYouReason | null
+    round: number
     /** Why a queued issue has not started yet; null when it is not waiting. */
     waiting: string | null
   }[]

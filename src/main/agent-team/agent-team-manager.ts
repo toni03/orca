@@ -10,7 +10,7 @@ import {
   teamProjectRepoId
 } from '../../shared/agent-team/agent-team-project-groups'
 import { projectTracker } from '../../shared/agent-team/agent-team-project-tracker'
-import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
+import type { AgentTeamIssue, AgentTeamState } from '../../shared/agent-team/agent-team-types'
 import { describeWaiting } from '../../shared/agent-team/agent-team-wait-reason'
 import type { TuiAgent } from '../../shared/agent-launch/catalog/tui-agent'
 import type { Store } from '../persistence/loading-store/store'
@@ -96,8 +96,26 @@ export async function buildAgentTeamContext(
         title: issue.title,
         status: issue.status,
         key: issue.tracker?.key ?? null,
+        ...issueStep(state, issue),
+        needsYou: issue.status === 'needs-you' ? (issue.needsYou?.reason ?? null) : null,
+        round: issue.round,
         waiting: waiting[issue.id] ?? null
       }))
+  }
+}
+
+function issueStep(
+  state: AgentTeamState,
+  issue: AgentTeamIssue
+): Pick<AgentTeamContext['queue'][number], 'step' | 'stepType'> {
+  const team = state.teams.find((candidate) => candidate.id === issue.teamId)
+  const step = team?.steps[issue.stepIndex]
+  if (!team || !step) {
+    return { step: null, stepType: null }
+  }
+  return {
+    step: step.name,
+    stepType: stepRole(team, issue.stepIndex, state.roles)?.stepType ?? null
   }
 }
 

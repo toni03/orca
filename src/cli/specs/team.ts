@@ -45,11 +45,27 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
   },
   {
     path: ['team', 'issue', 'answer'],
-    summary: 'Answer an issue that waits for you, so its step continues',
+    summary: 'Answer an issue that waits for you, so its current step continues',
     usage: 'orca team issue answer --issue <issueId> --text <answer> [--json]',
     allowedFlags: [...GLOBAL_FLAGS, 'issue', 'text'],
     notes: [
-      'A session still waiting gets the answer typed in; otherwise the same step starts again with it.'
+      'A session still waiting gets the answer typed in; otherwise the current step starts again with it.',
+      'On a Check step that relaunches the review on the same code. To send the work back to a Build step with changes, use orca team issue request-changes.'
+    ]
+  },
+  {
+    path: ['team', 'issue', 'request-changes'],
+    summary: 'Send an issue waiting after a Check step back to a Build step with changes',
+    usage:
+      'orca team issue request-changes --issue <issueId> --text <changes> [--step <buildStep>] [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'issue', 'text', 'step'],
+    notes: [
+      'Same as Request changes in the board: works on issues ready, escalated or blocked after a Check step, starts a new round and the text becomes the instructions for the Build step.',
+      'Goes to the closest Build step before the current one, or to --step, a Build step of the same team before it. Then the issue runs through the Check steps again.',
+      'An issue already in a Build step is an error: answer it with orca team issue answer. Going past the rounds per issue is allowed and warned about.'
+    ],
+    examples: [
+      'orca team issue request-changes --issue #125 --text "Bump the version in the changelog"'
     ]
   },
   {
@@ -65,11 +81,14 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
   },
   {
     path: ['team', 'issue', 'hold'],
-    summary: 'Move queued issues that have not started back to Not approved',
+    summary: 'Move issues back to Not approved, even if they already started',
     usage: 'orca team issue hold --issue <issueId>... [--json]',
     allowedFlags: [...GLOBAL_FLAGS, 'issue'],
     repeatableFlags: ['issue'],
-    notes: ['Issues a seat already works on cannot be held; discard them or wait.']
+    notes: [
+      'A started issue keeps its step, round, history, branch and worktree; a running session is stopped. Approve it again to continue from that step.',
+      'An issue that passed every step cannot be held: mark it done or request changes.'
+    ]
   },
   {
     path: ['team', 'issue', 'update'],
@@ -175,65 +194,6 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
       'Model and effort are the ids the agent CLI accepts (for example opus and high for Claude); they apply from the next session.'
     ],
     examples: ['orca team seat update --seat "Dev 1" --model opus --effort high']
-  },
-  {
-    path: ['team', 'roles'],
-    summary: 'List the agent team roles and the team steps that use them',
-    usage: 'orca team roles [--json]',
-    allowedFlags: [...GLOBAL_FLAGS]
-  },
-  {
-    path: ['team', 'role', 'show'],
-    summary: 'Show a role with its prompt and skills',
-    usage: 'orca team role show --role <roleId> [--json]',
-    allowedFlags: [...GLOBAL_FLAGS, 'role'],
-    notes: ['A role is its Orca id or its name when only one role has it.']
-  },
-  {
-    path: ['team', 'role', 'create'],
-    summary: 'Create an agent team role',
-    usage:
-      'orca team role create --name <text> --type <build|check> [--prompt <text> | --prompt-file <file>] [--skill <name>]... [--json]',
-    allowedFlags: [...GLOBAL_FLAGS, 'name', 'type', 'prompt', 'prompt-file', 'skill'],
-    repeatableFlags: ['skill'],
-    notes: [
-      'Build steps edit code in their own worktree; Check steps read and test the Build worktree.'
-    ]
-  },
-  {
-    path: ['team', 'role', 'update'],
-    summary: 'Change the name, step type, prompt or skills of a role',
-    usage:
-      'orca team role update --role <roleId> [--name <text>] [--type <build|check>] [--prompt <text> | --prompt-file <file>] [--skill <name>]... [--no-skills] [--json]',
-    allowedFlags: [
-      ...GLOBAL_FLAGS,
-      'role',
-      'name',
-      'type',
-      'prompt',
-      'prompt-file',
-      'skill',
-      'no-skills'
-    ],
-    repeatableFlags: ['skill'],
-    notes: [
-      'A new prompt bumps the role version; sessions already running keep the version they started with.',
-      '--skill replaces the whole list; --no-skills clears it.'
-    ],
-    examples: ['orca team role update --role Reviewer --prompt-file reviewer.md']
-  },
-  {
-    path: ['team', 'role', 'reset'],
-    summary: 'Reset a role copied from a template back to the template',
-    usage: 'orca team role reset --role <roleId> [--json]',
-    allowedFlags: [...GLOBAL_FLAGS, 'role']
-  },
-  {
-    path: ['team', 'role', 'delete'],
-    summary: 'Delete a role no team step uses',
-    usage: 'orca team role delete --role <roleId> [--json]',
-    allowedFlags: [...GLOBAL_FLAGS, 'role'],
-    notes: ['Roles from a template cannot be deleted; reset them instead.']
   },
   {
     path: ['team', 'project', 'show'],

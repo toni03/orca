@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path'
 import {
   applyAgentTeamStateCommand,
   isAgentTeamEngineCommand,
+  sessionsEndedBy,
   type AgentTeamCommand,
   type AgentTeamStateCommand
 } from '../../shared/agent-team/agent-team-commands'
@@ -14,7 +15,7 @@ import type { Repo } from '../../shared/repo-types'
 import type { ProjectGroup } from '../../shared/project-group-types'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import { AgentTeamEngine, AgentTeamError } from './agent-team-engine'
-import type { AgentTeamLauncher } from './agent-team-launcher'
+import { closeAgentTeamSession, type AgentTeamLauncher } from './agent-team-launcher'
 import {
   AGENT_TEAM_PROJECT_SPEC_PATH,
   createAgentTeamRuntimeLauncher,
@@ -147,9 +148,11 @@ export class AgentTeamService {
         return this.store.get()
       }
       const ruled = this.withFolderRules(command)
+      const ended = sessionsEndedBy(this.store.get(), ruled)
       const next = this.store.update((state) =>
         applyAgentTeamStateCommand(state, ruled, { newId: randomUUID, now: Date.now() })
       )
+      ended.forEach((assignment) => closeAgentTeamSession(this.launcher, assignment))
       void this.engine.tick()
       return next
     } catch (error) {

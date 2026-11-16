@@ -81,5 +81,64 @@ export const TEAM_STRUCTURE_COMMAND_SPECS: CommandSpec[] = [
     usage: 'orca team seat retire --seat <seatId> [--json]',
     allowedFlags: [...GLOBAL_FLAGS, 'seat'],
     notes: ['A step already running on the seat finishes; the seat takes nothing new.']
+  },
+  {
+    path: ['team', 'roles'],
+    summary: 'List the agent team roles and the team steps that use them',
+    usage: 'orca team roles [--json]',
+    allowedFlags: [...GLOBAL_FLAGS]
+  },
+  {
+    path: ['team', 'role', 'show'],
+    summary: 'Show a role with its prompt and skills',
+    usage: 'orca team role show --role <roleId> [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'role'],
+    notes: ['A role is its Orca id or its name when only one role has it.']
+  },
+  {
+    path: ['team', 'role', 'create'],
+    summary: 'Create an agent team role',
+    usage:
+      'orca team role create --name <text> --type <build|check> [--prompt <text> | --prompt-file <file>] [--skill <name>]... [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'name', 'type', 'prompt', 'prompt-file', 'skill'],
+    repeatableFlags: ['skill'],
+    notes: [
+      'Build steps edit code in their own worktree; Check steps read and test the Build worktree.'
+    ]
+  },
+  {
+    path: ['team', 'role', 'update'],
+    summary: 'Change the name, step type, prompt or skills of a role',
+    usage:
+      'orca team role update --role <roleId> [--name <text>] [--type <build|check>] [--prompt <text> | --prompt-file <file>] [--skill <name>]... [--no-skills] [--json]',
+    allowedFlags: [
+      ...GLOBAL_FLAGS,
+      'role',
+      'name',
+      'type',
+      'prompt',
+      'prompt-file',
+      'skill',
+      'no-skills'
+    ],
+    repeatableFlags: ['skill'],
+    notes: [
+      'A new prompt bumps the role version; sessions already running keep the version they started with.',
+      '--skill replaces the whole list; --no-skills clears it.'
+    ],
+    examples: ['orca team role update --role Reviewer --prompt-file reviewer.md']
+  },
+  {
+    path: ['team', 'role', 'reset'],
+    summary: 'Reset a role copied from a template back to the template',
+    usage: 'orca team role reset --role <roleId> [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'role']
+  },
+  {
+    path: ['team', 'role', 'delete'],
+    summary: 'Delete a role no team step uses',
+    usage: 'orca team role delete --role <roleId> [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'role'],
+    notes: ['Roles from a template cannot be deleted; reset them instead.']
   }
 ]

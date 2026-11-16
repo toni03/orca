@@ -18,6 +18,7 @@ import {
   createIssue,
   holdIssues,
   reorderQueue,
+  runningAssignments,
   updateIssueDetails,
   updateWorkflow,
   upsertProject,
@@ -31,6 +32,7 @@ import {
 } from './agent-team-role-mutations'
 import { removeProjectGroup, setProjectGroup } from './agent-team-project-groups'
 import type {
+  AgentTeamAssignment,
   AgentTeamIssueScope,
   AgentTeamProject,
   AgentTeamProjectGroup,
@@ -112,6 +114,14 @@ export function isAgentTeamEngineCommand(
   command: AgentTeamCommand
 ): command is AgentTeamEngineCommand {
   return command.kind === 'issue.decide' || command.kind === 'assignment.report'
+}
+
+/** Sessions a command ends: a held issue that was running keeps its worktree but not its session. */
+export function sessionsEndedBy(
+  state: AgentTeamState,
+  command: AgentTeamStateCommand
+): AgentTeamAssignment[] {
+  return command.kind === 'issue.hold' ? runningAssignments(state, command.issueIds) : []
 }
 
 export function applyAgentTeamStateCommand(
