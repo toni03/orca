@@ -12,7 +12,8 @@ export type AgentTeamWaitReason =
   | { kind: 'paused' }
   | { kind: 'team-paused' }
   | { kind: 'dependency'; issueId: string }
-  | { kind: 'project-locked'; byIssueId: string }
+  /** `team` when only the issue's own team is held; dependencies always cross teams. */
+  | { kind: 'project-locked'; byIssueId: string; byTeamId: string; scope: 'team' | 'project' }
   | { kind: 'no-free-seat'; stepId: string }
   | { kind: 'seats-paused'; stepId: string }
   | { kind: 'plan-limit'; stepId: string }
@@ -35,20 +36,32 @@ function byPriority(a: AgentTeamIssue, b: AgentTeamIssue): number {
   return a.priority - b.priority || a.createdAt - b.createdAt
 }
 
+/** Exclusive issues hold the whole project; team-exclusive ones only hold their own team's queue. */
+function lockScope(holder: AgentTeamIssue, issue: AgentTeamIssue): 'team' | 'project' | null {
+  if (holder.repoId !== issue.repoId || holder.id === issue.id) {
+    return null
+  }
+  if (holder.scope === 'exclusive' || issue.scope === 'exclusive') {
+    return 'project'
+  }
+  const teamExclusive = holder.scope === 'exclusive-team' || issue.scope === 'exclusive-team'
+  return teamExclusive && holder.teamId === issue.teamId ? 'team' : null
+}
+
 function projectLock(
   issue: AgentTeamIssue,
   active: readonly AgentTeamIssue[]
-): AgentTeamIssue | undefined {
+): AgentTeamWaitReason | undefined {
   if (holdsProject(issue)) {
     return undefined
   }
-  const sameProject = active.filter(
-    (other) => other.repoId === issue.repoId && other.id !== issue.id
-  )
-  if (issue.scope === 'exclusive') {
-    return sameProject[0]
+  for (const holder of active) {
+    const scope = lockScope(holder, issue)
+    if (scope) {
+      return { kind: 'project-locked', byIssueId: holder.id, byTeamId: holder.teamId, scope }
+    }
   }
-  return sameProject.find((other) => other.scope === 'exclusive')
+  return undefined
 }
 
 function preferredSeat(issue: AgentTeamIssue, stepId: string, free: readonly AgentTeamSeat[]) {
@@ -110,9 +123,9 @@ export function planAgentTeamAssignments(
       waiting[issue.id] = { kind: 'dependency', issueId: blockingDependency }
       continue
     }
-    const lockedBy = projectLock(issue, active)
-    if (lockedBy) {
-      waiting[issue.id] = { kind: 'project-locked', byIssueId: lockedBy.id }
+    const locked = projectLock(issue, active)
+    if (locked) {
+      waiting[issue.id] = locked
       continue
     }
     const stepSeats = state.seats.filter(

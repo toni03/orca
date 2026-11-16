@@ -100,12 +100,21 @@ export function waitReasonLabel(reason: AgentTeamWaitReason, state: AgentTeamSta
           key: keyOf(reason.issueId)
         }
       )
-    case 'project-locked':
-      return translate(
-        'auto.components.agentTeam.labels.waitLocked',
-        'Waiting · project locked by {{key}}',
-        { key: keyOf(reason.byIssueId) }
-      )
+    case 'project-locked': {
+      const team = state.teams.find((candidate) => candidate.id === reason.byTeamId)?.name ?? '?'
+      const values = { key: keyOf(reason.byIssueId), team }
+      return reason.scope === 'team'
+        ? translate(
+            'auto.components.agentTeam.labels.waitTeamLocked',
+            'Waiting for {{key}} ({{team}}) · it holds this team',
+            values
+          )
+        : translate(
+            'auto.components.agentTeam.labels.waitProjectLocked',
+            'Waiting for {{key}} ({{team}}) · it locks the project',
+            values
+          )
+    }
     case 'no-free-seat':
       return translate('auto.components.agentTeam.labels.waitSeat', 'Waiting · no free seat')
     case 'plan-limit':

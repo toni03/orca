@@ -193,6 +193,10 @@ export function TeamIssueCard({
           <Badge variant="outline">
             {translate('auto.components.agentTeam.TeamIssueCard.exclusive', 'Locks project')}
           </Badge>
+        ) : issue.scope === 'exclusive-team' ? (
+          <Badge variant="outline">
+            {translate('auto.components.agentTeam.TeamIssueCard.exclusiveTeam', 'Locks team')}
+          </Badge>
         ) : null}
         {indicators.map((indicator) => (
           <span key={indicator.stepId} className="inline-flex items-center gap-0.5">

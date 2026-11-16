@@ -104,8 +104,8 @@ export type AgentTeamIssueStatus =
 
 export type AgentTeamNeedsYouReason = 'ready' | 'escalated' | 'blocked' | 'question' | 'failed'
 
-/** Whether the issue may share its project with other active issues. */
-export type AgentTeamIssueScope = 'shared' | 'exclusive'
+/** Whether the issue runs alone in its project: shared, alone within its team, or alone in the whole project. */
+export type AgentTeamIssueScope = 'shared' | 'exclusive-team' | 'exclusive'
 
 export type AgentTeamFinding = {
   severity: 'blocker' | 'major' | 'minor' | 'info'

@@ -21,7 +21,10 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
+import type {
+  AgentTeamIssueScope,
+  AgentTeamState
+} from '../../../../shared/agent-team/agent-team-types'
 import { useAgentTeamCommand } from './use-agent-team-state'
 import { projectTracker } from '../../../../shared/agent-team/agent-team-project-tracker'
 import { sortByLabel, sortByName } from '../../../../shared/agent-team/agent-team-name-order'
@@ -58,7 +61,7 @@ function NewIssueForm({ onOpenChange, state, defaultTeamId }: Props): React.JSX.
   const [body, setBody] = useState('')
   const [criteria, setCriteria] = useState('')
   const [trackerKey, setTrackerKey] = useState('')
-  const [exclusive, setExclusive] = useState(false)
+  const [scope, setScope] = useState<AgentTeamIssueScope>('shared')
   const isFolder = teamRepos.find((repo) => repo.id === repoId)?.kind === 'folder'
   const [approved, setApproved] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -76,7 +79,7 @@ function NewIssueForm({ onOpenChange, state, defaultTeamId }: Props): React.JSX.
       title,
       body,
       criteria: criteria.split('\n'),
-      scope: exclusive || isFolder ? 'exclusive' : 'shared',
+      scope: isFolder ? 'exclusive' : scope,
       approved,
       ...(tracker && trackerKey.trim()
         ? { tracker: { provider: tracker.provider, key: trackerKey.trim() } }
@@ -197,30 +200,51 @@ function NewIssueForm({ onOpenChange, state, defaultTeamId }: Props): React.JSX.
             />
           </div>
         ) : null}
-        <label className="flex items-center justify-between gap-3 text-sm">
-          <span>
-            {translate(
-              'auto.components.agentTeam.TeamNewIssueDialog.exclusive',
-              'Locks the project'
-            )}
-            <span className="block text-xs text-muted-foreground">
-              {isFolder
-                ? translate(
-                    'auto.components.agentTeam.TeamNewIssueDialog.folderExclusiveHint',
-                    'Folder project: every issue locks it, because all steps work in the same folder.'
-                  )
-                : translate(
-                    'auto.components.agentTeam.TeamNewIssueDialog.exclusiveHint',
-                    'For refactors or upgrades: no other issue of this project runs beside it.'
-                  )}
-            </span>
-          </span>
-          <Switch
-            checked={exclusive || isFolder}
+        <div className="flex flex-col gap-1.5">
+          <Label>
+            {translate('auto.components.agentTeam.TeamNewIssueDialog.scope', 'Runs beside')}
+          </Label>
+          <Select
+            value={isFolder ? 'exclusive' : scope}
             disabled={isFolder}
-            onCheckedChange={setExclusive}
-          />
-        </label>
+            onValueChange={(value) => setScope(value as AgentTeamIssueScope)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="shared">
+                {translate(
+                  'auto.components.agentTeam.TeamNewIssueDialog.scopeShared',
+                  'Other issues of the project'
+                )}
+              </SelectItem>
+              <SelectItem value="exclusive-team">
+                {translate(
+                  'auto.components.agentTeam.TeamNewIssueDialog.scopeTeam',
+                  'Only issues of other teams (locks this team)'
+                )}
+              </SelectItem>
+              <SelectItem value="exclusive">
+                {translate(
+                  'auto.components.agentTeam.TeamNewIssueDialog.scopeProject',
+                  'Nothing (locks the whole project)'
+                )}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <span className="text-xs text-muted-foreground">
+            {isFolder
+              ? translate(
+                  'auto.components.agentTeam.TeamNewIssueDialog.folderExclusiveHint',
+                  'Folder project: every issue locks it, because all steps work in the same folder.'
+                )
+              : translate(
+                  'auto.components.agentTeam.TeamNewIssueDialog.scopeHint',
+                  'Lock the project for refactors or upgrades. Dependencies always apply across teams.'
+                )}
+          </span>
+        </div>
         <label className="flex items-center justify-between gap-3 text-sm">
           {translate('auto.components.agentTeam.TeamNewIssueDialog.approved', 'Approve now')}
           <Switch checked={approved} onCheckedChange={setApproved} />

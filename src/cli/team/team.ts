@@ -27,10 +27,14 @@ async function readFindings(path: string, cwd: string): Promise<unknown> {
   }
 }
 
-function formatIssues(result: {
+type IssueListReply = {
   issues: AgentTeamIssue[]
   teams: { id: string; name: string }[]
-}): string {
+  /** Why each queued issue has not started, by issue id. */
+  waiting?: Record<string, string>
+}
+
+function formatIssues(result: IssueListReply): string {
   if (result.issues.length === 0) {
     return 'No issues.'
   }
@@ -38,7 +42,8 @@ function formatIssues(result: {
     .map((issue) => {
       const team = result.teams.find((candidate) => candidate.id === issue.teamId)?.name ?? '?'
       const key = issue.tracker?.key ? ` ${issue.tracker.key}` : ''
-      return `${issue.id}${key}  [${issue.status}]  ${team} · round ${issue.round}  ${issue.title}`
+      const waiting = result.waiting?.[issue.id] ? `  (${result.waiting[issue.id]})` : ''
+      return `${issue.id}${key}  [${issue.status}]  ${team} · round ${issue.round}  ${issue.title}${waiting}`
     })
     .join('\n')
 }
@@ -79,6 +84,19 @@ function formatContext(context: AgentTeamContext): string {
     '',
     `Queue: ${context.queue.length} open issues (use --json for specs and the queue)`
   ].join('\n')
+}
+
+/** --exclusive locks the whole project, --exclusive-team only the issue's own team, --shared neither. */
+function scopeFlag(
+  flags: Map<string, string | boolean>
+): { scope: 'shared' | 'exclusive-team' | 'exclusive' } | Record<string, never> {
+  const chosen = (['exclusive', 'exclusive-team', 'shared'] as const).filter(
+    (flag) => flags.get(flag) === true
+  )
+  if (chosen.length > 1) {
+    throw new Error('Pass only one of --exclusive, --exclusive-team or --shared.')
+  }
+  return chosen[0] ? { scope: chosen[0] } : {}
 }
 
 type SeatPauseReply = { seats: string[] }
@@ -122,10 +140,7 @@ export const TEAM_HANDLERS: Record<string, CommandHandler> = {
   },
   'team issues': async ({ flags, client, json }) => {
     const status = getOptionalStringFlag(flags, 'status')
-    const response = await client.call<{
-      issues: AgentTeamIssue[]
-      teams: { id: string; name: string }[]
-    }>('team.issues', status ? { status } : {})
+    const response = await client.call<IssueListReply>('team.issues', status ? { status } : {})
     printResult(response, json, formatIssues)
   },
   'team issue answer': async ({ flags, client, json }) => {
@@ -161,7 +176,8 @@ export const TEAM_HANDLERS: Record<string, CommandHandler> = {
       ...(title !== undefined ? { title } : {}),
       ...(body !== undefined ? { body } : {}),
       ...(criteria.length > 0 ? { criteria } : {}),
-      ...(dependsOn.length > 0 || clearDependencies ? { dependsOn } : {})
+      ...(dependsOn.length > 0 || clearDependencies ? { dependsOn } : {}),
+      ...scopeFlag(flags)
     })
     printResult(response, json, (result) =>
       result.issue ? `Updated ${formatIssueStates([result.issue])}` : 'Updated.'
@@ -192,7 +208,7 @@ export const TEAM_HANDLERS: Record<string, CommandHandler> = {
       ...(body !== undefined ? { body } : {}),
       criteria: getRepeatedStringFlag(flags, 'criterion'),
       dependsOn: getRepeatedStringFlag(flags, 'depends-on'),
-      ...(flags.get('exclusive') === true ? { scope: 'exclusive' } : {}),
+      ...scopeFlag(flags),
       ...(trackerKey ? { trackerKey } : {}),
       ...(trackerUrl ? { trackerUrl } : {}),
       ...(flags.get('approved') === true ? { approved: true } : {})

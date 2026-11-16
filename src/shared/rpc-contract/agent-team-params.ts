@@ -29,7 +29,7 @@ export const AgentTeamIssueCreateParams = z.object({
   title: requiredString('Missing --title'),
   body: z.string().optional(),
   criteria: z.array(z.string()).optional(),
-  scope: z.enum(['shared', 'exclusive']).optional(),
+  scope: z.enum(['shared', 'exclusive-team', 'exclusive']).optional(),
   dependsOn: z.array(z.string()).optional(),
   trackerKey: z.string().optional(),
   trackerUrl: z.string().optional(),
@@ -73,7 +73,8 @@ export const AgentTeamIssueUpdateParams = z.object({
   body: z.string().optional(),
   criteria: z.array(z.string()).optional(),
   /** Replaces the dependencies; an empty list clears them. */
-  dependsOn: z.array(z.string()).optional()
+  dependsOn: z.array(z.string()).optional(),
+  scope: z.enum(['shared', 'exclusive-team', 'exclusive']).optional()
 })
 
 /** A seat by its id or, when unambiguous, its name; its agent CLI is fixed. */

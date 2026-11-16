@@ -224,7 +224,7 @@ export class AgentTeamService {
     if (command.kind === 'issue.create' && isFolder(command.repoId)) {
       return { ...command, scope: 'exclusive' }
     }
-    if (command.kind === 'issue.update' && command.scope === 'shared') {
+    if (command.kind === 'issue.update' && command.scope && command.scope !== 'exclusive') {
       const issue = this.store.get().issues.find((candidate) => candidate.id === command.issueId)
       if (issue && isFolder(issue.repoId)) {
         return { ...command, scope: 'exclusive' }

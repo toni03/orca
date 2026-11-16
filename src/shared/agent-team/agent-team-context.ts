@@ -33,5 +33,14 @@ export type AgentTeamContext = {
     steps: { name: string; role: string; stepType: string; seats: AgentTeamContextSeat[] }[]
   }[]
   workflow: AgentTeamState['workflow']
-  queue: { id: string; repoId: string; title: string; status: string; key: string | null }[]
+  queue: {
+    id: string
+    repoId: string
+    teamId: string
+    title: string
+    status: string
+    key: string | null
+    /** Why a queued issue has not started yet; null when it is not waiting. */
+    waiting: string | null
+  }[]
 }
