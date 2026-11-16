@@ -26,8 +26,14 @@ const TEAM_FLAG_HELP: Record<string, string> = {
   criterion: line('--criterion <text>', 'Acceptance criterion; repeat for several'),
   'depends-on': line('--depends-on <issueId>', 'Issue that must finish first; repeat for several'),
   'no-dependencies': line('--no-dependencies', 'Clear the issue dependencies'),
-  exclusive: line('--exclusive', 'Run alone in its project, across every team (refactors, upgrades)'),
-  'exclusive-team': line('--exclusive-team', 'Run alone within its own team; other teams keep working'),
+  exclusive: line(
+    '--exclusive',
+    'Run alone in its project, across every team (refactors, upgrades)'
+  ),
+  'exclusive-team': line(
+    '--exclusive-team',
+    'Run alone within its own team; other teams keep working'
+  ),
   shared: line('--shared', 'Let other issues of the project run beside it'),
   'tracker-key': line('--tracker-key <key>', 'Key of the issue in the project tracker'),
   'tracker-url': line('--tracker-url <url>', 'Link to the issue in the project tracker'),

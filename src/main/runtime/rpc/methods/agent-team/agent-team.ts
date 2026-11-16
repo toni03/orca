@@ -153,7 +153,9 @@ export const AGENT_TEAM_METHODS = [
     handler: (params) => {
       const service = requireAgentTeamService()
       const state = service.getState()
-      const issues = state.issues.filter((issue) => !params.status || issue.status === params.status)
+      const issues = state.issues.filter(
+        (issue) => !params.status || issue.status === params.status
+      )
       return {
         issues,
         waiting: describeWaiting(state, issues),

@@ -7,7 +7,7 @@ import {
   previousRoundFindings
 } from './agent-team-pipeline'
 import { composeAgentTeamSessionPrompt, projectSpecForRole } from './agent-team-session-prompt'
-import type { AgentTeam, AgentTeamIssue, AgentTeamState } from './agent-team-types'
+import type { AgentTeam, AgentTeamIssue } from './agent-team-types'
 
 const team: AgentTeam = {
   id: 'dev',
@@ -39,18 +39,6 @@ function issue(id: string, patch: Partial<AgentTeamIssue> = {}): AgentTeamIssue 
     updatedAt: 0,
     ...patch
   }
-}
-
-function state(issues: AgentTeamIssue[]): AgentTeamState {
-  const initial = createInitialAgentTeamState(0)
-  const seat = (id: string) => ({
-    id,
-    name: id,
-    agent: 'claude' as const,
-    instructions: '',
-    createdAt: 0
-  })
-  return { ...initial, teams: [team], seats: ['d1', 'd2', 'qa', 's'].map(seat), issues }
 }
 
 function started(id: string, seatId: string, patch: Partial<AgentTeamIssue> = {}): AgentTeamIssue {
