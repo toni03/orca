@@ -4,8 +4,10 @@ import {
   applyAgentTeamSessionStop,
   applyAgentTeamStepResult,
   applyAgentTeamUserDecision,
+  planRequestChanges,
   previousRoundFindings
 } from './agent-team-pipeline'
+import { holdIssues } from './agent-team-issue-mutations'
 import { composeAgentTeamSessionPrompt, projectSpecForRole } from './agent-team-session-prompt'
 import type { AgentTeam, AgentTeamIssue } from './agent-team-types'
 
@@ -160,6 +162,58 @@ describe('agent team pipeline', () => {
     })
     expect(next).toMatchObject({ stepIndex: 0, round: 1, status: 'working' })
     expect(next.body).toContain('Work from develop')
+  })
+})
+
+describe('agent team request changes', () => {
+  const initial = createInitialAgentTeamState(0)
+  const { roles, workflow } = initial
+  const waiting = (reason: 'ready' | 'escalated' | 'blocked', patch: Partial<AgentTeamIssue>) =>
+    issue('i1', { status: 'needs-you', needsYou: { reason, detail: '', at: 1 }, ...patch })
+  const plan = (target: AgentTeamIssue, step?: string) =>
+    planRequestChanges({ issue: target, team, roles, workflow, step })
+
+  it('sends a ready issue back to the Build step with the changes as a new round', () => {
+    const ready = waiting('ready', { stepIndex: 3, body: 'Spec' })
+    expect(plan(ready)).toEqual({ stepIndex: 0, round: 2, overLimit: false })
+    const next = applyAgentTeamUserDecision({
+      issue: ready,
+      team,
+      roles,
+      decision: { kind: 'request-changes', note: 'Bump the version', stepIndex: 0 },
+      now: 2
+    })
+    expect(next).toMatchObject({ status: 'working', stepIndex: 0, round: 2 })
+    expect(next.body).toBe('Spec\n\nRequested changes (round 2):\nBump the version')
+  })
+
+  it('sends an issue escalated at the last Check back to Build and flags the extra round', () => {
+    const escalated = waiting('escalated', { stepIndex: 2, round: 3 })
+    expect(plan(escalated)).toEqual({ stepIndex: 0, round: 4, overLimit: true })
+  })
+
+  it('refuses an issue that is already in a Build step', () => {
+    expect(() => plan(waiting('blocked', { stepIndex: 0 }))).toThrow(
+      'already in the Build step Develop'
+    )
+  })
+
+  it('only takes a Build step before the current one with --step', () => {
+    const blocked = waiting('blocked', { stepIndex: 2 })
+    expect(plan(blocked, 'develop').stepIndex).toBe(0)
+    expect(() => plan(blocked, 'QA')).toThrow('is a Check')
+  })
+})
+
+describe('agent team hold', () => {
+  it('moves a started issue to Not approved keeping its step, round, branch and history', () => {
+    const state = { ...createInitialAgentTeamState(0), teams: [team] }
+    const running = started('i1', 'qa', { stepIndex: 1, round: 2, worktreeId: 'wt-1' })
+    const held = holdIssues({ ...state, issues: [running] }, ['i1'], 9).issues[0]
+    expect(held).toMatchObject({ status: 'registered', stepIndex: 1, round: 2, worktreeId: 'wt-1' })
+    expect(held.assignments[0]).toMatchObject({ stopReason: 'cancelled', endedAt: 9 })
+    const ready = issue('i2', { status: 'needs-you', stepIndex: 3 })
+    expect(() => holdIssues({ ...state, issues: [ready] }, ['i2'], 9)).toThrow('passed every step')
   })
 })
 

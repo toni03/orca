@@ -62,6 +62,14 @@ export const AgentTeamIssueAnswerParams = z.object({
   text: requiredString('Missing --text')
 })
 
+/** Sends an issue waiting after a Check back to a Build step, like Request changes in the board. */
+export const AgentTeamIssueRequestChangesParams = z.object({
+  issueId: requiredString('Missing --issue'),
+  text: requiredString('Missing --text'),
+  /** A Build step of the issue's team by name or id; defaults to the closest one before. */
+  step: z.string().trim().min(1).optional()
+})
+
 /** Issues that move between Not approved and the queue together. */
 export const AgentTeamIssueIdsParams = z.object({
   issueIds: z.array(z.string().trim().min(1)).min(1, 'Pass --issue <issueId>')

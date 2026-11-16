@@ -20,7 +20,7 @@ const TEAM_FLAG_HELP: Record<string, string> = {
   findings: line('--findings <file>', 'JSON file with the review findings'),
   status: line('--status <status>', 'Only issues in this state'),
   issue: line('--issue <issueId>', 'Issue by Orca id or tracker key (#48, API-128)'),
-  text: line('--text <answer>', 'Answer for the step that waits for you'),
+  text: line('--text <text>', 'Your answer, or the changes the Build step must make'),
   title: line('--title <text>', 'Issue title'),
   body: line('--body <text>', 'Issue description'),
   criterion: line('--criterion <text>', 'Acceptance criterion; repeat for several'),

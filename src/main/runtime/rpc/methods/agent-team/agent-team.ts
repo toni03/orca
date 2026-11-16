@@ -6,6 +6,7 @@ import {
   AgentTeamIssueDecideParams,
   AgentTeamIssueIdsParams,
   AgentTeamIssueListParams,
+  AgentTeamIssueRequestChangesParams,
   AgentTeamIssueUpdateParams,
   AgentTeamReportParams,
   AgentTeamSeatPauseParams
@@ -14,6 +15,7 @@ import type {
   AgentTeamState,
   AgentTeamStepResult
 } from '../../../../../shared/agent-team/agent-team-types'
+import { planRequestChanges } from '../../../../../shared/agent-team/agent-team-pipeline'
 import { describeWaiting } from '../../../../../shared/agent-team/agent-team-wait-reason'
 import { requireAgentTeamService } from '../../../../agent-team/agent-team-service-registry'
 
@@ -103,6 +105,41 @@ export const AGENT_TEAM_METHODS = [
         decision: { kind: 'answer', note: params.text }
       })
       return { answered: true }
+    }
+  }),
+  defineMethod({
+    name: 'team.issueRequestChanges',
+    permission: 'workspace',
+    params: AgentTeamIssueRequestChangesParams,
+    handler: (params) => {
+      const service = requireAgentTeamService()
+      const state = service.getState()
+      const issueId = resolveIssueId(state, params.issueId)
+      const issue = state.issues.find((candidate) => candidate.id === issueId)
+      const team = state.teams.find((candidate) => candidate.id === issue?.teamId)
+      if (!issue || !team) {
+        throw new Error(`No issue ${params.issueId}.`)
+      }
+      const plan = planRequestChanges({
+        issue,
+        team,
+        roles: state.roles,
+        workflow: state.workflow,
+        step: params.step
+      })
+      service.execute({
+        kind: 'issue.decide',
+        issueId,
+        decision: { kind: 'request-changes', note: params.text, stepIndex: plan.stepIndex }
+      })
+      return {
+        issueId,
+        key: issue.tracker?.key ?? null,
+        step: team.steps[plan.stepIndex]?.name ?? null,
+        round: plan.round,
+        roundsPerIssue: state.workflow.roundsPerIssue,
+        overLimit: plan.overLimit
+      }
     }
   }),
   defineMethod({

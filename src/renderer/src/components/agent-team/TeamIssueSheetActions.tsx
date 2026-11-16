@@ -170,6 +170,10 @@ export function TeamIssueActions({
     return null
   }
   const running = openAssignment(issue) !== undefined
+  const stepCount = state.teams.find((team) => team.id === issue.teamId)?.steps.length ?? 0
+  // A started issue keeps its step, branch and worktree; one that passed every step is finished instead.
+  const holdable =
+    issue.status === 'queued' || (issue.status !== 'registered' && issue.stepIndex < stepCount)
   const candidates = state.issues.filter(
     (other) => other.id !== issue.id && other.status !== 'discarded'
   )
@@ -188,7 +192,7 @@ export function TeamIssueActions({
           {translate('auto.components.agentTeam.TeamIssueCard.approve', 'Approve')}
         </Button>
       ) : null}
-      {issue.status === 'queued' ? (
+      {holdable ? (
         <Button
           size="xs"
           variant="outline"

@@ -27,6 +27,27 @@ async function readFindings(path: string, cwd: string): Promise<unknown> {
   }
 }
 
+type RequestChangesReply = {
+  issueId: string
+  key: string | null
+  step: string | null
+  round: number
+  roundsPerIssue: number
+  overLimit: boolean
+}
+
+function formatRequestChanges(reply: RequestChangesReply): string {
+  const lines = [
+    `Changes requested. ${reply.key ?? reply.issueId} returns to ${reply.step ?? 'its Build step'} (round ${reply.round}/${reply.roundsPerIssue}).`
+  ]
+  if (reply.overLimit) {
+    lines.push(
+      `Warning: round ${reply.round} goes past the ${reply.roundsPerIssue} rounds per issue; tell the user the issue keeps bouncing between Build and Check.`
+    )
+  }
+  return lines.join('\n')
+}
+
 type IssueListReply = {
   issues: AgentTeamIssue[]
   teams: { id: string; name: string }[]
@@ -149,6 +170,15 @@ export const TEAM_HANDLERS: Record<string, CommandHandler> = {
       text: getRequiredStringFlag(flags, 'text')
     })
     printResult(response, json, () => 'Answered. The step continues with your answer.')
+  },
+  'team issue request-changes': async ({ flags, client, json }) => {
+    const step = getOptionalStringFlag(flags, 'step')
+    const response = await client.call<RequestChangesReply>('team.issueRequestChanges', {
+      issueId: getRequiredStringFlag(flags, 'issue'),
+      text: getRequiredStringFlag(flags, 'text'),
+      ...(step ? { step } : {})
+    })
+    printResult(response, json, formatRequestChanges)
   },
   'team issue approve': async ({ flags, client, json }) => {
     const response = await client.call<{ issues: AgentTeamIssue[] }>('team.issueApprove', {

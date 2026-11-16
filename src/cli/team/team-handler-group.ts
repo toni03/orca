@@ -7,6 +7,7 @@ export const TEAM_HANDLER_GROUP: HandlerGroup = {
     'team report',
     'team issues',
     'team issue answer',
+    'team issue request-changes',
     'team issue add',
     'team issue approve',
     'team issue hold',
