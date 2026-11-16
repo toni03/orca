@@ -11,6 +11,7 @@ import {
 } from '../../shared/agent-team/agent-team-project-groups'
 import { projectTracker } from '../../shared/agent-team/agent-team-project-tracker'
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
+import { describeWaiting } from '../../shared/agent-team/agent-team-wait-reason'
 import type { TuiAgent } from '../../shared/agent-launch/catalog/tui-agent'
 import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
@@ -35,6 +36,7 @@ export async function buildAgentTeamContext(
         repo.id !== state.managerRepoId && !runtimePathsEqual(repo.path, agentTeamManagerFolder())
     )
   // A group's other repos are not projects of their own: their issues belong to the tracker repo.
+  const waiting = describeWaiting(state)
   const projectRepos = teamRepos.filter((repo) => teamProjectRepoId(state, repo.id) === repo.id)
   const projects = await Promise.all(
     projectRepos.map(async (repo) => {
@@ -90,9 +92,11 @@ export async function buildAgentTeamContext(
       .map((issue) => ({
         id: issue.id,
         repoId: issue.repoId,
+        teamId: issue.teamId,
         title: issue.title,
         status: issue.status,
-        key: issue.tracker?.key ?? null
+        key: issue.tracker?.key ?? null,
+        waiting: waiting[issue.id] ?? null
       }))
   }
 }

@@ -20108,7 +20108,6 @@
           "waitPausedAll": "Waiting · all teams paused",
           "waitPaused": "Waiting · team paused",
           "waitDependency": "Waiting · after {{key}}",
-          "waitLocked": "Waiting · project locked by {{key}}",
           "waitSeat": "Waiting · no free seat",
           "waitNoSeat": "Waiting · this step has no seats",
           "waitTeam": "Waiting · its team or step was removed",
@@ -20122,7 +20121,9 @@
           "statusNeedsYou": "Needs you · {{reason}}",
           "statusDone": "Done",
           "statusDiscarded": "Discarded",
-          "waitPlanLimit": "Waiting · the seats of this step are out of plan until it resets"
+          "waitPlanLimit": "Waiting · the seats of this step are out of plan until it resets",
+          "waitTeamLocked": "Waiting for {{key}} ({{team}}) · it holds this team",
+          "waitProjectLocked": "Waiting for {{key}} ({{team}}) · it locks the project"
         },
         "TeamActivity": {
           "done": "Done",
@@ -20209,7 +20210,8 @@
           "openMergeRequest": "Open the merge request",
           "escalated": "Escalated · {{round}}/{{rounds}}",
           "readyToMerge": "Ready to merge",
-          "openPullRequest": "Open the pull request"
+          "openPullRequest": "Open the pull request",
+          "exclusiveTeam": "Locks team"
         },
         "TeamManagerPanel": {
           "title": "Manager",
@@ -20238,12 +20240,15 @@
           "criteria": "Acceptance criteria, one per line",
           "trackerKey": "Tracker key (optional)",
           "trackerKeyPlaceholder": "#212 or API-128",
-          "exclusive": "Locks the project",
           "folderExclusiveHint": "Folder project: every issue locks it, because all steps work in the same folder.",
-          "exclusiveHint": "For refactors or upgrades: no other issue of this project runs beside it.",
           "approved": "Approve now",
           "cancel": "Cancel",
-          "create": "Add issue"
+          "create": "Add issue",
+          "scope": "Runs beside",
+          "scopeShared": "Other issues of the project",
+          "scopeTeam": "Only issues of other teams (locks this team)",
+          "scopeProject": "Nothing (locks the whole project)",
+          "scopeHint": "Lock the project for refactors or upgrades. Dependencies always apply across teams."
         },
         "TeamNewTeamDialog": {
           "title": "New team",

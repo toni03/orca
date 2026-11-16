@@ -73,9 +73,9 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
   },
   {
     path: ['team', 'issue', 'update'],
-    summary: 'Change the title, description, criteria or dependencies of an issue',
+    summary: 'Change the title, description, criteria, dependencies or exclusivity of an issue',
     usage:
-      'orca team issue update --issue <issueId> [--title <text>] [--body <text>] [--criterion <text>]... [--depends-on <issueId>]... [--no-dependencies] [--json]',
+      'orca team issue update --issue <issueId> [--title <text>] [--body <text>] [--criterion <text>]... [--depends-on <issueId>]... [--no-dependencies] [--exclusive | --exclusive-team | --shared] [--json]',
     allowedFlags: [
       ...GLOBAL_FLAGS,
       'issue',
@@ -83,13 +83,20 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
       'body',
       'criterion',
       'depends-on',
-      'no-dependencies'
+      'no-dependencies',
+      'exclusive',
+      'exclusive-team',
+      'shared'
     ],
     repeatableFlags: ['criterion', 'depends-on'],
     notes: [
-      '--criterion and --depends-on replace the whole list; --no-dependencies clears the dependencies.'
+      '--criterion and --depends-on replace the whole list; --no-dependencies clears the dependencies.',
+      '--exclusive locks the whole project, --exclusive-team only the queue of its own team, --shared neither. Folder projects stay exclusive.'
     ],
-    examples: ['orca team issue update --issue #48 --no-dependencies']
+    examples: [
+      'orca team issue update --issue #48 --no-dependencies',
+      'orca team issue update --issue #49 --exclusive-team'
+    ]
   },
   {
     path: ['team', 'issue', 'discard'],
@@ -125,7 +132,7 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
     path: ['team', 'issue', 'add'],
     summary: 'Add an issue to the agent team',
     usage:
-      'orca team issue add --repo <repoId> --team <teamId> --title <text> [--body <text>] [--criterion <text>]... [--exclusive] [--depends-on <issueId>]... [--tracker-key <key>] [--tracker-url <url>] [--approved] [--json]',
+      'orca team issue add --repo <repoId> --team <teamId> --title <text> [--body <text>] [--criterion <text>]... [--exclusive | --exclusive-team] [--depends-on <issueId>]... [--tracker-key <key>] [--tracker-url <url>] [--approved] [--json]',
     allowedFlags: [
       ...GLOBAL_FLAGS,
       'repo',
@@ -134,6 +141,7 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
       'body',
       'criterion',
       'exclusive',
+      'exclusive-team',
       'depends-on',
       'tracker-key',
       'tracker-url',
@@ -142,7 +150,8 @@ export const TEAM_COMMAND_SPECS: CommandSpec[] = [
     repeatableFlags: ['criterion', 'depends-on'],
     notes: [
       'Without --approved the issue is registered and waits for approval in the Team view.',
-      '--exclusive keeps other issues of the project from running beside it (refactors, upgrades).'
+      '--exclusive keeps every other issue of the project, of any team, from running beside it (refactors, upgrades).',
+      '--exclusive-team only holds the queue of its own team; other teams of the project keep working. Dependencies always cross teams.'
     ]
   },
   {

@@ -18849,7 +18849,6 @@
           "failed": "Detenida",
           "waitPaused": "En espera · equipo en pausa",
           "waitDependency": "En espera · después de {{key}}",
-          "waitLocked": "En espera · proyecto bloqueado por {{key}}",
           "waitSeat": "En espera · no hay puestos libres",
           "waitNoSeat": "En espera · este paso no tiene puestos",
           "waitTeam": "En espera · se eliminó su equipo o paso",
@@ -18864,7 +18863,9 @@
           "statusNeedsYou": "Te necesita · {{reason}}",
           "statusDone": "Hecha",
           "statusDiscarded": "Descartada",
-          "waitPlanLimit": "En espera · los sitios de este paso agotaron su plan hasta que se reinicie"
+          "waitPlanLimit": "En espera · los sitios de este paso agotaron su plan hasta que se reinicie",
+          "waitTeamLocked": "Esperando a {{key}} ({{team}}) · ocupa este equipo",
+          "waitProjectLocked": "Esperando a {{key}} ({{team}}) · bloquea el proyecto"
         },
         "TeamActivity": {
           "done": "Hecha",
@@ -18951,7 +18952,8 @@
           "openMergeRequest": "Abrir la merge request",
           "escalated": "Escalada · {{round}}/{{rounds}}",
           "readyToMerge": "Lista para fusionar",
-          "openPullRequest": "Abrir la pull request"
+          "openPullRequest": "Abrir la pull request",
+          "exclusiveTeam": "Bloquea el equipo"
         },
         "TeamNewIssueDialog": {
           "title": "Nueva issue",
@@ -18963,12 +18965,15 @@
           "criteria": "Criterios de aceptación, uno por línea",
           "trackerKey": "Clave en el gestor de tareas (opcional)",
           "trackerKeyPlaceholder": "#212 o API-128",
-          "exclusive": "Bloquea el proyecto",
-          "exclusiveHint": "Para refactorizaciones o actualizaciones: ninguna otra issue de este proyecto se ejecuta a la vez.",
           "approved": "Aprobar ya",
           "cancel": "Cancelar",
           "create": "Añadir issue",
-          "folderExclusiveHint": "Proyecto de carpeta: cada issue lo bloquea, porque todos los pasos trabajan en la misma carpeta."
+          "folderExclusiveHint": "Proyecto de carpeta: cada issue lo bloquea, porque todos los pasos trabajan en la misma carpeta.",
+          "scope": "Se ejecuta junto a",
+          "scopeShared": "Otras issues del proyecto",
+          "scopeTeam": "Solo issues de otros equipos (bloquea este equipo)",
+          "scopeProject": "Nada (bloquea todo el proyecto)",
+          "scopeHint": "Bloquea el proyecto para refactorizaciones o actualizaciones. Las dependencias se aplican siempre entre equipos."
         },
         "TeamNewTeamDialog": {
           "title": "Nuevo equipo",

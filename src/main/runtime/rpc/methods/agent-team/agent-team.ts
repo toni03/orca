@@ -14,6 +14,7 @@ import type {
   AgentTeamState,
   AgentTeamStepResult
 } from '../../../../../shared/agent-team/agent-team-types'
+import { describeWaiting } from '../../../../../shared/agent-team/agent-team-wait-reason'
 import { requireAgentTeamService } from '../../../../agent-team/agent-team-service-registry'
 
 /** An issue by its Orca id or, when unambiguous, its tracker key (`#48`, `API-128`). */
@@ -152,8 +153,10 @@ export const AGENT_TEAM_METHODS = [
     handler: (params) => {
       const service = requireAgentTeamService()
       const state = service.getState()
+      const issues = state.issues.filter((issue) => !params.status || issue.status === params.status)
       return {
-        issues: state.issues.filter((issue) => !params.status || issue.status === params.status),
+        issues,
+        waiting: describeWaiting(state, issues),
         teams: state.teams.map((team) => ({ id: team.id, name: team.name })),
         seats: state.seats.map((seat) => ({ id: seat.id, name: seat.name })),
         projects: service.projectLabels()
@@ -196,6 +199,7 @@ export const AGENT_TEAM_METHODS = [
         ...(params.title !== undefined ? { title: params.title } : {}),
         ...(params.body !== undefined ? { body: params.body } : {}),
         ...(params.criteria ? { criteria: params.criteria } : {}),
+        ...(params.scope ? { scope: params.scope } : {}),
         ...(params.dependsOn
           ? { dependsOn: params.dependsOn.map((ref) => resolveIssueId(current, ref)) }
           : {})
