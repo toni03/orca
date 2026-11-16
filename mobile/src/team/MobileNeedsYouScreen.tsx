@@ -9,9 +9,9 @@ import { firstParam } from '../navigation/route-param-reader'
 import { useRouteHandoff } from '../navigation/route-handoff'
 import { useHostClient } from '../transport/connection/host-client-hooks'
 import { colors, pressedStyle } from '../theme/mobile-theme'
-import { MobileSegmentedControl } from '../components/MobileSegmentedControl'
+import { MobileSegmentedControl } from '../components/controls/MobileSegmentedControl'
 import { TextField } from '../components/composer-input/TextField'
-import { openExternalLink } from '../platform/external-link'
+import { openExternalLink } from '../platform/external-links/external-link'
 import { useTeamNeedsYou } from './use-team-needs-you'
 import type {
   TeamNeedsYouDecision,
