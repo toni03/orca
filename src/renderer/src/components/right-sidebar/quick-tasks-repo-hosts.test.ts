@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Repo } from '../../../../shared/repo-types'
+import type { Repo } from '../../../../shared/repository/repo-types'
 import { getQuickTasksRepoHost, splitQuickTasksReposByHost } from './quick-tasks-repo-hosts'
 
 function repo(id: string, remoteUrl?: string): Repo {

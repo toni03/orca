@@ -1,4 +1,4 @@
-import { isForkReleaseVersion } from './release-distribution'
+import { isForkReleaseVersion } from '../../release-distribution'
 
 type ParsedVersion = {
   core: [number, number, number]

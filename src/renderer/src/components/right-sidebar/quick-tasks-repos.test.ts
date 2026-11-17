@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Repo } from '../../../../shared/repo-types'
+import type { Repo } from '../../../../shared/repository/repo-types'
 import { getQuickTasksRepos } from './quick-tasks-repos'
 
 function repo(id: string, overrides: Partial<Repo> = {}): Repo {

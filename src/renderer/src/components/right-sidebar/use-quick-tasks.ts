@@ -9,12 +9,12 @@ import {
   gitLabTaskRepoSelector
 } from '@/components/task-page/gitlab/use-task-page-gitlab-loading'
 import { getTaskPresetQuery } from '../../../../shared/work-items/task-preset-query'
-import { mapSettledWithConcurrency } from '../../../../shared/map-with-concurrency'
+import { mapSettledWithConcurrency } from '../../../../shared/concurrency/map-with-concurrency'
 import type { GitHubWorkItem } from '../../../../shared/github/work-items/work-item-types'
-import type { GitLabWorkItem } from '../../../../shared/gitlab-types'
+import type { GitLabWorkItem } from '../../../../shared/gitlab/gitlab-types'
 import type { JiraIssue } from '../../../../shared/jira/jira-types'
-import type { Repo } from '../../../../shared/repo-types'
-import { getRepoExecutionHostId } from '../../../../shared/execution-host'
+import type { Repo } from '../../../../shared/repository/repo-types'
+import { getRepoExecutionHostId } from '../../../../shared/execution-host/execution-host'
 import { getQuickTasksRepoHost, splitQuickTasksReposByHost } from './quick-tasks-repo-hosts'
 
 const QUICK_TASKS_DISPLAY_LIMIT = 50

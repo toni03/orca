@@ -1,5 +1,5 @@
-import { isGitHubBackedRepo } from '../../../../shared/project-host-setup-projection'
-import type { Repo } from '../../../../shared/repo-types'
+import { isGitHubBackedRepo } from '../../../../shared/project/host-setup/project-host-setup-projection'
+import type { Repo } from '../../../../shared/repository/repo-types'
 import { parseRemoteRepo } from './source-control/review/remote-repo'
 
 /** `unknown` covers remote-less repos and self-hosted forges whose host name gives no hint. */

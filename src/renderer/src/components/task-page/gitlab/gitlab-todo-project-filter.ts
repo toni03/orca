@@ -1,6 +1,6 @@
 import { splitGitRemoteKey } from '../../../../../shared/git/remotes/git-remote-identity'
-import type { GitLabTodo } from '../../../../../shared/gitlab-types'
-import type { Repo } from '../../../../../shared/repo-types'
+import type { GitLabTodo } from '../../../../../shared/gitlab/gitlab-types'
+import type { Repo } from '../../../../../shared/repository/repo-types'
 
 /**
  * GitLab todos are user-scoped, so narrow them to the selected repos' projects.

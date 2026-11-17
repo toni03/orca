@@ -1,9 +1,9 @@
 import type { FolderWorkspace } from '../../../../shared/folder-workspaces/folder-workspace-types'
-import type { ProjectGroup } from '../../../../shared/project-group-types'
-import { getProjectGroupSubtreeIds } from '../../../../shared/project-groups'
-import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { Repo } from '../../../../shared/repo-types'
-import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
+import type { ProjectGroup } from '../../../../shared/project/groups/project-group-types'
+import { getProjectGroupSubtreeIds } from '../../../../shared/project/groups/project-groups'
+import { isGitRepoKind } from '../../../../shared/repository/repo-kind'
+import type { Repo } from '../../../../shared/repository/repo-types'
+import { parseWorkspaceKey } from '../../../../shared/workspace/identity/workspace-scope'
 
 /** Git repos whose tasks the quick panel lists: the active repo, or every repo of a folder workspace's group. */
 export function getQuickTasksRepos({

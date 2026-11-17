@@ -16,7 +16,7 @@ import { getLocalProjectRuntimeWorkspace } from '../wsl/local-project-runtime-wo
 import { getActiveWorkspaceOwnerTarget } from '../../../lib/workspace/ownership/resolved-worktree-execution-host'
 import { getEnvironmentRuntimeContextKey } from '../observations/provider-runtime-context'
 import { getRendererAppPlatform } from '../../../app-shell/platform/renderer-app-platform'
-import type { RuntimeClientTarget } from '../../../../../shared/runtime-client-target'
+import type { RuntimeClientTarget } from '../../../../../shared/remote-runtime/host-catalog/runtime-client-target'
 import {
   getProjectRuntimePreflightContext,
   getCachedLocalProjectRuntimeWslContext,
