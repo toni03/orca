@@ -12,4 +12,4 @@ declare const ORCA_BUILD_COMMIT: string
 
 // ORCA_RELEASE_REPOSITORY and ORCA_RELEASE_VERSION_TAG are declared and read in src/shared/release-distribution.ts.
 
-// ORCA_LAYOUT_OWNER is declared and read in one place: src/shared/layout-owner-switch.ts.
+// ORCA_LAYOUT_OWNER is declared and read in one place: src/shared/workspace-layout/layout-owner-switch.ts.
