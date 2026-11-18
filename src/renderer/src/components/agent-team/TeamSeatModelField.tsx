@@ -6,7 +6,7 @@ import { AgentChoiceControls } from '@/components/agent/launch-settings/AgentCho
 import { useAgentSettingsModelCatalog } from '@/components/agent/launch-settings/use-agent-settings-model-catalog'
 import { sourceControlActionAgentPicksModel } from '../../../../shared/source-control/ai/recipes/source-control-action-options'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
-import type { RuntimeClientTarget } from '../../../../shared/runtime-client-target'
+import type { RuntimeClientTarget } from '../../../../shared/remote-runtime/host-catalog/runtime-client-target'
 import type { AgentSessionModelCatalogResult } from '../../../../shared/agent-session/agent-session-wire'
 
 // Team seats run on this computer, so its CLIs and accounts list the models.

@@ -1,4 +1,4 @@
-import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
+import CommentMarkdown from '@/components/comment-markdown/CommentMarkdown'
 import type { AgentTeamIssue } from '../../../../shared/agent-team/agent-team-types'
 
 /** The issue text in a frame; GitHub and GitLab write Markdown, so it renders as such. */

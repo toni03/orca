@@ -2,7 +2,7 @@ import {
   agentsAtPlanLimit,
   updateLimitPauses
 } from '../../shared/agent-team/agent-team-plan-limits'
-import type { RateLimitState } from '../../shared/rate-limit-types'
+import type { RateLimitState } from '../../shared/agent-usage/rate-limits/rate-limit-types'
 import type { RateLimitService } from '../rate-limits/service/rate-limit-service'
 import type { AgentTeamStore } from './agent-team-store'
 

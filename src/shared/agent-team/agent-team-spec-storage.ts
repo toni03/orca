@@ -1,4 +1,4 @@
-import type { Repo } from '../repo-types'
+import type { Repo } from '../repository/repo-types'
 import { getRepoRoutingConnectionId } from '../execution-host'
 import type { AgentTeamProject, AgentTeamProjectSpecStorage } from './agent-team-types'
 

@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { AgentTeamProject, AgentTeamSeat } from '../../shared/agent-team/agent-team-types'
-import type { AgentLaunchPreferences } from '../../shared/agent-session/agent-session-host-authority'
+import type { AgentLaunchPreferences } from '../../shared/agent-session/lifecycle/operations/agent-session-host-authority'
 import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import { effectiveProjectSpecStorage } from '../../shared/agent-team/agent-team-spec-storage'

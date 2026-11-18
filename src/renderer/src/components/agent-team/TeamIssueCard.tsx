@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/class-names'
 import { openAssignment, stepRole } from '../../../../shared/agent-team/agent-team-pipeline'
 import type { AgentTeamWaitReason } from '../../../../shared/agent-team/agent-team-scheduler'
-import type { Repo } from '../../../../shared/repo-types'
+import type { Repo } from '../../../../shared/repository/repo-types'
 import type { AgentTeamIssue, AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 import {
   formatDuration,

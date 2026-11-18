@@ -1,4 +1,4 @@
-import { getAppEnvironment, hasAppEnvironment } from '../../shared/app-environment'
+import { getAppEnvironment, hasAppEnvironment } from '../../shared/app-lifecycle/app-environment'
 import { prependOrcaCliDirToChildPath } from '../cli/launchers/orca-cli-child-path'
 
 /** This app's own CLI launcher; agent CLIs may rebuild PATH and reach another Orca install. */

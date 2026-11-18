@@ -10,7 +10,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useTaskSourceProviderReadiness } from '@/components/settings/tasks/use-task-source-provider-readiness'
 import type { AgentTeamProject } from '../../../../shared/agent-team/agent-team-types'
-import type { Repo } from '../../../../shared/repo-types'
+import type { Repo } from '../../../../shared/repository/repo-types'
 import { TASK_PROVIDERS } from '../../../../shared/work-items/task-providers'
 import { getRepoRoutingConnectionId } from '../../../../shared/execution-host'
 import { effectiveProjectSpecStorage } from '../../../../shared/agent-team/agent-team-spec-storage'
