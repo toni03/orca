@@ -1,4 +1,8 @@
-import type { ProviderRateLimits, RateLimitState, RateLimitWindow } from '../agent-usage/rate-limits/rate-limit-types'
+import type {
+  ProviderRateLimits,
+  RateLimitState,
+  RateLimitWindow
+} from '../agent-usage/rate-limits/rate-limit-types'
 import type { TuiAgent } from '../agent-launch/catalog/tui-agent'
 import type { AgentTeamLimitPause, AgentTeamState } from './agent-team-types'
 
