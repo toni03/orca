@@ -1,5 +1,5 @@
 import type { Repo } from '../repository/repo-types'
-import { getRepoRoutingConnectionId } from '../execution-host'
+import { getRepoRoutingConnectionId } from '../execution-host/execution-host'
 import type { AgentTeamProject, AgentTeamProjectSpecStorage } from './agent-team-types'
 
 /** Remote checkouts are not readable from this computer, so their spec always lives locally. */

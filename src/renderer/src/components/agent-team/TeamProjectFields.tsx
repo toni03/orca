@@ -12,7 +12,7 @@ import { useTaskSourceProviderReadiness } from '@/components/settings/tasks/use-
 import type { AgentTeamProject } from '../../../../shared/agent-team/agent-team-types'
 import type { Repo } from '../../../../shared/repository/repo-types'
 import { TASK_PROVIDERS } from '../../../../shared/work-items/task-providers'
-import { getRepoRoutingConnectionId } from '../../../../shared/execution-host'
+import { getRepoRoutingConnectionId } from '../../../../shared/execution-host/execution-host'
 import { effectiveProjectSpecStorage } from '../../../../shared/agent-team/agent-team-spec-storage'
 import {
   projectTracker,
