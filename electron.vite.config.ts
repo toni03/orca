@@ -18,28 +18,15 @@ import { createViteCacheRetentionPlugin } from './config/build-plugins/vite-cach
 import { MAIN_BUILD_ENTRY_POINTS } from './config/build-plugins/main-build-entry-points'
 import { createPlainNodeEntryGuardPlugin } from './config/build-plugins/plain-node-entry-guard'
 import { createDevServeConfig } from './config/build-plugins/dev-serve-config'
+import {
+  ignoreIneffectiveDynamicImport,
+  RENDERER_CHUNK_SIZE_WARNING_LIMIT_KB
+} from './config/build-plugins/rollup-warning-filter'
 import { reactPluginOptions } from './config/build-plugins/react-compiler'
+import { BUILD_DEFINES } from './config/build-plugins/build-defines'
+import { BUNDLED_MAIN_DEPENDENCIES } from './config/build-plugins/bundled-main-dependencies'
 import { resolveBuildSourceCommit } from './config/scripts/build-identity/build-source-commit.mjs'
 
-const BUNDLED_MAIN_DEPENDENCIES = new Set([
-  'stream-json',
-  'stream-chain',
-  '@xterm/headless',
-  '@xterm/addon-serialize',
-  'tldts',
-  'smol-toml',
-  'yaml',
-  'fflate',
-  'mime-types',
-  'mime-db',
-  // Linear save confirmation; bundled like orcad so packaging needs no extra node_modules.
-  'unified',
-  'remark-parse',
-  'remark-gfm',
-  'hast-util-from-html-isomorphic',
-  // Windows NSIS copies app.asar before external resources; bootstrap must not race resources/node_modules.
-  'zod'
-])
 // Official CI alone injects ORCA_BUILD_IDENTITY (stable|rc) and ORCA_POSTHOG_WRITE_KEY secrets; other builds substitute literal null.
 // Compile-time substitution gates telemetry at module load without runtime env fallback; declarations live in src/types/build-constants.d.ts.
 const orcaBuildIdentity = process.env.ORCA_BUILD_IDENTITY
@@ -62,7 +49,6 @@ const darkBuildSwitches: {
   darkBuildDefines: () => Record<string, string>
   darkBuildMarkers: () => { fileName: string; text: string }[]
 } = createRequire(import.meta.url)('./config/dark-build-switches.cjs')
-const DARK_BUILD_DEFINES = darkBuildSwitches.darkBuildDefines()
 
 /** Marks a dark switched-on main build so packaging refuses it. */
 function createDarkBuildMarkerPlugin(): Plugin {
@@ -78,10 +64,6 @@ function createDarkBuildMarkerPlugin(): Plugin {
 
 // Pin official skill installs to the bundled commit on every channel; main installs, renderer prints the command.
 const ORCA_BUILD_COMMIT_LITERAL = JSON.stringify(resolveBuildSourceCommit())
-// The updater reads releases from the repository the build was published to (forks set it).
-const RELEASE_DISTRIBUTION_DEFINES = createRequire(import.meta.url)(
-  './config/release-distribution.cjs'
-).resolveReleaseDistributionDefines()
 
 function createStartupDiagnosticsBanner(chunkName: string): string {
   return `
@@ -231,6 +213,7 @@ export const electronViteConfig: UserConfig = {
       },
       rollupOptions: {
         input: MAIN_BUILD_ENTRY_POINTS,
+        onwarn: ignoreIneffectiveDynamicImport,
         // CLI builds replace exported entries; keep their internals separate without moving startup paths.
         preserveEntrySignatures: 'exports-only',
         // Electron and sidecar launchers require stable CommonJS paths despite Rolldown’s SSR ESM default.
@@ -256,8 +239,7 @@ export const electronViteConfig: UserConfig = {
       ORCA_POSTHOG_WRITE_KEY: ORCA_POSTHOG_WRITE_KEY_LITERAL,
       ORCA_DIAGNOSTICS_TOKEN_URL: ORCA_DIAGNOSTICS_TOKEN_URL_LITERAL,
       ORCA_BUILD_COMMIT: ORCA_BUILD_COMMIT_LITERAL,
-      ...RELEASE_DISTRIBUTION_DEFINES,
-      ...DARK_BUILD_DEFINES
+      ...BUILD_DEFINES
     },
     // @xterm/headless declares exports:null; point Vite directly at its published CJS main to permit inlining.
     resolve: {
@@ -280,8 +262,7 @@ export const electronViteConfig: UserConfig = {
     cacheDir: resolve('.cache/vite/renderer'),
     define: {
       ORCA_BUILD_COMMIT: ORCA_BUILD_COMMIT_LITERAL,
-      ...RELEASE_DISTRIBUTION_DEFINES,
-      ...DARK_BUILD_DEFINES
+      ...BUILD_DEFINES
     },
     resolve: {
       alias: {
@@ -305,6 +286,7 @@ export const electronViteConfig: UserConfig = {
     build: {
       manifest: true,
       reportCompressedSize: false,
+      chunkSizeWarningLimit: RENDERER_CHUNK_SIZE_WARNING_LIMIT_KB,
       modulePreload: { polyfill: true },
       minify: 'oxc',
       target: 'es2020',
@@ -312,6 +294,7 @@ export const electronViteConfig: UserConfig = {
       rollupOptions: {
         // Shared chunks must not import HTML entries that mount another React root.
         preserveEntrySignatures: 'strict',
+        onwarn: ignoreIneffectiveDynamicImport,
         output: { charset: 'ascii' },
         input: {
           index: resolve('src/renderer/index.html'),

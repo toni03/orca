@@ -1,5 +1,6 @@
-import { translate } from '@/i18n/i18n'
+import { getIntlLocale, translate } from '@/i18n/i18n'
 import {
+  continueNativeChatToolRunClause,
   nativeChatToolRunSentence as sharedRunSentence,
   type NativeChatToolRunSentenceWords
 } from '../../../../../../shared/native-chat/tools/native-chat-tool-run-sentence'
@@ -149,6 +150,7 @@ function liveClause(category: NativeChatToolCategory, count: number): string {
 }
 
 const LOCALIZED_WORDS: NativeChatToolRunSentenceWords = {
+  continuation: (text) => continueNativeChatToolRunClause(text, getIntlLocale()),
   clause,
   teamClause,
   pair: (first, second) =>

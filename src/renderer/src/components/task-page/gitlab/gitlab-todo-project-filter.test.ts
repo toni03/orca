@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { GitLabTodo } from '../../../../../shared/gitlab-types'
+import type { GitLabTodo } from '../../../../../shared/gitlab/gitlab-types'
 import { filterGitLabTodosForRepos } from './gitlab-todo-project-filter'
 
 function todo(id: number, projectPath: string): GitLabTodo {

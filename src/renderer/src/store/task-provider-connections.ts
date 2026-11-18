@@ -7,9 +7,9 @@ import { localPreflightContextKey } from '@/runtime/hosts/preflight/local-prefli
 import { getProviderRuntimeContextKey } from '@/runtime/hosts/observations/provider-runtime-context'
 import { getTaskPageRepoSourceContext } from '@/lib/work-items/task-repo-source-context'
 import { taskSourceRuntimeTarget } from '@/lib/work-items/task-source-runtime-target'
-import { isGitRepoKind } from '../../../shared/repo-kind'
-import type { Repo } from '../../../shared/repo-types'
-import type { RuntimeClientTarget } from '../../../shared/runtime-client-target'
+import { isGitRepoKind } from '../../../shared/repository/repo-kind'
+import type { Repo } from '../../../shared/repository/repo-types'
+import type { RuntimeClientTarget } from '../../../shared/remote-runtime/host-catalog/runtime-client-target'
 import type {
   TaskProviderAvailability,
   TaskProviderConnections
