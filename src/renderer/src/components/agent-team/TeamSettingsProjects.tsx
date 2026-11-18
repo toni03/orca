@@ -13,8 +13,8 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
-import type { ProjectGroup } from '../../../../shared/project-group-types'
-import type { Repo } from '../../../../shared/repo-types'
+import type { ProjectGroup } from '../../../../shared/project/groups/project-group-types'
+import type { Repo } from '../../../../shared/repository/repo-types'
 import { effectiveProjectSpecStorage } from '../../../../shared/agent-team/agent-team-spec-storage'
 import { getFolderSourceRepos } from '../../../../shared/folder-workspaces/folder-workspace-source-repos'
 import { projectTracker } from '../../../../shared/agent-team/agent-team-project-tracker'

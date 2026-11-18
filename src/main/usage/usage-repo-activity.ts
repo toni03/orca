@@ -1,6 +1,6 @@
 import { getLocalUsageDay } from './reporting/range-query/usage-calendar-range'
 
-import type { UsageRepoActivity } from '../../shared/backend-service-contract'
+import type { UsageRepoActivity } from '../../shared/backend/backend-service-contract'
 
 export type { UsageRepoActivity }
 

@@ -5,7 +5,7 @@ import {
   getRuntimeRepoBaseRefDefault,
   searchRuntimeRepoBaseRefs
 } from '@/runtime/source-control/references/runtime-repo-client'
-import type { Repo } from '../../../../shared/repo-types'
+import type { Repo } from '../../../../shared/repository/repo-types'
 import { getRepoExecutionHostId } from '../../../../shared/execution-host'
 import { normalizeHostedReviewBaseRef } from '../../../../shared/source-control/hosted-review/hosted-review-refs'
 import { TeamFieldRow } from './TeamFieldRow'

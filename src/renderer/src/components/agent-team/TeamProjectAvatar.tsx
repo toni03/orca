@@ -1,5 +1,5 @@
 import { cn } from '@/lib/class-names'
-import type { Repo } from '../../../../shared/repo-types'
+import type { Repo } from '../../../../shared/repository/repo-types'
 
 /** Project colour square with its initial, the same colour the sidebar uses for the repo. */
 export function TeamProjectAvatar({

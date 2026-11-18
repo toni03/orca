@@ -1,5 +1,5 @@
 import { splitGitRemoteKey } from '../git/remotes/git-remote-identity'
-import type { Repo } from '../repo-types'
+import type { Repo } from '../repository/repo-types'
 import type { TaskProvider } from '../work-items/task-providers'
 import type { AgentTeamProject } from './agent-team-types'
 

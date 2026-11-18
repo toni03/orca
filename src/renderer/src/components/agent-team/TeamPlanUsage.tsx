@@ -3,7 +3,7 @@ import { useAppStore } from '@/store'
 import { getAgentLabel } from '@/lib/agent-catalog/agent-catalog'
 import { cn } from '@/lib/class-names'
 import type { AgentTeamSeat } from '../../../../shared/agent-team/agent-team-types'
-import type { RateLimitWindow } from '../../../../shared/rate-limit-types'
+import type { RateLimitWindow } from '../../../../shared/agent-usage/rate-limits/rate-limit-types'
 import { agentPlanWindows } from '../../../../shared/agent-team/agent-team-plan-limits'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 

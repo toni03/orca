@@ -8,8 +8,8 @@ import { projectGroupOfRepo } from '../../shared/agent-team/agent-team-project-g
 import { projectTracker } from '../../shared/agent-team/agent-team-project-tracker'
 import { effectiveProjectSpecStorage } from '../../shared/agent-team/agent-team-spec-storage'
 import { getFolderSourceRepos } from '../../shared/folder-workspaces/folder-workspace-source-repos'
-import type { ProjectGroup } from '../../shared/project-group-types'
-import type { Repo } from '../../shared/repo-types'
+import type { ProjectGroup } from '../../shared/project/groups/project-group-types'
+import type { Repo } from '../../shared/repository/repo-types'
 import type { AgentTeamService } from './agent-team-service'
 
 /** One item by its id or, when only one has it, its name (any case). */
