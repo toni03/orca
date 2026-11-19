@@ -5,13 +5,18 @@ import type { AgentStatusEntry } from '../../../../shared/agent-status/contracts
 
 /** The live hook status of a seat session, matched by its runtime terminal handle. */
 export function useSessionStatus(terminalHandle: string | undefined): AgentStatusEntry | undefined {
-  return useAppStore((s) =>
-    terminalHandle
-      ? Object.values(s.agentStatusByPaneKey).find(
-          (entry) => entry.terminalHandle === terminalHandle
-        )
-      : undefined
-  )
+  return useAppStore((s) => {
+    if (!terminalHandle) {
+      return undefined
+    }
+    // A map-like store since v1.4.262: Object.values would read its private fields.
+    for (const entry of s.agentStatusByPaneKey.values()) {
+      if (entry.terminalHandle === terminalHandle) {
+        return entry
+      }
+    }
+    return undefined
+  })
 }
 
 /** What the session is doing now, for example `Edit · src/auth.ts` or `Bash · pnpm test`. */
