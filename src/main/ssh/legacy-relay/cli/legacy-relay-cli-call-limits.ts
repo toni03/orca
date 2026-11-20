@@ -8,7 +8,6 @@ import { isDurableMutation } from '../../../../shared/orchestration/orchestratio
 import type { OrcaRuntimeService } from '../../../runtime/orca-runtime'
 import type { RpcAnyMethodDeclaration } from '../../../runtime/rpc/core'
 import { ALL_RPC_METHODS } from '../../../runtime/rpc/methods/rpc-method-registry'
-import type { RpcAnyMethodDeclaration } from '../../../runtime/rpc/core'
 import {
   hashCanonical,
   readPromptBasePayloadHash,

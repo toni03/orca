@@ -68,6 +68,15 @@ export function installOrcadUsageService(
       const method = `${provider}:getAutomationRunUsage`
       // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: The usage service returns its typed automation result for this provider method.
       return (await usage.invoke(method, input, true)) as AutomationRunUsage
+    },
+    getRepoActivity: async (repoId, from, to) => {
+      const usage = await start()
+      // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: The usage service returns the store's repo activity for this provider method.
+      return (await usage.invoke(
+        `${provider}:getRepoActivity`,
+        { repoId, from, to },
+        true
+      )) as Awaited<ReturnType<AutomationUsageClient['getRepoActivity']>>
     }
   })
   return {
