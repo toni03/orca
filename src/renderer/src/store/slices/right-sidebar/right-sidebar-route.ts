@@ -42,7 +42,11 @@ export function normalizeRightSidebarRoute(
     tab === 'source-control' ||
     tab === 'checks' ||
     tab === 'ports' ||
-    tab === 'tasks'
+    tab === 'tasks' ||
+    tab === 'bot-activity' ||
+    tab === 'bot-automations' ||
+    tab === 'bot-connectors' ||
+    tab === 'bot-chats'
   ) {
     return {
       rightSidebarTab: tab,
