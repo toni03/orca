@@ -28,6 +28,6 @@ export function watchAgentTeamPlanLimits(
     )
     onChange()
   }
-  apply(limits.getState())
+  void limits.getState().then(apply)
   return limits.onStateChange(apply)
 }
