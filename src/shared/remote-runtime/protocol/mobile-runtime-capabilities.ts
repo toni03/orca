@@ -6,11 +6,15 @@ export const NOTIFICATIONS_REMOTE_PUSH_RUNTIME_CAPABILITY = 'notifications.remot
 
 // Hosts without this capability have no team.issues / team.issueDecide for phones.
 export const MOBILE_TEAM_NEEDS_YOU_RUNTIME_CAPABILITY = 'mobile.team-needs-you.v1' as const
+// Hosts without this capability have no notifications.pushCoverage RPC, so a mirroring desktop pushes its phones itself.
+export const NOTIFICATIONS_PUSH_COVERAGE_RUNTIME_CAPABILITY =
+  'notifications.push-coverage.v1' as const
 
 export const MOBILE_RUNTIME_CAPABILITIES = [
   'mobile.tasks.v1',
   MOBILE_TEAM_NEEDS_YOU_RUNTIME_CAPABILITY,
   NOTIFICATIONS_REMOTE_PUSH_RUNTIME_CAPABILITY,
   NOTIFICATIONS_DESKTOP_PRESENCE_RUNTIME_CAPABILITY,
+  NOTIFICATIONS_PUSH_COVERAGE_RUNTIME_CAPABILITY,
   ...MOBILE_RELAY_RUNTIME_CAPABILITIES
 ] as const

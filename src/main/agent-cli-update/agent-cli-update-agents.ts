@@ -92,10 +92,25 @@ const AGENT_CLI_UPDATE_DEFINITIONS: Record<AgentCliUpdateAgent, AgentCliUpdateDe
     plan: selfUpdate('update')
   },
   // `hermes update` restarts the profile's gateways, which serve its open chats, so the user runs it.
+  // It updates the checkout the launcher execs and leaves the launcher itself untouched.
   hermes: {
+    updatesOutsideLauncher: true,
     latest: () => ({ kind: 'github', repo: 'NousResearch/hermes-agent', tagPrefix: 'v' }),
     plan: () => ({ runnable: false, command: 'hermes update' })
-  }
+  },
+  // `goose update` replaces its own binary with the stable release's.
+  goose: {
+    latest: () => ({ kind: 'github', repo: 'aaif-goose/goose', tagPrefix: 'v' }),
+    plan: selfUpdate('update')
+  },
+  // `auggie upgrade` installs its prerelease channel, so the user installs npm's stable release.
+  aug: {
+    latest: () => npm('@augmentcode/auggie'),
+    plan: () => ({ runnable: false, command: 'npm install -g @augmentcode/auggie@latest' })
+  },
+  // Both upgrade the way they were installed, as OpenCode 1.x does.
+  kilo: { latest: () => npm('@kilocode/cli'), plan: selfUpdate('upgrade') },
+  'mimo-code': { latest: () => npm('@mimo-ai/cli'), plan: selfUpdate('upgrade') }
 }
 
 export function agentCliUpdateDefinition(agent: AgentCliUpdateAgent): AgentCliUpdateDefinition {
