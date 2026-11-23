@@ -11,6 +11,7 @@ import { getFolderSourceRepos } from '../../shared/folder-workspaces/folder-work
 import type { ProjectGroup } from '../../shared/project/groups/project-group-types'
 import type { Repo } from '../../shared/repository/repo-types'
 import type { AgentTeamService } from './agent-team-service'
+import { isAgentTeamProjectRepo } from './agent-team-context-build'
 
 /** One item by its id or, when only one has it, its name (any case). */
 export function resolveByIdOrName<T>(
@@ -60,8 +61,7 @@ export function resolveSeat(state: AgentTeamState, ref: string): AgentTeamSeat {
 }
 
 function teamRepos(service: AgentTeamService): Repo[] {
-  const managerRepoId = service.getState().managerRepoId
-  return service.repoCatalog().repos.filter((repo) => repo.id !== managerRepoId)
+  return service.repoCatalog().repos.filter(isAgentTeamProjectRepo)
 }
 
 export function resolveRepo(service: AgentTeamService, ref: string): Repo {

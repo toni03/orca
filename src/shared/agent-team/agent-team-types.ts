@@ -1,5 +1,6 @@
 import type { TuiAgent } from '../agent-launch/catalog/tui-agent'
 import type { TaskProvider } from '../work-items/task-providers'
+import type { AgentTeamManagerBots, AgentTeamManagerScope } from './agent-team-manager-bots'
 
 /** Orca routes by step type only; role names and prompts belong to the user. */
 export type AgentTeamStepType = 'build' | 'check'
@@ -239,6 +240,8 @@ export type AgentTeamState = {
   trackerSyncedAt?: number
   /** Project groups worked as one project; optional so older states still load. */
   groups?: AgentTeamProjectGroup[]
-  /** The Manager's own folder project, kept out of team project lists. */
-  managerRepoId?: string
+  /** Absent means one shared Manager bot. */
+  managerScope?: AgentTeamManagerScope
+  /** The Orca bots that are the Manager; created from Settings, deleted like any bot. */
+  managerBots?: AgentTeamManagerBots
 }

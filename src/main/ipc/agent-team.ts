@@ -2,7 +2,8 @@ import { BrowserWindow, ipcMain } from 'electron'
 import type { AgentTeamCommand } from '../../shared/agent-team/agent-team-commands'
 import { AGENT_TEAM_CHANNELS } from '../../shared/agent-team/agent-team-ipc'
 import type { AgentTeamState } from '../../shared/agent-team/agent-team-types'
-import type { TuiAgent } from '../../shared/agent-launch/catalog/tui-agent'
+import type { AgentTeamManagerScope } from '../../shared/agent-team/agent-team-manager-bots'
+import type { Bot } from '../../shared/bot-types'
 import type { AgentTeamService } from '../agent-team/agent-team-service'
 
 function broadcastAgentTeamState(state: AgentTeamState): void {
@@ -30,11 +31,12 @@ export function registerAgentTeamHandlers(service: AgentTeamService): () => void
     service.writeProjectSpec(repoId, text)
   )
   ipcMain.handle(
-    AGENT_TEAM_CHANNELS.launchManager,
-    (_event, args: { agent: TuiAgent; request: string }) => service.launchManager(args)
+    AGENT_TEAM_CHANNELS.createManagerBot,
+    (_event, args: { agent: Bot['agent']; teamId?: string }) => service.createManagerBot(args)
   )
-  ipcMain.handle(AGENT_TEAM_CHANNELS.managerSession, () => service.managerSession())
-  ipcMain.handle(AGENT_TEAM_CHANNELS.managerActivity, () => service.managerActivity())
+  ipcMain.handle(AGENT_TEAM_CHANNELS.setManagerScope, (_event, scope: AgentTeamManagerScope) =>
+    service.setManagerScope(scope)
+  )
   ipcMain.handle(AGENT_TEAM_CHANNELS.issueLiveStatus, (_event, issueId: string) =>
     service.issueLiveStatus(issueId)
   )
@@ -46,9 +48,8 @@ export function registerAgentTeamHandlers(service: AgentTeamService): () => void
       AGENT_TEAM_CHANNELS.execute,
       AGENT_TEAM_CHANNELS.readProjectSpec,
       AGENT_TEAM_CHANNELS.writeProjectSpec,
-      AGENT_TEAM_CHANNELS.launchManager,
-      AGENT_TEAM_CHANNELS.managerSession,
-      AGENT_TEAM_CHANNELS.managerActivity,
+      AGENT_TEAM_CHANNELS.createManagerBot,
+      AGENT_TEAM_CHANNELS.setManagerScope,
       AGENT_TEAM_CHANNELS.issueLiveStatus
     ]) {
       ipcMain.removeHandler(channel)

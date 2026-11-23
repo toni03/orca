@@ -7,7 +7,6 @@ import type {
 import type { AutomationRunUsage } from '../../shared/automations/history/automation-run'
 import type { AutomationUsageClient } from '../../shared/backend/backend-service-contract'
 import type { AgentTeamStore } from './agent-team-store'
-import type { AgentTeamManagerActivity } from '../../shared/agent-team/agent-team-ipc'
 
 export type AgentTeamUsageSources = {
   claude: () => AutomationUsageClient | null
@@ -120,9 +119,4 @@ export function startAgentTeamUsageCollector(
   timer.unref?.()
   sweep()
   return () => clearInterval(timer)
-}
-
-/** The Manager is a bot now; its chat usage is not attributed to the team yet. */
-export function readManagerActivity(): Promise<AgentTeamManagerActivity> {
-  return Promise.resolve({ tokens: 0, activeMs: 0 })
 }

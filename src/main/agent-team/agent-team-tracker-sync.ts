@@ -10,8 +10,8 @@ import type {
 } from '../../shared/agent-team/agent-team-types'
 import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
-import { findLiveManagerSession } from './agent-team-manager'
-import { agentTeamManagerFolder } from './agent-team-manager-workspace'
+import { activeManagerBots } from '../../shared/agent-team/agent-team-manager-bots'
+import { messageAgentTeamManagerBot } from './agent-team-manager-bot'
 import type { AgentTeamStore } from './agent-team-store'
 
 const DELIVERY_INTERVAL_MS = 30_000
@@ -20,7 +20,7 @@ function syncEnabled(state: AgentTeamState): boolean {
   return state.workflow.syncTracker !== false
 }
 
-/** Records tracker-linked moves and hands them to an idle Manager session. */
+/** Records tracker-linked moves and hands each Manager bot the moves of its teams' issues. */
 export class AgentTeamTrackerSync {
   private delivering = false
 
@@ -58,41 +58,26 @@ export class AgentTeamTrackerSync {
     }
   }
 
-  /** Pending moves as one message, for the first prompt of a new Manager session. */
-  peekPending(): { message: string; events: AgentTeamTrackerEvent[] } | undefined {
-    const events = this.store.get().trackerEvents ?? []
-    if (events.length === 0 || !syncEnabled(this.store.get())) {
-      return undefined
-    }
-    return { message: this.message(events), events }
-  }
-
-  markSent(events: AgentTeamTrackerEvent[]): void {
-    this.clear(events)
-  }
-
   private async deliver(): Promise<void> {
-    const events = this.store.get().trackerEvents ?? []
-    if (this.delivering || events.length === 0 || !syncEnabled(this.store.get())) {
+    const state = this.store.get()
+    const events = state.trackerEvents ?? []
+    if (this.delivering || events.length === 0 || !syncEnabled(state)) {
       return
     }
     this.delivering = true
     try {
-      const session = await findLiveManagerSession(this.runtime, agentTeamManagerFolder())
-      if (!session) {
-        return
+      const teamOf = new Map(state.issues.map((issue) => [issue.id, issue.teamId]))
+      for (const manager of activeManagerBots(state)) {
+        const mine = events.filter((event) =>
+          manager.teamIds.includes(teamOf.get(event.issueId) ?? '')
+        )
+        if (mine.length === 0) {
+          continue
+        }
+        // A bot that is mid-turn gets the message queued as its next turn.
+        await messageAgentTeamManagerBot(this.runtime, manager.botId, this.message(mine))
+        this.clear(mine)
       }
-      // A busy Manager would get the update mid-turn; wait for it to go idle.
-      const status = await this.runtime
-        .getTerminalAgentStatus(session.terminalHandle)
-        .catch(() => null)
-      if (status?.status !== 'idle') {
-        return
-      }
-      await this.runtime.sendTerminalAgentPrompt(session.terminalHandle, this.message(events), {
-        inputKind: 'driving'
-      })
-      this.clear(events)
     } catch (error) {
       console.warn('[agent-team] Could not send tracker updates to the Manager:', error)
     } finally {

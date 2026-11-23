@@ -22,29 +22,22 @@ import {
   readRepositoryProjectSpec
 } from './agent-team-runtime-launcher'
 import { AgentTeamStore } from './agent-team-store'
-import {
-  buildAgentTeamContext,
-  findLiveManagerSession,
-  launchAgentTeamManager
-} from './agent-team-manager'
-import { agentTeamManagerFolder } from './agent-team-manager-workspace'
-import type {
-  AgentTeamIssueLiveStatus,
-  AgentTeamManagerActivity,
-  AgentTeamManagerSession
-} from '../../shared/agent-team/agent-team-ipc'
+import { buildAgentTeamContext } from './agent-team-context-build'
+import { addAgentTeamManagerBot, syncAgentTeamManagerBots } from './agent-team-manager-bot'
+import { resolveAgentTeamCliCommand } from './agent-team-cli-command'
+import type { AgentTeamIssueLiveStatus } from '../../shared/agent-team/agent-team-ipc'
+import type { AgentTeamManagerScope } from '../../shared/agent-team/agent-team-manager-bots'
+import type { Bot } from '../../shared/bot-types'
 import { readAgentTeamIssueLiveStatus } from './agent-team-issue-status'
 import { reconcileAgentTeamSessionsAfterRestart } from './agent-team-restart-reconcile'
 import { AgentTeamTrackerSync } from './agent-team-tracker-sync'
 import { startAgentTeamMobileAlerts } from './agent-team-mobile-alerts'
 import {
-  readManagerActivity,
   startAgentTeamUsageCollector,
   type AgentTeamUsageSources
 } from './agent-team-usage-collector'
 import { effectiveProjectSpecStorage } from '../../shared/agent-team/agent-team-spec-storage'
 import type { AgentTeamContext } from '../../shared/agent-team/agent-team-context'
-import type { TuiAgent } from '../../shared/agent-launch/catalog/tui-agent'
 import { getRepoRoutingConnectionId } from '../../shared/execution-host/execution-host'
 import { watchAgentTeamPlanLimits } from './agent-team-plan-limit-watch'
 import type { RateLimitService } from '../rate-limits/service/rate-limit-service'
@@ -92,6 +85,9 @@ export class AgentTeamService {
       )
     )
     this.disposers.push(this.trackerSync.start())
+    void syncAgentTeamManagerBots(this.runtime, this.store, resolveAgentTeamCliCommand()).catch(
+      (error: unknown) => console.warn('[agent-team] Could not check the Manager bots:', error)
+    )
     this.disposers.push(
       watchAgentTeamPlanLimits(this.planLimits(), this.store, () => void this.engine.tick())
     )
@@ -169,28 +165,16 @@ export class AgentTeamService {
     )
   }
 
-  async launchManager(args: {
-    agent: TuiAgent
-    request: string
-  }): Promise<AgentTeamManagerSession> {
-    const pending = this.trackerSync.peekPending()
-    const launched = await launchAgentTeamManager(this.runtime, {
+  /** Creates the Manager bot of the current scope; `teamId` names its team with one per team. */
+  createManagerBot(args: { agent: Bot['agent']; teamId?: string }): Promise<Bot> {
+    return addAgentTeamManagerBot(this.runtime, this.store, {
       ...args,
-      ...(pending ? { pendingUpdates: pending.message } : {})
+      cliCommand: resolveAgentTeamCliCommand()
     })
-    if (this.store.get().managerRepoId !== launched.managerRepoId) {
-      this.store.update((state) => ({ ...state, managerRepoId: launched.managerRepoId }))
-    }
-    // A reused session gets pending moves from the delivery loop once it is idle.
-    if (pending && launched.startedNew) {
-      this.trackerSync.markSent(pending.events)
-    }
-    return launched.session
   }
 
-  /** The live Manager session, so the Team page can show it without starting one. */
-  managerSession(): Promise<AgentTeamManagerSession | null> {
-    return findLiveManagerSession(this.runtime, agentTeamManagerFolder())
+  setManagerScope(scope: AgentTeamManagerScope): AgentTeamState {
+    return this.store.update((state) => ({ ...state, managerScope: scope }))
   }
 
   /** Orca's repos and project groups, for CLI commands that name a project or group. */
@@ -215,10 +199,6 @@ export class AgentTeamService {
     return issue
       ? readAgentTeamIssueLiveStatus(this.runtime, issue)
       : Promise.resolve({ tracker: null, review: null })
-  }
-
-  managerActivity(): Promise<AgentTeamManagerActivity> {
-    return readManagerActivity()
   }
 
   /** Folder projects share one directory, so their issues always lock the project. */

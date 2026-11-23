@@ -9,9 +9,8 @@ export const agentTeamApi = {
   readProjectSpec: (repoId) => ipcRenderer.invoke(AGENT_TEAM_CHANNELS.readProjectSpec, repoId),
   writeProjectSpec: (repoId, text) =>
     ipcRenderer.invoke(AGENT_TEAM_CHANNELS.writeProjectSpec, repoId, text),
-  launchManager: (args) => ipcRenderer.invoke(AGENT_TEAM_CHANNELS.launchManager, args),
-  managerSession: () => ipcRenderer.invoke(AGENT_TEAM_CHANNELS.managerSession),
-  managerActivity: (from, to) => ipcRenderer.invoke(AGENT_TEAM_CHANNELS.managerActivity, from, to),
+  createManagerBot: (args) => ipcRenderer.invoke(AGENT_TEAM_CHANNELS.createManagerBot, args),
+  setManagerScope: (scope) => ipcRenderer.invoke(AGENT_TEAM_CHANNELS.setManagerScope, scope),
   issueLiveStatus: (issueId) => ipcRenderer.invoke(AGENT_TEAM_CHANNELS.issueLiveStatus, issueId),
   onChanged: (callback) => {
     const listener = (_event: Electron.IpcRendererEvent, state: AgentTeamState): void =>
