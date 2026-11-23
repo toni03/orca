@@ -1,0 +1,11 @@
+import type { Repo } from '../repository/repo-types'
+import { getRepoRoutingConnectionId } from '../execution-host/execution-host'
+import type { AgentTeamProject, AgentTeamProjectSpecStorage } from './agent-team-types'
+
+/** Remote checkouts are not readable from this computer, so their spec always lives locally. */
+export function effectiveProjectSpecStorage(
+  project: Pick<AgentTeamProject, 'specStorage'> | undefined,
+  repo: Pick<Repo, 'connectionId' | 'executionHostId'> | undefined | null
+): AgentTeamProjectSpecStorage {
+  return repo && getRepoRoutingConnectionId(repo) ? 'local' : (project?.specStorage ?? 'repository')
+}

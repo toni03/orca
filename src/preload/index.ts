@@ -94,6 +94,7 @@ import { sshApi } from './api/ssh/ssh-bridge'
 import { plainSshTerminalApi } from './api/terminal/plain-ssh-terminal-bridge'
 import { legacyRelayBridgeApi } from './api/mobile/legacy-relay-bridge-api'
 import { automationsApi } from './api/automations/automations-bridge'
+import { agentTeamApi } from './api/agent-team/agent-team-bridge'
 import { e2eApi } from './api/diagnostics/e2e-bridge'
 import { mobileApi } from './api/mobile/mobile-bridge'
 import { agentStatusApi } from './api/agent-status/agent-status-bridge'
@@ -209,6 +210,7 @@ const api = {
   plainSsh: plainSshTerminalApi,
   legacyRelayBridge: legacyRelayBridgeApi,
   automations: automationsApi,
+  agentTeam: agentTeamApi,
   e2e: e2eApi,
   mobile: mobileApi,
   agentStatus: agentStatusApi,

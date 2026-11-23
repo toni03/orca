@@ -20,6 +20,7 @@ import type {
 import type { AiVaultApi } from './api/ai-vault/ai-vault-api'
 import type { AppApi, E2EApi, PlatformApi } from './api/app-api'
 import type { AutomationsApi } from './api/automations/automation-api'
+import type { AgentTeamApi } from './api/agent-team/agent-team-api'
 import type { BrowserApi } from './api/browser/browser-api'
 import type { CliApi } from './api/cli-install/cli-install-api'
 import type { OrcaUninstallApi } from './api/orca-uninstall/orca-uninstall-api'
@@ -194,6 +195,7 @@ export type PreloadApi = {
   /** Desktop only: heavy background work paused after repeated crashes. */
   backgroundWorker?: BackgroundWorkerApi
   automations: AutomationsApi
+  agentTeam: AgentTeamApi
   wsl: RuntimeApi['wsl']
   wslMove: WslMoveApi
   wslDriveProject: WslDriveProjectApi

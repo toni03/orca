@@ -32,6 +32,7 @@ import {
   configureRuntimeServices
 } from '../startup/runtime-startup/main-process-runtime-service'
 import { createRuntimeAutomationService } from '../automations/runtime-automation-service'
+import { initializeMainProcessAgentTeam } from '../startup/runtime-startup/main-process-agent-team'
 import { createRendererShutdownCheckpointService } from './renderer-shutdown-checkpoint-service'
 import { initializeMainProcessPlugins } from '../startup/plugin-startup/main-process-plugins'
 import {
@@ -269,6 +270,7 @@ export async function composeDesktopCore(
     userDataPath: paths.userData,
     isPackaged: paths.isPackaged
   })
+  initializeMainProcessAgentTeam(core, store, native.isServeMode())
   installFirstWorkRenameHookSubscription(firstWorkRenameDeps(store, runtime))
   await initializeMainProcessPlugins(core, store)
   core.starNag = new StarNagService(store, core.stats!)
