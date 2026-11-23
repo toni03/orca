@@ -55,6 +55,7 @@ export class DesktopCore {
   repoMaintenanceShutdown: Promise<void> = Promise.resolve()
   watcherShutdownDone = false
   automations: AutomationService | null = null
+  stopAgentTeam: (() => void) | null = null
   pluginService: PluginService | null = null
   pluginKillListService: PluginKillListService | null = null
   pluginInstallStatsService: PluginInstallStatsService | null = null

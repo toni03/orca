@@ -1,0 +1,135 @@
+import { previousRoundFindings } from '../../shared/agent-team/agent-team-pipeline'
+import { composeAgentTeamSessionPrompt } from '../../shared/agent-team/agent-team-session-prompt'
+import type {
+  AgentTeamAssignment,
+  AgentTeamIssue,
+  AgentTeamProject,
+  AgentTeamRole,
+  AgentTeamSeat
+} from '../../shared/agent-team/agent-team-types'
+
+/** What the engine needs from Orca to start and end a seat's session. */
+export type AgentTeamLauncher = {
+  /** Exact path of this app's CLI for report commands; null keeps the bare `orca`. */
+  cliCommand(): string | null
+  /** Folder projects have no git, so seats work in place and never open merge requests. */
+  isFolderProject(repoId: string): boolean
+  /** The project's name as Orca shows it, for prompts that list several repos. */
+  repoName(repoId: string): string
+  /** Build step without a worktree yet: create one from the base branch and start the agent in it. */
+  launchInNewWorktree(args: {
+    repoId: string
+    name: string
+    baseBranch?: string
+    seat: AgentTeamSeat
+    prompt: string
+    title: string
+    /** Linked worktrees of a grouped issue the agent may also edit. */
+    extraDirs?: string[]
+  }): Promise<{ worktreeId: string; branch?: string; terminalHandle: string }>
+  /** A grouped issue's worktree in another repo of the group, without an agent. */
+  createLinkedWorktree(args: {
+    repoId: string
+    name: string
+    baseBranch?: string
+    title: string
+  }): Promise<{ worktreeId: string; path: string; branch?: string }>
+  /** Any later step: start the agent in the issue's worktree. */
+  launchInWorktree(args: {
+    worktreeId: string
+    seat: AgentTeamSeat
+    prompt: string
+    title: string
+    extraDirs?: string[]
+  }): Promise<{ terminalHandle: string }>
+  readProjectSpec(project: AgentTeamProject | undefined, repoId: string): Promise<string | null>
+  /** Resolves when the session's process exits; ptyId adopts a session started before a restart. */
+  watchExit(terminalHandle: string, onExit: () => void, ptyId?: string): void
+  /** Live terminals among these handles with their PTY ids; null when liveness cannot be read. */
+  liveTerminals(handles: string[]): Promise<Map<string, string | null> | null>
+  /** Types the user's answer into a session that is waiting for input. */
+  sendToSession(terminalHandle: string, text: string): Promise<void>
+  /** Closes a session whose step is over; its transcript stays with the agent CLI. */
+  closeSession(terminalHandle: string): Promise<void>
+  /** The open or latest merge or pull request of a branch, from the project host. */
+  findMergeRequest(
+    repoId: string,
+    branch: string
+  ): Promise<{ url: string; state: string; updatedAt: string } | null>
+  /** Removes the worktree of an issue that is done or discarded. */
+  removeWorktree(worktreeId: string): Promise<void>
+}
+
+/** The whole prompt of one step: Orca contract, delivery rules for this project, role, spec, seat, issue. */
+export async function agentTeamStepPrompt(
+  launcher: AgentTeamLauncher,
+  args: {
+    role: AgentTeamRole
+    seat: AgentTeamSeat
+    issue: AgentTeamIssue
+    assignment: AgentTeamAssignment
+    project: AgentTeamProject | undefined
+  }
+): Promise<string> {
+  const { role, issue, project } = args
+  return composeAgentTeamSessionPrompt({
+    ...args,
+    projectSpec: await launcher.readProjectSpec(project, issue.repoId),
+    previousFindings: role.stepType === 'build' ? previousRoundFindings(issue) : null,
+    cliCommand: launcher.cliCommand(),
+    delivery: {
+      folder: launcher.isFolderProject(issue.repoId),
+      baseBranch: project?.baseBranch?.trim() || null,
+      ...(issue.mergeRequest ? { mergeRequestUrl: issue.mergeRequest.url } : {}),
+      ...(issue.mergeRequests ? { mergeRequestUrls: issue.mergeRequests.map((mr) => mr.url) } : {}),
+      ...(issue.tracker ? { tracker: issue.tracker } : {}),
+      ...(issue.linkedWorktrees?.length
+        ? {
+            linked: issue.linkedWorktrees.map((linked) => ({
+              name: launcher.repoName(linked.repoId),
+              path: linked.path
+            }))
+          }
+        : {})
+    }
+  })
+}
+
+export function agentTeamWorktreeName(issue: AgentTeamIssue): string {
+  const key = (issue.tracker?.key ?? issue.id.slice(0, 8)).replace(/[^A-Za-z0-9]+/g, '')
+  const slug = issue.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40)
+  return [key.toLowerCase(), slug].filter(Boolean).join('-') || `team-${issue.id.slice(0, 8)}`
+}
+
+/** The step is over: its record lives in the issue history and the tracker, not an open tab. */
+export function closeAgentTeamSession(
+  launcher: AgentTeamLauncher,
+  assignment: AgentTeamAssignment
+): void {
+  if (assignment.terminalHandle) {
+    void launcher.closeSession(assignment.terminalHandle).catch(() => undefined)
+  }
+}
+
+/** A done or discarded issue no longer needs its worktrees; folder projects keep their folder. */
+export function removeFinishedAgentTeamWorktree(
+  launcher: AgentTeamLauncher,
+  issue: AgentTeamIssue
+): void {
+  const finished = issue.status === 'done' || issue.status === 'discarded'
+  if (!finished || launcher.isFolderProject(issue.repoId)) {
+    return
+  }
+  for (const worktreeId of [
+    issue.worktreeId,
+    ...(issue.linkedWorktrees ?? []).map((linked) => linked.worktreeId)
+  ]) {
+    if (worktreeId) {
+      void launcher.removeWorktree(worktreeId).catch(() => undefined)
+    }
+  }
+}

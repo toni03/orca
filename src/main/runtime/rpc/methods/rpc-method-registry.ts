@@ -7,6 +7,9 @@ import { ORCAD_MIGRATION_METHODS } from './orcad/orcad-migration'
 import { SESSION_TERMINAL_SCROLLBACK_METHODS } from './terminal/session-terminal-scrollback'
 import { AI_VAULT_METHODS } from './history/ai-vault'
 import { AUTOMATION_METHODS } from './automations/automations'
+import { AGENT_TEAM_METHODS } from './agent-team/agent-team'
+import { AGENT_TEAM_CONFIG_METHODS } from './agent-team/agent-team-config'
+import { AGENT_TEAM_STRUCTURE_METHODS } from './agent-team/agent-team-structure'
 import { REPO_METHODS } from './projects/repo'
 import { WORKTREE_METHODS } from './workspaces/worktree'
 import { WORKSPACE_CLEANUP_RUNNER_METHODS } from './workspaces/workspace-cleanup-runner-methods'
@@ -138,6 +141,9 @@ const CORE_RPC_METHODS = [
   ...AI_VAULT_METHODS,
   ...ARTIFACT_METHODS,
   ...AUTOMATION_METHODS,
+  ...AGENT_TEAM_METHODS,
+  ...AGENT_TEAM_CONFIG_METHODS,
+  ...AGENT_TEAM_STRUCTURE_METHODS,
   ...REPO_METHODS,
   ...WORKTREE_METHODS,
   ...WORKSPACE_CLEANUP_RUNNER_METHODS,

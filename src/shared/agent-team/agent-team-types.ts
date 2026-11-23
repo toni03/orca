@@ -1,0 +1,260 @@
+import type { TuiAgent } from '../agent-launch/catalog/tui-agent'
+import type { TaskProvider } from '../work-items/task-providers'
+import type { AgentTeamManagerBots, AgentTeamManagerScope } from './agent-team-manager-bots'
+
+/** Orca routes by step type only; role names and prompts belong to the user. */
+export type AgentTeamStepType = 'build' | 'check'
+
+export type AgentTeamTemplateOrigin = 'builtin' | 'organization' | 'local'
+
+export type AgentTeamRole = {
+  id: string
+  name: string
+  stepType: AgentTeamStepType
+  prompt: string
+  skills: string[]
+  /** Bumped on every prompt edit; sessions record the version they used. */
+  version: number
+  origin: AgentTeamTemplateOrigin
+  /** Template this role was copied from, so it can be reset or updated. */
+  templateId?: string
+  templateVersion?: number
+  updatedAt: number
+}
+
+export type AgentTeamStep = {
+  id: string
+  name: string
+  roleId: string
+  seatIds: string[]
+}
+
+export type AgentTeam = {
+  id: string
+  name: string
+  /** Build and Check steps in order; Needs you always follows the last one. */
+  steps: AgentTeamStep[]
+  templateId?: string
+  /** A paused team takes no new steps; running sessions finish. */
+  paused?: boolean
+  createdAt: number
+}
+
+export type AgentTeamSeat = {
+  id: string
+  name: string
+  /** Fixed once the seat exists: correction rounds resume the same CLI. */
+  agent: TuiAgent
+  model?: string
+  /** Reasoning level the agent offers for the model, e.g. `high`; absent is its default. */
+  effort?: string
+  instructions: string
+  /** A paused seat takes no new steps, for example while its agent is out of credits. */
+  paused?: boolean
+  createdAt: number
+  retiredAt?: number
+}
+
+export type AgentTeamTrackerRef = {
+  provider: TaskProvider
+  /** Provider key as shown to people: `#212`, `API-128`, `ENG-42`. */
+  key: string
+  url?: string
+}
+
+export type AgentTeamProjectSpecStorage = 'repository' | 'local'
+
+export type AgentTeamProject = {
+  repoId: string
+  /** Absent follows the repo's code host (GitHub or GitLab); null means the project has no tracker. */
+  tracker?: { provider: TaskProvider; projectKey?: string } | null
+  specStorage: AgentTeamProjectSpecStorage
+  /** Only used when `specStorage` is `local`; repository specs live in the repo file. */
+  localSpec?: string
+  specTemplateId?: string
+  /** Branch new worktrees start from and merge requests target; absent uses the repo default. */
+  baseBranch?: string
+}
+
+/**
+ * An Orca project group worked as one project: each issue gets a worktree in every member repo on
+ * one branch. The tracker repo holds the project config and the issues; its worktree hosts the agent.
+ */
+export type AgentTeamProjectGroup = {
+  groupId: string
+  trackerRepoId: string
+  /** Git repos of the group that take part, the tracker repo included. */
+  repoIds: string[]
+}
+
+/** A member repo's worktree of a grouped issue, beside the tracker repo's `worktreeId`. */
+export type AgentTeamLinkedWorktree = {
+  repoId: string
+  worktreeId: string
+  path: string
+  branch?: string
+}
+
+export type AgentTeamIssueStatus =
+  | 'registered'
+  | 'queued'
+  | 'working'
+  | 'needs-you'
+  | 'done'
+  | 'discarded'
+
+export type AgentTeamNeedsYouReason = 'ready' | 'escalated' | 'blocked' | 'question' | 'failed'
+
+/** Whether the issue runs alone in its project: shared, alone within its team, or alone in the whole project. */
+export type AgentTeamIssueScope = 'shared' | 'exclusive-team' | 'exclusive'
+
+export type AgentTeamFinding = {
+  severity: 'blocker' | 'major' | 'minor' | 'info'
+  message: string
+  file?: string
+  line?: number
+}
+
+export type AgentTeamStepResult =
+  | {
+      kind: 'done'
+      summary: string
+      mergeRequestUrl?: string
+      /** Every merge request a grouped issue opened, one per changed repo; the first is mergeRequestUrl. */
+      mergeRequestUrls?: string[]
+    }
+  | {
+      kind: 'blocked'
+      summary: string
+      questions?: string[]
+      /** Short answers the user can pick with one click, e.g. Allow / Deny. */
+      options?: string[]
+    }
+  | { kind: 'pass'; summary: string; findings?: AgentTeamFinding[] }
+  | { kind: 'changes'; summary: string; findings: AgentTeamFinding[] }
+
+/** Tokens a session used, read from the agent's local transcripts after it ends. */
+export type AgentTeamAssignmentUsage =
+  | {
+      status: 'known'
+      inputTokens: number
+      outputTokens: number
+      cacheReadTokens: number
+      totalTokens: number
+    }
+  | { status: 'unavailable'; reason: string }
+
+export type AgentTeamAssignment = {
+  id: string
+  seatId: string
+  stepId: string
+  round: number
+  roleVersion: number
+  terminalHandle?: string
+  startedAt: number
+  endedAt?: number
+  result?: AgentTeamStepResult
+  /** Set when the session stopped without reporting. */
+  stopReason?: 'exited' | 'needs-input' | 'errored' | 'launch-failed' | 'cancelled'
+  stopDetail?: string
+  usage?: AgentTeamAssignmentUsage
+}
+
+export type AgentTeamBotItemLink = {
+  uid: string
+  botId: string
+  /** The needsYou.at the item asks about; a newer Needs you asks again. */
+  askedAt: number
+  /** Item events up to this id were read. */
+  seenEventId: number
+  /** The issue status last written to the item, so each move is written once. */
+  mirrored: AgentTeamIssueStatus
+}
+
+export type AgentTeamIssue = {
+  id: string
+  repoId: string
+  teamId: string
+  title: string
+  body: string
+  criteria: string[]
+  tracker?: AgentTeamTrackerRef
+  status: AgentTeamIssueStatus
+  /** Lower runs first; the Manager orders it and the user can override. */
+  priority: number
+  scope: AgentTeamIssueScope
+  dependsOn: string[]
+  stepIndex: number
+  round: number
+  worktreeId?: string
+  branch?: string
+  /** Worktrees in the other repos of a project group, on the same branch. */
+  linkedWorktrees?: AgentTeamLinkedWorktree[]
+  assignments: AgentTeamAssignment[]
+  needsYou?: {
+    reason: AgentTeamNeedsYouReason
+    detail: string
+    at: number
+    /** Quick answers the seat offered; picking one answers with its text. */
+    options?: string[]
+  }
+  /** Merge or pull request the Build step opened for review. */
+  mergeRequest?: { url: string }
+  /** All merge requests of a grouped issue, mergeRequest first. */
+  mergeRequests?: { url: string }[]
+  /** The Manager bot item that mirrors this issue's Needs you; replies on it decide the issue. */
+  botItem?: AgentTeamBotItemLink
+  createdAt: number
+  updatedAt: number
+}
+
+export type AgentTeamWorkflow = {
+  roundsPerIssue: number
+  /** The Manager proposes the next batch when fewer queued issues remain. */
+  batchThreshold: number
+  paused: boolean
+  /** Absent means on: the Manager updates tracker labels as issues move. */
+  syncTracker?: boolean
+}
+
+/** A move the Manager still has to reflect in the tracker. */
+export type AgentTeamTrackerEvent = {
+  id: string
+  issueId: string
+  repoId: string
+  key: string
+  title: string
+  position: string
+  at: number
+}
+
+/** An agent CLI ran out of its plan window; its seats took no new steps until it reset. */
+export type AgentTeamLimitPause = {
+  agent: TuiAgent
+  startedAt: number
+  endedAt?: number
+  /** When the provider said the window resets, if it did. */
+  resetsAt?: number
+}
+
+export type AgentTeamState = {
+  version: 1
+  roles: AgentTeamRole[]
+  teams: AgentTeam[]
+  seats: AgentTeamSeat[]
+  projects: AgentTeamProject[]
+  issues: AgentTeamIssue[]
+  workflow: AgentTeamWorkflow
+  /** Optional so states saved before tracker sync still load. */
+  trackerEvents?: AgentTeamTrackerEvent[]
+  /** Spans when an agent CLI hit its plan limit, so its seats waited; the latest are kept. */
+  limitPauses?: AgentTeamLimitPause[]
+  /** When the Manager last received the tracker moves, so the board can say how fresh trackers are. */
+  trackerSyncedAt?: number
+  /** Project groups worked as one project; optional so older states still load. */
+  groups?: AgentTeamProjectGroup[]
+  /** Absent means one shared Manager bot. */
+  managerScope?: AgentTeamManagerScope
+  /** The Orca bots that are the Manager; created from Settings, deleted like any bot. */
+  managerBots?: AgentTeamManagerBots
+}

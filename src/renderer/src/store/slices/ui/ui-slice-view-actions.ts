@@ -137,6 +137,18 @@ export function createUiViewActions(set: UISliceSet, get: UISliceGet): Partial<U
       set((state) => ({
         activeView: state.previousViewBeforeMobile
       })),
+    openTeamPage: (tab) =>
+      set((state) => ({
+        activeView: 'team',
+        ...(tab ? { teamPageTab: tab } : {}),
+        previousViewBeforeTeam:
+          state.activeView === 'team' ? state.previousViewBeforeTeam : state.activeView
+      })),
+    setTeamPageTab: (tab) => set({ teamPageTab: tab }),
+    closeTeamPage: () =>
+      set((state) => ({
+        activeView: state.previousViewBeforeTeam
+      })),
     setNewWorkspaceDraft: (draft) => set({ newWorkspaceDraft: draft }),
     clearNewWorkspaceDraft: () => set({ newWorkspaceDraft: null })
   }
