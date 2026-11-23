@@ -3,6 +3,7 @@ import { getGeneralSubPageTitle } from '../general/general-sub-pages'
 import { ActiveSettingsSectionProvider } from '../section-layout/SettingsSection'
 import { SettingsContentScrollElementProvider } from './settings-content-scroll-element'
 import { SettingsSidebar } from '../navigation/SettingsSidebar'
+import { renderTeamSettingsSection } from '../team/team-settings-section'
 import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 import type { Translate } from '@/i18n/use-translate'
@@ -181,6 +182,7 @@ export function renderSettingsPage(
                   {renderBotsSettingsSections(context)}
                   {renderMobileSettingsSection(context, t)}
                   {renderAutomationsSettingsSection(context, t)}
+                  {renderTeamSettingsSection(context, t)}
                   {renderArtifactsSettingsSection(context, t)}
                   {renderShareSkillsSettingsSection(context, t)}
                   {renderSharedLinksSettingsSection(context, t)}

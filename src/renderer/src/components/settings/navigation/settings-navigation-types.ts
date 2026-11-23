@@ -50,6 +50,7 @@ const SETTINGS_NAV_TARGETS = [
   'share-skills',
   'shared-links',
   'automations',
+  'team',
   'bots',
   'orca-account',
   'linear',

@@ -24,6 +24,8 @@ export function createUiTaskActions(set: UISliceSet, get: UISliceGet): Partial<U
     pendingSkillShareId: null,
     pendingSkillsSharedView: false,
     previousViewBeforeMobile: 'terminal',
+    previousViewBeforeTeam: 'terminal',
+    teamPageTab: 'board',
     previousViewBeforeArtifacts: 'terminal',
     setActiveView: (view) => set({ activeView: view }),
     taskPageData: {},

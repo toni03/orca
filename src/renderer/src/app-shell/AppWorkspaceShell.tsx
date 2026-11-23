@@ -55,6 +55,7 @@ const GitHubInstallMount = lazy(() =>
     default: module.GitHubInstallMount
   }))
 )
+const TeamPage = lazy(() => import('../components/agent-team/TeamPage'))
 const Terminal = lazy(() => import('../components/terminal/workbench/Terminal'))
 
 type WorktreeSidebarScrollRefs = {
@@ -153,6 +154,7 @@ function ActivePage({ layout }: { layout: AppChromeLayout }): React.JSX.Element 
       <Suspense fallback={null}>
         <GitHubInstallMount />
       </Suspense>
+      {activeView === 'team' ? <TeamPage /> : null}
       {activeView === 'terminal' && creationLayoutActive && activePendingCreationId ? (
         <PendingCreationSurface
           creationId={activePendingCreationId}

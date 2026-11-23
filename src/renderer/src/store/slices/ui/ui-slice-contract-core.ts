@@ -31,6 +31,7 @@ export type PendingAutomationRunNavigation = {
   origin?: AutomationRunPageOrigin
 }
 
+export type TeamPageTab = 'board' | 'activity' | 'needs-you' | 'settings'
 export type PendingSidebarWorktreeReveal = {
   rowKey?: string
   worktreeId: string
@@ -139,6 +140,7 @@ export type UiViewHistory =
   | 'skills'
   | 'artifacts'
   | 'mobile'
+  | 'team'
 
 export type UISliceCore = {
   sidebarOpen: boolean
@@ -178,6 +180,9 @@ export type UISliceCore = {
   previousViewBeforeSpace: Exclude<UiViewHistory, 'space'>
   previousViewBeforeSkills: Exclude<UiViewHistory, 'skills'>
   previousViewBeforeMobile: Exclude<UiViewHistory, 'mobile'>
+  previousViewBeforeTeam: Exclude<UiViewHistory, 'team'>
+  /** Tab the Team page shows; the Needs you sidebar entry opens its inbox. */
+  teamPageTab: TeamPageTab
   previousViewBeforeArtifacts: Exclude<UiViewHistory, 'artifacts'>
   setActiveView: (view: UISliceCore['activeView']) => void
   taskPageData: TaskPageData
@@ -232,6 +237,9 @@ export type UISliceCore = {
   closeArtifactsPage: () => void
   openMobilePage: () => void
   closeMobilePage: () => void
+  openTeamPage: (tab?: TeamPageTab) => void
+  setTeamPageTab: (tab: TeamPageTab) => void
+  closeTeamPage: () => void
   setNewWorkspaceDraft: (draft: NonNullable<UISliceCore['newWorkspaceDraft']>) => void
   clearNewWorkspaceDraft: () => void
   pendingRevealWorktree: PendingSidebarWorktreeReveal | null

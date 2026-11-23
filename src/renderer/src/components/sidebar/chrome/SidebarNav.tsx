@@ -10,6 +10,7 @@ import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { SetupGuideSidebarEntry } from '../../setup-guide/SetupGuideSidebarEntry'
+import { TeamSidebarButton } from '../../agent-team/TeamSidebarButton'
 import { SidebarTaskNavButton } from './SidebarTaskNavButton'
 import { HideSidebarMenu } from './sidebar-nav-controls'
 import { useTranslate } from '@/i18n/use-translate'
@@ -67,6 +68,7 @@ const SidebarNav = React.memo(function SidebarNav() {
   const activeView = useAppStore((s) => s.activeView)
   const showAgentDashboardButton = useAppStore((s) => shouldShowAgentDashboardButton(s.settings))
   const showAutomationsButton = useAppStore((s) => shouldShowAutomationsButton(s.settings))
+  const showTeamButton = useAppStore((s) => s.settings?.showTeamButton !== false)
   const showMobileButton = useAppStore((s) => shouldShowMobileButton(s.settings))
   const showArtifactsButton = useAppStore((s) => shouldShowArtifactsButton(s.settings))
   const showSkillsButton = useAppStore((s) => shouldShowSkillsButton(s.settings))
@@ -131,6 +133,7 @@ const SidebarNav = React.memo(function SidebarNav() {
       </button>
       <SetupGuideSidebarEntry />
       {appRailVisible ? null : <SidebarTaskNavButton />}
+      <TeamSidebarButton visible={showTeamButton} />
       {showArtifactsButton && !appRailVisible ? (
         <ContextMenu>
           <ContextMenuTrigger asChild>

@@ -6,6 +6,7 @@ import {
 } from '../../../../../../shared/native-chat/tools/native-chat-tool-run-sentence'
 import type { NativeChatToolCategory } from '../../../../../../shared/native-chat/tools/native-chat-tool-icon'
 import type { NativeChatBlock } from '../../../../../../shared/native-chat/native-chat-types'
+import { teamClause } from './native-chat-team-tool-run-label'
 
 /** Extraction requires literal keys/fallbacks; parity tests keep these clauses aligned with mobile’s shared record. */
 function clause(category: NativeChatToolCategory, count: number, live: boolean): string {
@@ -151,6 +152,7 @@ function liveClause(category: NativeChatToolCategory, count: number): string {
 const LOCALIZED_WORDS: NativeChatToolRunSentenceWords = {
   continuation: (text) => continueNativeChatToolRunClause(text, getIntlLocale()),
   clause,
+  teamClause,
   pair: (first, second) =>
     translate('components.native-chat.tool.runPair', '{{value0}} and {{value1}}', {
       value0: first,
