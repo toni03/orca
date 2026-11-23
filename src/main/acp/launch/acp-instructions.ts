@@ -120,6 +120,11 @@ export const deliverKiroInstructions: AcpInstructionsDelivery = async ({ text })
   sessionMeta: { kiro: { steering: [{ name: 'orca', inclusion: 'always', content: text }] } }
 })
 
+// Droid rebuilds its system prompt at every start from the file each launch passes.
+export const deliverDroidInstructions: AcpInstructionsDelivery = async ({ file }) => ({
+  args: ['--append-system-prompt-file', await file()]
+})
+
 // Cursor reads its folder's rules once, when a session opens, and keeps them across reopens.
 export const deliverCursorInstructions: AcpInstructionsDelivery = async ({ text }) => ({
   aroundNewSession: (cwd) => placeCursorOpeningRule(cwd, text)
@@ -145,6 +150,42 @@ export const deliverKimiInstructions: AcpInstructionsDelivery = async ({ text, c
 // every model call, so a reopened chat reads what its latest launch wrote (checked live on 1.60.2).
 export const deliverGooseInstructions: AcpInstructionsDelivery = async ({ text, cwd }) => {
   await writeFolderContextFile(cwd, '.goosehints', 'Goose', text)
+  return {}
+}
+
+// Gemini ignores `_meta` and builds its context from the folder's GEMINI.md at every start, a
+// reopen and each compression included, but reads it only in a trusted folder, so the launch trusts it.
+export const deliverGeminiInstructions: AcpInstructionsDelivery = async ({ text, cwd }) => {
+  await writeFolderContextFile(cwd, 'GEMINI.md', 'Gemini', text)
+  return { env: { GEMINI_CLI_TRUST_WORKSPACE: 'true' } }
+}
+
+// Qwen rebuilds its system prompt from the folder's QWEN.md at every start, reopens included
+// (checked live on 0.28.0), so every launch rewrites it with the current text.
+export const deliverQwenCodeInstructions: AcpInstructionsDelivery = async ({ text, cwd }) => {
+  await writeFolderContextFile(cwd, 'QWEN.md', 'Qwen Code', text)
+  return {}
+}
+
+// Cline rebuilds its system prompt from the folder's rules at every start, reopens included
+// (checked live on 3.0.75); `.cline/rules` sits beside the user's own `.clinerules`.
+export const deliverClineInstructions: AcpInstructionsDelivery = async ({ text, cwd }) => {
+  await writeFolderContextFile(cwd, join('.cline', 'rules', 'orca.md'), 'Cline', text)
+  return {}
+}
+
+// Devin reads the folder's AGENTS.local.md as an always-on rule at `session/new` and keeps it with
+// the session, so a reopened chat keeps the text it began with (checked live on 3000.14.30821).
+export const deliverDevinInstructions: AcpInstructionsDelivery = async ({ text, cwd }) => {
+  await writeFolderContextFile(cwd, 'AGENTS.local.md', 'Devin', text)
+  return {}
+}
+
+// CodeBuddy rebuilds its system prompt from the folder's CODEBUDDY.local.md at every start, reopens
+// included (checked live on 2.185.0). Its --append-system-prompt takes only inline text, which a
+// grown bot preamble would push past Windows' command-line limit.
+export const deliverCodeBuddyInstructions: AcpInstructionsDelivery = async ({ text, cwd }) => {
+  await writeFolderContextFile(cwd, 'CODEBUDDY.local.md', 'CodeBuddy', text)
   return {}
 }
 
