@@ -19225,6 +19225,15 @@
           "perTeam": "Un Manager por equipo",
           "allTeams": "Todos los equipos",
           "noAgents": "No hay ningún agente que pueda ejecutar un bot instalado y activado. Activa uno en Ajustes › Agentes."
+        },
+        "TeamManagerChat": {
+          "loading": "Abriendo el chat del Manager…",
+          "scope": "{{bot}} · {{agent}}",
+          "pick": "Manager con el que hablar",
+          "openBot": "Abrir la página del bot Manager",
+          "collapse": "Mostrar el tablero junto al Manager",
+          "expand": "Mostrar solo el Manager",
+          "close": "Ocultar Manager"
         }
       }
     },

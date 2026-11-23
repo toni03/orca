@@ -1,22 +1,15 @@
-import { Bot as BotIcon, ChevronDown } from 'lucide-react'
+import { Bot as BotIcon, MessagesSquare } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
 import { useBots } from '@/lib/bot-catalog'
-import { openBotHomePanelFromSidebar } from '@/components/bots/BotRow'
 import type { Bot } from '../../../../shared/bot-types'
 import { activeManagerBots } from '../../../../shared/agent-team/agent-team-manager-bots'
 import type { AgentTeamState } from '../../../../shared/agent-team/agent-team-types'
 
-type ManagerEntry = { bot: Bot; label: string }
+export type ManagerEntry = { bot: Bot; label: string }
 
 /** The Manager bots in use, labelled by their team when there is one per team. */
-function useManagerEntries(state: AgentTeamState | null): ManagerEntry[] {
+export function useManagerEntries(state: AgentTeamState | null): ManagerEntry[] {
   const bots = useBots()
   if (!state) {
     return []
@@ -31,26 +24,19 @@ function useManagerEntries(state: AgentTeamState | null): ManagerEntry[] {
   })
 }
 
-function openManager(bot: Bot): void {
-  openBotHomePanelFromSidebar(bot, () => undefined)
-}
-
-/** Opens the first Manager bot; null when none was set up yet. */
-export function useOpenTeamManager(state: AgentTeamState | null): (() => void) | undefined {
-  const [first] = useManagerEntries(state)
-  return first ? () => openManager(first.bot) : undefined
-}
-
+/** Shows or hides the Manager chat; sends to Settings › Team when no Manager was set up yet. */
 export function TeamManagerButton({
-  state,
+  hasManager,
+  open,
+  onToggle,
   onOpenSettings
 }: {
-  state: AgentTeamState
+  hasManager: boolean
+  open: boolean
+  onToggle: () => void
   onOpenSettings: () => void
 }): React.JSX.Element {
-  const entries = useManagerEntries(state)
-  const label = translate('auto.components.agentTeam.TeamPage.manager', 'Manager')
-  if (entries.length === 0) {
+  if (!hasManager) {
     return (
       <Button size="sm" variant="outline" onClick={onOpenSettings}>
         <BotIcon />
@@ -58,30 +44,15 @@ export function TeamManagerButton({
       </Button>
     )
   }
-  if (entries.length === 1) {
-    return (
-      <Button size="sm" onClick={() => openManager(entries[0]!.bot)}>
-        <BotIcon />
-        {label}
-      </Button>
-    )
-  }
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button size="sm">
-          <BotIcon />
-          {label}
-          <ChevronDown />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {entries.map((entry) => (
-          <DropdownMenuItem key={entry.bot.id} onSelect={() => openManager(entry.bot)}>
-            {entry.label}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      size="sm"
+      variant={open ? 'secondary' : 'default'}
+      aria-pressed={open}
+      onClick={onToggle}
+    >
+      <MessagesSquare />
+      {translate('auto.components.agentTeam.TeamPage.manager', 'Manager')}
+    </Button>
   )
 }

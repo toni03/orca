@@ -15,7 +15,9 @@ import { TeamBoard } from './TeamBoard'
 import { TeamIconButton } from './TeamIconButton'
 import { TeamActivity } from './TeamActivity'
 import { TeamInbox } from './TeamInbox'
-import { TeamManagerButton, useOpenTeamManager } from './TeamManagerButton'
+import { TeamManagerButton, useManagerEntries } from './TeamManagerButton'
+import { TeamManagerChat } from './TeamManagerChat'
+import { useTeamManagerView } from './team-manager-view'
 import { formatDuration } from './team-labels'
 import { useAgentTeamCommand, useAgentTeamState } from './use-agent-team-state'
 import { useNow } from './use-now'
@@ -66,7 +68,10 @@ export default function TeamPage(): React.JSX.Element {
     openSettingsPage()
   }
   const setTab = useAppStore((s) => s.setTeamPageTab)
-  const openManager = useOpenTeamManager(state)
+  const managers = useManagerEntries(state)
+  const [managerView, setManagerView] = useTeamManagerView()
+  const managerOpen = managers.length > 0 && managerView !== 'closed'
+  const openManager = managers.length > 0 ? () => setManagerView('docked') : undefined
   const now = useNow(60_000)
   const today = state ? activityTotals(state, lastDaysRange(1, now), now) : null
   const needsYou = state?.issues.filter((issue) => issue.status === 'needs-you').length ?? 0
@@ -94,7 +99,14 @@ export default function TeamPage(): React.JSX.Element {
                 : translate('auto.components.agentTeam.TeamPage.pauseTeam', 'Pause team')}
             </Button>
           ) : null}
-          {state ? <TeamManagerButton state={state} onOpenSettings={openTeamSettings} /> : null}
+          {state ? (
+            <TeamManagerButton
+              hasManager={managers.length > 0}
+              open={managerOpen}
+              onToggle={() => setManagerView(managerOpen ? 'closed' : 'docked')}
+              onOpenSettings={openTeamSettings}
+            />
+          ) : null}
           <TeamIconButton
             variant="ghost"
             size="icon-sm"
@@ -134,7 +146,11 @@ export default function TeamPage(): React.JSX.Element {
                 setTab(value)
               }
             }}
-            className="flex min-h-0 min-w-0 flex-1 flex-col"
+            className={
+              managerOpen && managerView === 'expanded'
+                ? 'hidden'
+                : 'flex min-h-0 min-w-0 flex-1 flex-col'
+            }
           >
             <div className="mx-5 mt-3 flex items-center gap-3">
               <TabsList>
@@ -183,6 +199,14 @@ export default function TeamPage(): React.JSX.Element {
               </div>
             </TabsContent>
           </Tabs>
+          {managerOpen ? (
+            <TeamManagerChat
+              entries={managers}
+              expanded={managerView === 'expanded'}
+              onExpandedChange={(expanded) => setManagerView(expanded ? 'expanded' : 'docked')}
+              onClose={() => setManagerView('closed')}
+            />
+          ) : null}
         </div>
       )}
     </div>

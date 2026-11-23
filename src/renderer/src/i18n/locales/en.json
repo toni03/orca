@@ -21095,6 +21095,15 @@
           "perTeam": "One Manager per team",
           "allTeams": "All teams",
           "noAgents": "No agent that can run a bot is installed and switched on. Turn one on in Settings › Agents."
+        },
+        "TeamManagerChat": {
+          "loading": "Opening the Manager chat…",
+          "scope": "{{bot}} · {{agent}}",
+          "pick": "Manager to talk to",
+          "openBot": "Open the Manager's bot page",
+          "collapse": "Show the board beside the Manager",
+          "expand": "Show only the Manager",
+          "close": "Hide Manager"
         }
       }
     },
