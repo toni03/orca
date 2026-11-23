@@ -23,7 +23,9 @@ import {
 } from './agent-team-runtime-launcher'
 import { AgentTeamStore } from './agent-team-store'
 import { buildAgentTeamContext } from './agent-team-context-build'
-import { addAgentTeamManagerBot, syncAgentTeamManagerBots } from './agent-team-manager-bot'
+import { addAgentTeamManagerBot } from './agent-team-manager-bot'
+import { startAgentTeamBackground } from './agent-team-background'
+import type { AgentTeamUsageSources } from './agent-team-usage-collector'
 import { resolveAgentTeamCliCommand } from './agent-team-cli-command'
 import type { AgentTeamIssueLiveStatus } from '../../shared/agent-team/agent-team-ipc'
 import type { AgentTeamManagerScope } from '../../shared/agent-team/agent-team-manager-bots'
@@ -31,15 +33,8 @@ import type { Bot } from '../../shared/bot-types'
 import { readAgentTeamIssueLiveStatus } from './agent-team-issue-status'
 import { reconcileAgentTeamSessionsAfterRestart } from './agent-team-restart-reconcile'
 import { AgentTeamTrackerSync } from './agent-team-tracker-sync'
-import { startAgentTeamMobileAlerts } from './agent-team-mobile-alerts'
-import {
-  startAgentTeamUsageCollector,
-  type AgentTeamUsageSources
-} from './agent-team-usage-collector'
 import { effectiveProjectSpecStorage } from '../../shared/agent-team/agent-team-spec-storage'
 import type { AgentTeamContext } from '../../shared/agent-team/agent-team-context'
-import { getRepoRoutingConnectionId } from '../../shared/execution-host/execution-host'
-import { watchAgentTeamPlanLimits } from './agent-team-plan-limit-watch'
 import type { RateLimitService } from '../rate-limits/service/rate-limit-service'
 
 const TICK_INTERVAL_MS = 30_000
@@ -75,28 +70,15 @@ export class AgentTeamService {
   start(): void {
     this.disposers.push(this.watchSessions())
     this.disposers.push(
-      startAgentTeamUsageCollector(
-        this.store,
-        (repoId) => {
-          const repo = this.repos.getRepo(repoId)
-          return repo ? getRepoRoutingConnectionId(repo) !== null : false
-        },
-        this.usage
-      )
-    )
-    this.disposers.push(this.trackerSync.start())
-    void syncAgentTeamManagerBots(this.runtime, this.store, resolveAgentTeamCliCommand()).catch(
-      (error: unknown) => console.warn('[agent-team] Could not check the Manager bots:', error)
-    )
-    this.disposers.push(
-      watchAgentTeamPlanLimits(this.planLimits(), this.store, () => void this.engine.tick())
-    )
-    this.disposers.push(
-      startAgentTeamMobileAlerts({
-        getState: () => this.store.get(),
-        subscribe: (listener) => this.store.subscribe(listener),
-        projectName: (repoId) => this.repos.getRepo(repoId)?.displayName ?? repoId,
-        dispatch: (event) => this.runtime.dispatchMobileNotification(event)
+      ...startAgentTeamBackground({
+        store: this.store,
+        runtime: this.runtime,
+        repos: this.repos,
+        usage: this.usage,
+        planLimits: this.planLimits(),
+        trackerSync: this.trackerSync,
+        decide: (issueId, decision) => this.execute({ kind: 'issue.decide', issueId, decision }),
+        tick: () => void this.engine.tick()
       })
     )
     const timer = setInterval(() => void this.engine.tick(), TICK_INTERVAL_MS)

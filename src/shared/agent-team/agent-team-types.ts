@@ -160,6 +160,17 @@ export type AgentTeamAssignment = {
   usage?: AgentTeamAssignmentUsage
 }
 
+export type AgentTeamBotItemLink = {
+  uid: string
+  botId: string
+  /** The needsYou.at the item asks about; a newer Needs you asks again. */
+  askedAt: number
+  /** Item events up to this id were read. */
+  seenEventId: number
+  /** The issue status last written to the item, so each move is written once. */
+  mirrored: AgentTeamIssueStatus
+}
+
 export type AgentTeamIssue = {
   id: string
   repoId: string
@@ -191,6 +202,8 @@ export type AgentTeamIssue = {
   mergeRequest?: { url: string }
   /** All merge requests of a grouped issue, mergeRequest first. */
   mergeRequests?: { url: string }[]
+  /** The Manager bot item that mirrors this issue's Needs you; replies on it decide the issue. */
+  botItem?: AgentTeamBotItemLink
   createdAt: number
   updatedAt: number
 }
