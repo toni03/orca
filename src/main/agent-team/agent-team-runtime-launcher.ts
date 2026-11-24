@@ -83,6 +83,8 @@ export function createAgentTeamRuntimeLauncher(
           prompt,
           title,
           suppressStartupUpdatePrompt: true,
+          // Seat steps run unattended: they must not unfold collapsed projects in the sidebar.
+          surfaceOwner: false,
           ...(launchPreferences(seat) ? { launchPreferences: launchPreferences(seat) } : {})
         })
         if (launched.ptyId) {
@@ -132,6 +134,8 @@ export function createAgentTeamRuntimeLauncher(
         prompt,
         title,
         suppressStartupUpdatePrompt: true,
+        // Seat steps run unattended: they must not unfold collapsed projects in the sidebar.
+        surfaceOwner: false,
         ...(extraAgentArgs ? { extraAgentArgs } : {}),
         ...(launchPreferences(seat) ? { launchPreferences: launchPreferences(seat) } : {})
       })
