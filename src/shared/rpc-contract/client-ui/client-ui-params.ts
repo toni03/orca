@@ -6,6 +6,7 @@ import {
   normalizeWorktreeCardProperties
 } from '../../worktree/row-display/card-properties'
 import { isPluginPanelTabKey } from '../../plugins/frames/plugin-tab-key'
+import { TopLevelViewSchema } from './top-level-view-schema'
 import {
   STATIC_RIGHT_SIDEBAR_TABS,
   type StaticRightSidebarTab
@@ -104,23 +105,6 @@ export const FeatureInteractionIdParam = z.custom<FeatureInteractionId>(isFeatur
   message: 'Unknown feature interaction id'
 })
 
-export const TopLevelViewSchema = z
-  .enum([
-    'terminal',
-    'settings',
-    'tasks',
-    'activity',
-    'automations',
-    'space',
-    'skills',
-    // Bot templates was a view before it became a dialog; an older peer can still send it.
-    'botTemplates',
-    'artifacts',
-    'mobile',
-    'team'
-  ])
-  .transform((view) => (view === 'botTemplates' ? 'terminal' : view))
-
 export const UiUpdateFields = z
   .object({
     lastActiveRepoId: NullableString.optional(),
@@ -134,6 +118,9 @@ export const UiUpdateFields = z
     rightSidebarExplorerView: z.enum(['files', 'search']).optional(),
     rightSidebarWidth: z.number().finite().optional(),
     activityBarPosition: z.enum(['top', 'side']).optional(),
+    activityBarOrder: z.array(z.string()).optional(),
+    activityBarBotOrder: z.array(z.string()).optional(),
+    activityBarHidden: z.array(z.string()).optional(),
     markdownTocPanelWidth: z.number().finite().optional(),
     combinedDiffFileTreeWidth: z.number().finite().optional(),
     groupBy: z.enum(['none', 'workspace-status', 'repo', 'pr-status']).optional(),

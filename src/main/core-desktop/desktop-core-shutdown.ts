@@ -73,6 +73,10 @@ function stopPluginsAndSessions(
   core.starNag?.stop()
   core.automations?.stop()
   core.stopAgentTeam?.()
+  core.stopTeamPolicyRefresh?.()
+  core.stopTeamPolicyRefresh = null
+  core.stopTeamPluginPolicy?.()
+  core.stopTeamPluginPolicy = null
   if (core.runtime) {
     getWorkspaceCleanupRunner(core.runtime)?.stop()
   }
