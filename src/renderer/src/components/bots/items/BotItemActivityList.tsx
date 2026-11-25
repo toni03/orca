@@ -21,11 +21,15 @@ import {
 } from '../../../../../shared/bots/bot-items'
 import {
   botItemActivity,
+  botItemLiveAskKey,
+  botItemWaitEntryKey,
+  botItemWorkerStopReason,
   type BotItemActivityEntry
 } from '../../../../../shared/bots/bot-item-activity'
 import { botItemActorName } from '../../../../../shared/bots/bot-item-actor-name'
 import { botItemStatusName } from './bot-item-status-name'
 import { BotItemCommentCard } from './BotItemCommentCard'
+import { BotItemWaitCard } from './BotItemWaitCard'
 import { revealBotItemComment } from './bot-item-comment-reveal'
 import type { BotItemQuickReplyActions } from './use-bot-item-question-steps'
 import { NativeChatMessageTimestamp } from '../../native-chat/messages/rows/NativeChatMessageTimestamp'
@@ -197,12 +201,14 @@ function WorkerBody({
     )
   }
   const failed = entry.link.state === 'failed' || entry.link.state === 'stopped'
+  const reason = botItemWorkerStopReason(entry.link)
   return (
     <>
       {failed
         ? t('bots.items.activity.workerFailed', 'Worker stopped:')
         : t('bots.items.activity.workerFinished', 'Worker finished:')}{' '}
       {title}
+      {reason ? ` - ${reason}` : null}
       {entry.link.report ? <span className="block">{entry.link.report.subject}</span> : null}
     </>
   )
@@ -261,6 +267,8 @@ export function BotItemActivityList({
 }): React.JSX.Element {
   const t = useTranslate()
   const entries = botItemActivity(item, events)
+  const waitKey = botItemWaitEntryKey(item, entries)
+  const liveAskId = botItemLiveAskKey(entries)
   const list = useRef<HTMLDivElement | null>(null)
   // A reply's quote leads to its question, focused so Tab goes on from there.
   const jump = useCallback(
@@ -294,9 +302,14 @@ export function BotItemActivityList({
                     : entry
                 }
                 onJump={jump}
+                liveAskId={liveAskId}
                 quickReplies={quickReplies}
               />
             )
+          }
+          // Shown last, as its card, while the item waits.
+          if (entry.key === waitKey) {
+            return null
           }
           return (
             <div
@@ -322,6 +335,9 @@ export function BotItemActivityList({
             </div>
           )
         })}
+        {item.status === 'waiting' && item.wait ? (
+          <BotItemWaitCard text={item.wait.text} at={item.wait.at} />
+        ) : null}
         {/* Last, as sent: never placed by this machine's clock among the host's events. */}
         {pending?.shown.map(({ event, failed }) =>
           // Answers posted as one comment show on their lines already.
