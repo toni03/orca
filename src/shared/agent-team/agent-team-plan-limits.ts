@@ -17,7 +17,7 @@ function providerFor(agent: TuiAgent, limits: RateLimitState): ProviderRateLimit
   if (agent === 'codex') {
     return limits.codex
   }
-  return agent === 'gemini' ? limits.gemini : null
+  return null
 }
 
 function full(window: RateLimitWindow | null | undefined): boolean {
