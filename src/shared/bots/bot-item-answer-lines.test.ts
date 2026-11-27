@@ -7,8 +7,8 @@ import {
 import { botItemQuestionPairing } from './bot-item-question-answers'
 import type { BotItemEvent } from './bot-items'
 import {
+  botItemAnswerWords,
   botItemAnswersText,
-  botItemHeldAnswersText,
   botItemNamedAnswers,
   botItemUnsentAnswers
 } from './bot-item-answer-lines'
@@ -23,9 +23,13 @@ it('keeps each answer on its own line when two questions share a first line', ()
   }
   const answers = ['the internal ones', 'none yet']
   expect(botItemNamedAnswers(shape, botItemAnswersText(shape, answers))).toEqual(answers)
-  // Held with the first still open, the second stays on its own line.
   const later = [null, 'none yet']
-  expect(botItemNamedAnswers(shape, botItemHeldAnswersText(shape, later))).toEqual(later)
+  // Posted with the first left out, the second keeps its place too; a place after the last answer
+  // isn't written, and no answers write nothing.
+  expect(botItemAnswersText(shape, later)).toBe('Target? →\nTarget? → none yet')
+  expect(botItemNamedAnswers(shape, botItemAnswersText(shape, later))).toEqual(later)
+  expect(botItemAnswersText(shape, ['the internal ones', null])).toBe('Target? → the internal ones')
+  expect(botItemAnswersText(shape, [null, null])).toBe('')
 })
 
 it('leaves out of a recovery the lines a comment already answered', () => {
@@ -34,6 +38,67 @@ it('leaves out of a recovery the lines a comment already answered', () => {
     'No',
     null
   ])
+})
+
+it('shows each posted option on its own question when their headings and options match', () => {
+  const options = [{ label: 'Yes' }, { label: 'No' }]
+  const shape = botItemQuestionShape({
+    ask: {
+      questions: ['Target?\nStaging', 'Target?\nProduction'].map((prompt) => ({ prompt, options }))
+    }
+  })
+  const reply = { text: 'Target? → Yes\nTarget? → No' }
+  expect(shape.decisions.map((_, index) => botItemAnswerWords(shape, index, reply))).toEqual([
+    'Yes',
+    'No'
+  ])
+})
+
+it('round-trips a typed answer that would otherwise make a longer question heading', () => {
+  const shape = botItemQuestionShape({
+    ask: {
+      questions: ['Keep', 'Keep → x?', 'Keep →  x?'].map((prompt) => ({ prompt, options: [] }))
+    }
+  })
+  const answers = ['x? → No', null, null]
+  const posted = botItemAnswersText(shape, answers)
+  expect(posted).toBe('Keep →   x? → No')
+  expect(botItemNamedAnswers(shape, posted)).toEqual(answers)
+  expect(botItemNamedAnswers(shape, 'Keep → x? → No')).toEqual([null, 'No', null])
+})
+
+it('pairs a posted quick reply with the longest matching heading', () => {
+  const questions = [
+    { prompt: 'Keep', options: [{ label: 'x? → No' }] },
+    { prompt: 'Keep → x?', options: [{ label: 'No' }] }
+  ]
+  const pair = (ask: { questions: typeof questions }, text: string) =>
+    botItemQuestionPairing({ status: 'needs_you' }, [
+      {
+        id: 'e1',
+        kind: 'commented',
+        actor: { kind: 'bot', botId: 'b', chatId: 'c' },
+        data: { ask },
+        at: 1
+      },
+      {
+        id: 'e2',
+        kind: 'commented',
+        actor: { kind: 'owner' },
+        data: { text },
+        at: 2
+      }
+    ]).questions.get('e1')!
+  const ask = { questions }
+  const selected = botItemAnswersText(botItemQuestionShape({ ask }), [null, 'No'])
+  expect(selected).toBe('Keep → x? → No')
+  const paired = pair(ask, selected)
+  expect(paired.answers.map((answer) => answer?.id ?? null)).toEqual([null, 'e2'])
+  expect(paired.waiting).toBe(true)
+
+  const single = pair({ questions: [questions[0]!] }, 'x? → No')
+  expect(single.answers.map((answer) => answer?.id ?? null)).toEqual(['e2'])
+  expect(single.byOrder).toEqual([false])
 })
 
 it('reads answers and drafts written with the question line older builds wrote', () => {
@@ -81,8 +146,7 @@ it("keeps a line on the question it names when another's old line reads the same
       ]
     }
   })
-  const held = botItemHeldAnswersText(shape, [null, 'drop it'])
-  expect(botItemNamedAnswers(shape, held)).toEqual([null, 'drop it'])
+  expect(botItemNamedAnswers(shape, 'Keep private helper? → drop it')).toEqual([null, 'drop it'])
   expect(botItemPickedReplies(shape, { text: 'Keep private helper? → No' })).toEqual([
     [],
     [{ label: 'No', recommended: false }]

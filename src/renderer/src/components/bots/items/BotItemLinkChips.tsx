@@ -1,6 +1,6 @@
 // An item's links as one or two lines of chips under its frozen title, so they stay in view while the
 // owner reads and answers lower down. Each chip opens its link as its row in the full list would; the
-// chips with no room go behind "+N", whose popover lists them as full rows.
+// chips with no room go behind "+N", whose popover lists every link as full rows.
 import { FileText, GitPullRequest, Hourglass, Link2, Square } from 'lucide-react'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,8 @@ import { NativeChatLinkPeekProvider } from '@/components/native-chat/links/previ
 import type { Bot } from '../../../../../shared/bot-types'
 import type { BotItemLinkView, BotItemWorkerState } from '../../../../../shared/bots/bot-items'
 import {
+  BOT_ITEM_LINK_ROWS,
+  botItemLinkPage,
   botItemLinkRows,
   botItemWorkerRow,
   type BotItemLinkRow
@@ -58,7 +60,12 @@ function LinkChips({
   chat: string
 }): React.JSX.Element | null {
   const t = useTranslate()
-  const rows = useMemo(() => botItemLinkChipOrder(botItemLinkRows(links)), [links])
+  // Chips for the newest page only: an item holds up to 1,000 links, and two lines show far fewer.
+  const rows = useMemo(
+    () => botItemLinkChipOrder(botItemLinkPage(links, BOT_ITEM_LINK_ROWS).rows),
+    [links]
+  )
+  const total = useMemo(() => botItemLinkRows(links).length, [links])
   useBotItemPrWorkspacesVisible(rows)
   const fileContext = useBotItemFileContext(bot)
   const list = useRef<HTMLUListElement | null>(null)
@@ -67,7 +74,7 @@ function LinkChips({
   if (rows.length === 0) {
     return null
   }
-  const rest = rows.slice(shown)
+  const rest = total - shown
   // A GitHub chip's hover card finds its repo from the bot's folder on the bot's own host, as a chat's
   // links find theirs from its worktree.
   return (
@@ -94,17 +101,17 @@ function LinkChips({
             </li>
           ))}
         </ul>
-        {rest.length > 0 ? (
+        {rest > 0 ? (
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 size="xs"
                 aria-label={t('bots.items.view.moreLinks', '{{count}} more links', {
-                  count: rest.length
+                  count: rest
                 })}
               >
-                <span className="tabular-nums">+{rest.length}</span>
+                <span className="tabular-nums">+{rest}</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent
@@ -123,7 +130,7 @@ function LinkChips({
                 tabIndex={-1}
                 className="scrollbar-sleek max-h-60 overflow-y-auto p-1 outline-none"
               >
-                <BotItemLinkRowList bot={bot} rows={rest} chat={chat} />
+                <BotItemLinkRowList bot={bot} links={links} chat={chat} />
               </div>
             </PopoverContent>
           </Popover>
