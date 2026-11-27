@@ -4,7 +4,6 @@ import {
   GitBranch,
   House,
   ListChecks,
-  ListTodo,
   MessagesSquare,
   Plug,
   Workflow
@@ -120,12 +119,6 @@ export function getDefaultRightSidebarActivityItems({
       title: t('auto.components.right.sidebar.index.83a10e3c44', 'Checks'),
       shortcut: checksShortcut === 'Unassigned' ? '' : checksShortcut,
       gitOnly: true
-    },
-    {
-      id: 'tasks',
-      icon: ListTodo,
-      title: t('auto.components.right.sidebar.index.quickTasks', 'Tasks'),
-      shortcut: ''
     },
     {
       id: 'ports',

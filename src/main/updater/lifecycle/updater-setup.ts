@@ -1,4 +1,5 @@
-import { app, powerMonitor, type BrowserWindow } from 'electron'
+import { app, powerMonitor } from 'electron'
+import type { BrowserWindow } from 'electron'
 import type { ReleaseBuild, ReleaseChannel } from '../../../shared/updater/release-channel'
 import type { ReleaseBuildListOptions } from '../releases/updater-release-build-cache'
 import {
@@ -202,10 +203,7 @@ export class UpdaterSetup extends UpdaterDownloadInstall {
 
     // Security: never re-add a verifyUpdateCodeSignature override — a no-op disables electron-updater's built-in Authenticode check and accepts any installer.
     if (this.activeUpdateSource === 'release') {
-      autoUpdater.setFeedURL({
-        provider: 'generic',
-        url: `${RELEASES_URL}/latest/download`
-      })
+      autoUpdater.setFeedURL({ provider: 'generic', url: `${RELEASES_URL}/latest/download` })
     }
     if (this.autoUpdaterInitialized) {
       return

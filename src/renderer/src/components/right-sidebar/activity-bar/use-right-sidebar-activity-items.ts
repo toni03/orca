@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { ListTodo } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { useRepoById } from '@/store/repos/use-repository-catalog'
 import { isFolderRepo } from '../../../../../shared/repository/repo-kind'
@@ -27,6 +28,7 @@ import { getActiveChecksStatus } from '../checks-panel/status/active-checks-stat
 import { useTranslate } from '@/i18n/use-translate'
 import { useUiLanguageRevision } from '@/i18n/use-ui-language-revision'
 import type { ActivityBarItem } from './activity-bar-buttons'
+import { activityItemStatus } from './activity-bar-item-names'
 import { useBotForWorkspace, useBotGroupForWorkspace } from '../../bots/bot-workspace'
 import { useFocusedChatWorkers } from '@/lib/focused-chat-workers'
 import { useBotNeedsYouCount, useBotNow } from '../../bots/use-bot-now'
@@ -116,6 +118,14 @@ export function useRightSidebarActivityItems({
       needsYou,
       connectorsNeedingOwner
     })
+    // ITG quick tasks tab, kept just before Ports as before the defaults were extracted.
+    const portsIndex = builtInItems.findIndex((item) => item.id === 'ports')
+    builtInItems.splice(portsIndex === -1 ? builtInItems.length : portsIndex, 0, {
+      id: 'tasks',
+      icon: ListTodo,
+      title: t('auto.components.right.sidebar.index.quickTasks', 'Tasks'),
+      shortcut: ''
+    })
     return [
       ...builtInItems,
       // Append plugin tabs to preserve built-in navigation positions. Checked against every built-in
@@ -157,7 +167,7 @@ export function useRightSidebarActivityItems({
           isGroupHome,
           hasChatWorkers
         }),
-        (item) => item.statusIndicator ?? (item.id === 'checks' ? checksStatus : null)
+        (item) => activityItemStatus(item, checksStatus)
       ),
     [
       activityItems,

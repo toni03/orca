@@ -4,7 +4,11 @@ import type { TaskProviderConnections } from '../../../../../../shared/work-item
 import type { Repo } from '../../../../../../shared/repository/repo-types'
 import { useAppStore } from '@/store/index'
 import { getLocalPreflightContext } from '@/runtime/hosts/preflight/local-preflight-context'
-import { getProviderRuntimeContextKey } from '@/runtime/hosts/observations/provider-runtime-context'
+import {
+  getProviderRuntimeContextKey,
+  useProviderRuntimeSessionGeneration
+} from '@/runtime/hosts/observations/provider-runtime-context'
+import { recomputeOn } from '@/lib/recompute-on'
 import { localPreflightContextKey } from '../../../../runtime/hosts/preflight/local-preflight-context-key'
 
 export type IntegrationStepState = 'active' | 'done' | 'upcoming'
@@ -220,7 +224,10 @@ export function useIntegrationConnectionStatus(): IntegrationConnectionStatus {
     localPreflightContextKey(getLocalPreflightContext(s))
   )
 
-  const providerRuntimeContextKey = getProviderRuntimeContextKey(settings)
+  const providerRuntimeSessionGeneration = useProviderRuntimeSessionGeneration()
+  const providerRuntimeContextKey = recomputeOn([providerRuntimeSessionGeneration], () =>
+    getProviderRuntimeContextKey(settings)
+  )
 
   return deriveIntegrationConnectionStatus({
     preflightStatus,
